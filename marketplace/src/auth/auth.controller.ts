@@ -41,4 +41,23 @@ export class AuthController {
       groups: request.user['groups'],
     };
   }
+
+  @Get('user')
+  @OnlyAllowGroups(Group.User)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
+  @ApiOperation({
+    summary: 'Test if user oauth token works',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Oauth token works',
+  })
+  @ApiProduces('application/json')
+  async onlyUser(@Request() request: any) {
+    return {
+      message: 'Only user can see this',
+      user: request.user['user'],
+      groups: request.user['groups'],
+    };
+  }
 }

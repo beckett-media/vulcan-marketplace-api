@@ -22,13 +22,22 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err, user, info) {
     // You can throw an exception based on either "info" or "err" arguments
     const env = process.env['runtime'];
-    const authEnabled = configuration()[env]['auth_enabled'];
+    const config = configuration()[env];
+    const authEnabled = config['auth_enabled'];
     if (authEnabled) {
       this.logger.log(
         `handleRequest: err: ${err}, user: ${JSON.stringify(
           user,
         )}, info: ${info}`,
       );
+
+      // check client id
+      if (config['cognito']['COGNITO_CLIENT_ID'] != user['client_id']) {
+        throw new UnauthorizedException(
+          `Invalid client_id: ${user['client_id']}`,
+        );
+      }
+
       if (err || !user) {
         throw err || new UnauthorizedException();
       }

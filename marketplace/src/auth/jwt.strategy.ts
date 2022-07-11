@@ -23,9 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         jwksRequestsPerMinute: 5,
         jwksUri: `${authority}/.well-known/jwks.json`,
       }),
-
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      audience: config['cognito']['COGNITO_CLIENT_ID'],
       issuer: authority,
       algorithms: ['RS256'],
     });
@@ -35,6 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       user: payload['sub'],
       groups: payload['cognito:groups'],
+      client_id: payload['client_id'],
     };
   }
 }

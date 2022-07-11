@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import got from 'got/dist/source';
 import configuration from 'src/config/configuration';
 import { DetailedLogger } from 'src/logger/detailed.logger';
-import { removeBase64 } from 'src/util/format';
+import { trimForLoggin } from 'src/util/format';
 
 @Injectable()
 export class BravoService {
@@ -35,7 +35,7 @@ export class BravoService {
     this.logger.log(
       `Mint new nft token by Bravo API: url => ${url}, header => ${JSON.stringify(
         headers,
-      )} payload => ${JSON.stringify(removeBase64(payload))}`,
+      )} payload => ${JSON.stringify(trimForLoggin(payload))}`,
     );
 
     try {
@@ -73,7 +73,7 @@ export class BravoService {
     this.logger.log(
       `Burn nft token by Bravo API: url => ${url}, header => ${JSON.stringify(
         headers,
-      )} payload => ${JSON.stringify(removeBase64(payload))}`,
+      )} payload => ${JSON.stringify(trimForLoggin(payload))}`,
     );
 
     try {
