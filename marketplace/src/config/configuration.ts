@@ -3,7 +3,7 @@ export default () => ({
     api_port: 5000,
     webhook_port: 5001,
     aws: {
-      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
+      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-prod',
     },
     redis: {
       host: 'localhost',

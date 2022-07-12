@@ -18,3 +18,12 @@ export function onlyUser(user: any) {
     );
   }
 }
+
+// both auth and params users should match
+export function userShouldMatch(authUser: string, paramsUser: string) {
+  if (authUser !== paramsUser) {
+    throw new UnauthorizedException(
+      'User parameter does not match auth header',
+    );
+  }
+}

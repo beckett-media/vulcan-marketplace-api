@@ -120,19 +120,45 @@ export function trimForLoggin(body) {
   var _body = Object.assign({}, body);
   // loop through body and params and shorten base64 data
   for (const key in _body) {
+    // remove image
     if (key.includes('base64')) {
       // shorten base64 data
       _body[key] = _body[key].substring(0, 100) + '......';
     }
 
+    // remove password
     if (key.includes('password')) {
       // shorten password data
       _body[key] = '********';
     }
 
+    // trim image
     if (key.includes('image') && _body[key].length > base64Threshold) {
       // shorten base64 data
       _body[key] = _body[key].substring(0, 100) + '......';
+    }
+
+    // remove id token
+    if (!!_body['idToken'] && !!_body['idToken']['jwtToken']) {
+      var _idToken = Object.assign({}, _body['idToken']);
+      _idToken['jwtToken'] = '......';
+      _idToken['payload'] = '{...}';
+      _body['idToken'] = _idToken;
+    }
+
+    // remove refresh token
+    if (!!_body['refreshToken'] && !!_body['refreshToken']['token']) {
+      var _refreshToken = Object.assign({}, _body['refreshToken']);
+      _refreshToken['token'] = '......';
+      _body['refreshToken'] = _refreshToken;
+    }
+
+    // remove access token
+    if (!!_body['accessToken'] && !!_body['accessToken']['jwtToken']) {
+      var _accessToken = Object.assign({}, _body['accessToken']);
+      _accessToken['jwtToken'] = '......';
+      _accessToken['payload'] = '{...}';
+      _body['accessToken'] = _accessToken;
     }
   }
 
