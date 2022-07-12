@@ -226,7 +226,7 @@ export class MarketplaceService {
     const listing = await this.databaseService.getListingByVaultingID(
       vaulting_id,
     );
-    if (listing.status != ListingStatus.NotListed) {
+    if (!!listing && listing.status != ListingStatus.NotListed) {
       throw new InternalServerErrorException(
         `Vaulting ${vaulting_id} has a listing`,
       );

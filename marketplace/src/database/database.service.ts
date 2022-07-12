@@ -411,11 +411,6 @@ export class DatabaseService {
     const listing = await this.listingRepo.findOne({
       where: { vaulting_id: vaulting.id },
     });
-    if (!listing) {
-      throw new NotFoundException(
-        `Listing not found for vaulting ${vaulting_id}`,
-      );
-    }
     return listing;
   }
 
