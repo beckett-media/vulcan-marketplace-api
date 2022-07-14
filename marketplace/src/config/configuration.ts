@@ -70,7 +70,7 @@ export default () => ({
   awsdev: {
     api_port: 3300,
     webhook_port: 3301,
-    auth_enabled: false,
+    auth_enabled: true,
     aws: {
       AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
       AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWS_ACCESS_KEY_ID,

@@ -116,6 +116,32 @@ DELETE   http://127.0.0.1:3300/marketplace/vaulting/5
 #########################################################################################################################
 ## aws dev
 
+### authenticate ADMIN to get jwt token
+POST https://dev.beckett.com:3300/auth/login
+Content-Type: application/json
+
+{
+  "name": "headless-admin@beckett.com",
+  "password": "Beckett123!"
+}
+
+### authenticate USER to get jwt token
+POST https://dev.beckett.com:3300/auth/login
+Content-Type: application/json
+
+{
+  "name": "headless@beckett.com",
+  "password": "Beckett123!"
+}
+
+### Test jwt token for ADMIN
+GET  https://dev.beckett.com:3300/auth/admin
+//authorization: Bearer eyJraWQiOiJxUFA4Q29DY3hybjRiU2o1RmJoMWQwVWJRSW5za0dRaTQzRDJcL0p5Rjc5RT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyZjVmMTRiMy02NjcyLTRiZTUtYWMxNS1hYmIxMTQyNmU3OGIiLCJjb2duaXRvOmdyb3VwcyI6WyJ2YXVsdGluZyIsImFkbWluIl0sImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy13ZXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtd2VzdC0xX1FnQ01VR2R1WiIsImNsaWVudF9pZCI6IjMwYXBqNGtucTdwczJxc2FsZHI2Y2xwcjlwIiwib3JpZ2luX2p0aSI6IjhmNzY2ODVjLWE4MDItNGY5MC1iODFjLWNjMzBkMGExN2RjMyIsImV2ZW50X2lkIjoiY2NhMWFiN2ItMDQxMi00NmFlLTgzY2UtODkzZDExZTU3NGE2IiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTY1NzgxMzk3OSwiZXhwIjoxNjU3ODE3NTc5LCJpYXQiOjE2NTc4MTM5NzksImp0aSI6IjM5ZDA2ZGVhLTM2ZDctNGE2ZS1hYzdkLWQ1NTgyYWJlYWFmNiIsInVzZXJuYW1lIjoiSGVhZGxlc3NBZG1pbiJ9.IyizX1E3nReVrNVGwxWnM-dTs5xf7eMyI0lmci7_ELnV7MXVYUnoxBSmUjerE30fGrbs2h6lySLQ5ghx5jbXhhvXmgYjmwPgXau9xfjvF3jJkJoCxrKk4vvhHPBKTS1vgTXwBiO41zbi5SwQNWbhMrIOIAwJpxbgk9s9dLv2Nn_fa59rpISQwGrJ5qzPL7hyFYTg_wn0gWiuJLlvYVlZJdKV5efQurfmFUfNvotjOHJeruEzDnppES1DgTUk51n-br_rdDNXacFEOjMu0SHvr7eKtTTMx1ovtvepcD9k3u1brsfDKOyTjOHeqCdnStWWaIvehZMrUItRtkXgPCJ39A
+
+### Test jwt token for USER
+GET  https://dev.beckett.com:3300/auth/user
+//authorization: Bearer eyJraWQiOiJxUFA4Q29DY3hybjRiU2o1RmJoMWQwVWJRSW5za0dRaTQzRDJcL0p5Rjc5RT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI4MzI0ZDYyNy1kMWE2LTQwNTgtYWIyMS04Mjk3ZWRmZGU2NDQiLCJjb2duaXRvOmdyb3VwcyI6WyJ2YXVsdGluZyJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0xLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMV9RZ0NNVUdkdVoiLCJjbGllbnRfaWQiOiIzMGFwajRrbnE3cHMycXNhbGRyNmNscHI5cCIsIm9yaWdpbl9qdGkiOiI3OGQ2ZWRjNy0xYzUxLTQ2YWQtODQxOC00ZGViMzUwNGRlNWEiLCJldmVudF9pZCI6ImEzMTYwMTA3LTQ3MWMtNGYyNy04OTNiLTdmOTFiOTAyNThiNCIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE2NTc1NzM0MDksImV4cCI6MTY1NzU3NzAwOSwiaWF0IjoxNjU3NTczNDA5LCJqdGkiOiJhNDM1MThiMi02Y2I3LTQwMzUtOWJiMi00MWVhMDcxYjUxZTUiLCJ1c2VybmFtZSI6IkhlYWRsZXNzVXNlciJ9.lWT5qTSqkcYh0eR9KX-YUjmOmYhBvEmpzcBc0CI4mVLJ0-4hhL_AzCBNPKqG7SefYBvpHyMfTUKqlotux5KpRisfb5IYhww3BMWyHMQI1Ie8KTNKcLFg2ZcEczJscHps51hQSeVMMD66R-YMYEu6bqCzLWUr4rFb9GPngFN6--wwCTGr06mg1wyt3vPcjZrmZ3vgEWiBRuo0rcpy61pouohC2Ytopwz4NU7Eq8EAeQ_ocwT3n6mXsisN_UCa_ir7VMG9vKWbjKoHEWrgF9WT4tqVGXsD6per3RTRRdpZtlB5EuEp8dapk7tf0SKXvHEOAI1A79A66NgWEt-y_uldCw
+
 
 ### submit new item
 POST https://dev.beckett.com:3300/marketplace/submission
