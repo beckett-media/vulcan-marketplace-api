@@ -11,8 +11,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class SubmissionRequest {
   @ApiProperty({
-    description: 'The user who submitted the item',
+    description: 'The uuid of the user who submitted the item',
     required: true,
+    example: '12345678-0000-0000-0000-000000000000',
   })
   @IsString()
   @MinLength(1)
@@ -21,6 +22,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The grading company of the submitted the item',
     required: true,
+    example: 'foo company',
   })
   @IsString()
   grading_company: string;
@@ -28,6 +30,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The serial number of the submitted the item',
     required: true,
+    example: 'SN12345678',
   })
   @IsString()
   serial_number: string;
@@ -35,6 +38,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The title of the submitted the item',
     required: true,
+    example: 'Foo Title',
   })
   @IsString()
   title: string;
@@ -42,6 +46,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The description of the submitted the item',
     required: true,
+    example: 'Foo description',
   })
   @IsString()
   description: string;
@@ -49,6 +54,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The genre of the submitted the item',
     required: true,
+    example: 'Foo genre',
   })
   @IsString()
   genre: string;
@@ -56,6 +62,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The manufacturer of the submitted the item',
     required: true,
+    example: 'Foo manufacturer',
   })
   @IsString()
   @MinLength(0)
@@ -64,6 +71,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The year of the submitted the item',
     required: true,
+    example: 1999,
   })
   @IsNumber()
   year: number;
@@ -71,6 +79,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The overall grade of the submitted the item',
     required: true,
+    example: 'AAA',
   })
   @IsString()
   overall_grade: string;
@@ -78,6 +87,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The sub grades of the submitted the item',
     required: true,
+    example: 'BBB',
   })
   @IsString()
   sub_grades: string;
@@ -85,6 +95,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The autograph of the submitted the item',
     required: true,
+    example: 'Foo autograph',
   })
   @IsString()
   @IsOptional()
@@ -94,6 +105,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The subject of the submitted item',
     required: true,
+    example: 'Foo subject',
   })
   @IsString()
   subject: string;
@@ -101,6 +113,7 @@ export class SubmissionRequest {
   @ApiProperty({
     description: 'The estimated value of the submitted item in cents',
     required: true,
+    example: 10000,
   })
   @IsNumber()
   est_value: number;
@@ -108,13 +121,15 @@ export class SubmissionRequest {
   @ApiProperty({
     description: "The base64 encoding of the submitted item's image ",
     required: true,
+    example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
   })
   @IsString()
   image_base64: string;
 
   @ApiProperty({
-    description: 'The image format  of the submitted the item',
+    description: 'The image format of the submitted item',
     required: true,
+    example: 'jpg',
   })
   @IsString()
   image_format: string;
@@ -128,13 +143,15 @@ export class SubmissionResponse {
   @ApiProperty({
     description: 'The uuid of the user who submitted the item',
     required: true,
+    example: '12345678-0000-0000-0000-000000000000',
   })
   @IsNumber()
   user: string;
 
   @ApiProperty({
-    description: 'The  of the submitted the item',
+    description: 'The id of the submitted item',
     required: true,
+    example: 1,
   })
   @IsNumber()
   submission_id: number;
@@ -142,6 +159,7 @@ export class SubmissionResponse {
   @ApiProperty({
     description: 'The id of the submission',
     required: true,
+    example: 1,
   })
   @IsNumber()
   item_id: number;
@@ -149,20 +167,23 @@ export class SubmissionResponse {
   @ApiProperty({
     description: 'The uuid of the submission',
     required: true,
+    example: '12345678-0000-0000-0000-000000000000',
   })
   @IsString()
   item_uuid: string;
 
   @ApiProperty({
-    description: 'The status of the submitted the item',
+    description: 'The status of the submitted item',
     required: true,
+    example: '1',
   })
   @IsNumber()
   status: number;
 
   @ApiProperty({
-    description: 'The description of the status of the submitted the item',
+    description: 'The description of the status of the submitted item',
     required: true,
+    example: 'Submitted',
   })
   @IsString()
   status_desc: string;
@@ -176,6 +197,7 @@ export class SubmissionDetails {
   @ApiProperty({
     description: 'The id of the submission',
     required: true,
+    example: 1,
   })
   @IsNumber()
   id: number;
@@ -183,6 +205,7 @@ export class SubmissionDetails {
   @ApiProperty({
     description: 'The uuid of the user who submitted the item',
     required: true,
+    example: '12345678-0000-0000-0000-000000000000',
   })
   @IsNumber()
   user: string;
@@ -190,6 +213,7 @@ export class SubmissionDetails {
   @ApiProperty({
     description: 'The timestamp of the creation of the submission',
     required: true,
+    example: 1657074424,
   })
   @IsNumber()
   created_at: number;
@@ -197,134 +221,151 @@ export class SubmissionDetails {
   @ApiProperty({
     description: 'The timestamp of the receipt of the item',
     required: true,
+    example: 1657074424,
   })
   @IsNumber()
   received_at: number;
 
   @ApiProperty({
-    description: 'The timestamp of the approval of the submitted the item',
+    description: 'The timestamp of the approval of the submitted item',
     required: true,
+    example: 1657074424,
   })
   @IsNumber()
   approved_at: number;
 
   @ApiProperty({
-    description: 'The timestamp of the rejection of the submitted the item',
+    description: 'The timestamp of the rejection of the submitted item',
     required: true,
+    example: 1657074424,
   })
   @IsNumber()
   rejected_at: number;
 
   @ApiProperty({
-    description: 'The current status of the submitted the item',
+    description: 'The current status of the submitted item',
     required: true,
+    example: 1,
   })
   @IsNumber()
   status: number;
 
   @ApiProperty({
-    description: 'The description of current status of the submitted the item',
+    description: 'The description of current status of the submitted item',
     required: true,
+    example: 'Submitted',
   })
   @IsString()
   @MinLength(1)
   status_desc: string;
 
   @ApiProperty({
-    description: 'The id of the submission',
+    description: 'The id of the submitted item',
     required: true,
+    example: 1,
   })
   @IsNumber()
   item_id: number;
 
   @ApiProperty({
-    description: 'The uuid of the submission',
+    description: 'The uuid of the submitted item',
     required: true,
+    example: '12345678-0000-0000-0000-000000000000',
   })
   @IsString()
   item_uuid: string;
 
   @ApiProperty({
-    description: 'The grading company of the submitted the item',
+    description: 'The grading company of the submitted item',
     required: true,
+    example: 'Foo grading company',
   })
   @IsString()
   @MinLength(1)
   grading_company: string;
 
   @ApiProperty({
-    description: 'The serial number of the submitted the item',
+    description: 'The serial number of the submitted item',
     required: true,
+    example: 'SN12345678',
   })
   @IsString()
   @MinLength(1)
   serial_number: string;
 
   @ApiProperty({
-    description: 'The title of the submitted the item',
+    description: 'The title of the submitted item',
     required: true,
+    example: 'Foo title',
   })
   @IsString()
   @MinLength(1)
   title: string;
 
   @ApiProperty({
-    description: 'The description of the submitted the item',
+    description: 'The description of the submitted item',
     required: true,
+    example: 'Foo description',
   })
   @IsString()
   @MinLength(1)
   description: string;
 
   @ApiProperty({
-    description: 'The genre of the submitted the item',
+    description: 'The genre of the submitted item',
     required: true,
+    example: 'Foo genre',
   })
   @IsString()
   @MinLength(1)
   genre: string;
 
   @ApiProperty({
-    description: 'The manufacturer of the submitted the item',
+    description: 'The manufacturer of the submitted item',
     required: true,
+    example: 'Foo manufacturer',
   })
   @IsString()
   @MinLength(1)
   manufacturer: string;
 
   @ApiProperty({
-    description: 'The year of the submitted the item',
+    description: 'The year of the submitted item',
     required: true,
+    example: 1999,
   })
-  @IsString()
-  @MinLength(1)
+  @IsNumber()
   year: number;
 
   @ApiProperty({
-    description: 'The overall grade of the submitted the item',
+    description: 'The overall grade of the submitted item',
     required: true,
+    example: 'AAA',
   })
   @IsString()
   overall_grade: string;
 
   @ApiProperty({
-    description: 'The sub grades of the submitted the item',
+    description: 'The sub grades of the submitted item',
     required: true,
+    example: 'BBB',
   })
   @IsString()
   sub_grades: string;
 
   @ApiProperty({
-    description: 'The autograph of the submitted the item',
+    description: 'The autograph of the submitted item',
     required: true,
+    example: 'Foo autograph',
   })
   @IsString()
   @IsOptional()
   autograph: string;
 
   @ApiProperty({
-    description: 'The subject of the submitted the item',
+    description: 'The subject of the submitted item',
     required: true,
+    example: 'Foo subject',
   })
   @IsString()
   @IsOptional()
@@ -333,13 +374,15 @@ export class SubmissionDetails {
   @ApiProperty({
     description: 'The estimated value of the submitted item in cents',
     required: true,
+    example: 10000,
   })
   @IsNumber()
   est_value: number;
 
   @ApiProperty({
-    description: 'The image url of the submitted the item',
+    description: 'The image url of the submitted item',
     required: true,
+    example: 'https://example.com/image.jpg',
   })
   @IsString()
   @IsOptional()
@@ -351,7 +394,11 @@ export class SubmissionDetails {
 }
 
 export class SubmissionStatusUpdate {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The status enum number',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   status: number;
 
@@ -371,8 +418,8 @@ export class VaultingRequest {
   item_id: number;
 
   @ApiProperty({
-    description: 'The uuid of the user who is vaulting the item',
-    example: 1,
+    description: 'The uuid of the user who vaulted the item',
+    example: '12345678-0000-0000-0000-000000000000',
     required: true,
   })
   @IsNotEmpty()
@@ -432,7 +479,7 @@ export class VaultingResponse {
 
   @ApiProperty({
     description: 'The uuid of the item to vault',
-    example: 1,
+    example: '12345678-0000-0000-0000-000000000000',
     required: true,
   })
   @IsNotEmpty()
@@ -440,8 +487,8 @@ export class VaultingResponse {
   item_uuid: string;
 
   @ApiProperty({
-    description: 'The uuid of the user who is vaulting the item',
-    example: 1,
+    description: 'The uuid of the user who vaulted the item',
+    example: '12345678-0000-0000-0000-000000000000',
     required: true,
   })
   @IsNotEmpty()
@@ -459,7 +506,7 @@ export class VaultingResponse {
 
   @ApiProperty({
     description: 'The description of the status of the vaulted item',
-    example: 1,
+    example: 'Vaulted',
     required: true,
   })
   @IsNotEmpty()
@@ -472,52 +519,100 @@ export class VaultingResponse {
 }
 
 export class VaultingDetails {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the vaulting',
+    example: 1,
+    required: true,
+  })
   @IsNumber()
   id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The collection of the minted NFT token',
+    example: '0x0000000000000000000000000000000000000000',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   collection: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the minted NFT token',
+    example: 1,
+    required: true,
+  })
   @IsNumber()
   token_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the submission',
+    example: 1,
+    required: true,
+  })
   @IsNumber()
   submission_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The uuid of the user who vaulted the item',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
   @IsString()
   user: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the blockchain that the token is on',
+    example: 99,
+    required: true,
+  })
   @IsNumber()
   chain_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The hash of the transaction that mints the NFT token',
+    required: true,
+    example: '0x0000000000000000000000000000000000000000',
+  })
   @IsString()
   mint_tx_hash: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The hash of the transaction that burns the NFT token',
+    required: true,
+    example: '0x0000000000000000000000000000000000000000',
+  })
   @IsString()
   burn_tx_hash: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The timestamp when the token is minted',
+    required: true,
+    example: 1657074424,
+  })
   @IsNumber()
   minted_at: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The timestamp when the token is burned',
+    required: true,
+    example: 1657074424,
+  })
   @IsNumber()
   burned_at: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The status enum of the vaulted item',
+    example: 1,
+    required: true,
+  })
   @IsNumber()
   status: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the status of the vaulted item',
+    example: 'Vaulted',
+    required: true,
+  })
   @IsString()
   @MinLength(1)
   status_desc: string;
@@ -525,6 +620,7 @@ export class VaultingDetails {
   @ApiProperty({
     description: 'The id of the vaulted item',
     required: true,
+    example: 1,
   })
   @IsNumber()
   item_id: number;
@@ -532,71 +628,119 @@ export class VaultingDetails {
   @ApiProperty({
     description: 'The uuid of the vaulted item',
     required: true,
+    example: '12345678-0000-0000-0000-000000000000',
   })
   @IsString()
   item_uuid: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The grading company of the vaulted item',
+    required: true,
+    example: 'foo company',
+  })
   @IsString()
   @MinLength(1)
   grading_company: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The serial number of the vaulted item',
+    required: true,
+    example: 'SN12345678',
+  })
   @IsString()
   @MinLength(1)
   serial_number: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The title of the vaulted item',
+    required: true,
+    example: 'Foo Title',
+  })
   @IsString()
   @MinLength(1)
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the vaulted item',
+    required: true,
+    example: 'Foo description',
+  })
   @IsString()
   @MinLength(1)
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The genre of the vaulted item',
+    required: true,
+    example: 'Foo genre',
+  })
   @IsString()
   @MinLength(1)
   genre: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The manufacturer of the vaulted item',
+    required: true,
+    example: 'Foo manufacturer',
+  })
   @IsString()
   @MinLength(1)
   manufacturer: string;
 
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
+  @ApiProperty({
+    description: 'The year of the vaulted item',
+    required: true,
+    example: 1999,
+  })
+  @IsNumber()
   year: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The overall grade of the vaulted item',
+    required: true,
+    example: 'AAA',
+  })
   @IsString()
   overall_grade: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The sub grades of the vaulted item',
+    required: true,
+    example: 'BBB',
+  })
   @IsString()
   sub_grades: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The autograph of the vaulted item',
+    required: true,
+    example: 'Foo autograph',
+  })
   @IsString()
   @IsOptional()
   autograph: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The subject of the vaulted item',
+    required: true,
+    example: 'Foo subject',
+  })
   @IsString()
   @IsOptional()
   subject: string;
 
   @ApiProperty({
-    description: 'The estimated value of the submitted item in cents',
+    description: 'The estimated value of the vaulted item in cents',
     required: true,
   })
   @IsNumber()
   est_value: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The image url of the vaulted item',
+    required: true,
+    example: 'https://example.com/image.jpg',
+  })
   @IsString()
   @IsOptional()
   image_url: string;
@@ -608,42 +752,74 @@ export class VaultingDetails {
 
 export class VaultingUpdate {
   @ApiProperty({
+    description: 'The type of the vaulting update',
     required: true,
+    example: 1,
   })
   @IsNumber()
   type: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the blockchain that the token is on',
+    example: 99,
+    required: true,
+  })
   @IsNumber()
   chain_id: number;
 
   @ApiProperty({
+    description: 'The uuid of the vaulted item',
     required: true,
+    example: '12345678-0000-0000-0000-000000000000',
   })
   @IsString()
   item_uuid: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the job that burns the NFT token',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   burn_job_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The hash of the transaction that mints the NFT token',
+    required: true,
+    example: '0x0000000000000000000000000000000000000000',
+  })
   @IsString()
   mint_tx_hash: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The hash of the transaction that burns the NFT token',
+    required: true,
+    example: '0x0000000000000000000000000000000000000000',
+  })
   @IsString()
   burn_tx_hash: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The collection of the minted NFT token',
+    example: '0x0000000000000000000000000000000000000000',
+    required: true,
+  })
   @IsString()
   collection: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the minted NFT token',
+    example: 1,
+    required: true,
+  })
   @IsNumber()
   token_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The status to be updated to for the vaulted item',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   status: number;
 
@@ -653,15 +829,27 @@ export class VaultingUpdate {
 }
 
 export class ListingRequest {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the vaulting to be listed',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   vaulting_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The uuid of the user who listed the item',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
   @IsString()
   user: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The price of the listed item in cents',
+    required: true,
+    example: 10000,
+  })
   @IsNumber()
   price: number;
 
@@ -671,27 +859,51 @@ export class ListingRequest {
 }
 
 export class ListingResponse {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the listing',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the related vaulting',
+    required: true,
+    example: 1657074424,
+  })
   @IsNumber()
   vaulting_id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The uuid of the user who listed the item',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
   @IsString()
   user: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The price of the listed item in cents',
+    required: true,
+    example: 10000,
+  })
   @IsNumber()
   price: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The status of the listing',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   status: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the status of the listing',
+    required: true,
+    example: 'Listed',
+  })
   @IsString()
   status_desc: string;
 
@@ -701,103 +913,178 @@ export class ListingResponse {
 }
 
 export class ListingDetails {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The id of the listing',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The price of the listed item in cents',
+    required: true,
+    example: 10000,
+  })
   @IsNumber()
   price: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The uuid of the user who listed the item',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
   @IsString()
   user: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The status of the listing',
+    required: true,
+    example: 1,
+  })
   @IsNumber()
   status: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the status of the listing',
+    required: true,
+    example: 'Listed',
+  })
   @IsString()
   @MinLength(1)
   status_desc: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The timestamp of the creation of the listing',
+    required: true,
+    example: 1657074424,
+  })
   @IsNumber()
   created_at: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The timestamp of the update of the listing',
+    required: true,
+    example: 1657074424,
+  })
   @IsNumber()
   updated_at: number;
 
   @ApiProperty({
-    description: 'The id of the vaulted item',
+    description: 'The id of the listed item',
     required: true,
   })
   @IsNumber()
   item_id: number;
 
   @ApiProperty({
-    description: 'The uuid of the vaulted item',
+    description: 'The uuid of the listed item',
     required: true,
   })
   @IsString()
   item_uuid: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The grading company of the listed item',
+    required: true,
+    example: 'foo company',
+  })
   @IsString()
   @MinLength(1)
   grading_company: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The serial number of the listed item',
+    required: true,
+    example: 'SN12345678',
+  })
   @IsString()
   @MinLength(1)
   serial_number: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The title of the listed item',
+    required: true,
+    example: 'Foo Title',
+  })
   @IsString()
   @MinLength(1)
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The description of the listed item',
+    required: true,
+    example: 'Foo description',
+  })
   @IsString()
   @MinLength(1)
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The genre of the listed item',
+    required: true,
+    example: 'Foo genre',
+  })
   @IsString()
   @MinLength(1)
   genre: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The manufacturer of the listed item',
+    required: true,
+    example: 'Foo manufacturer',
+  })
   @IsString()
   @MinLength(1)
   manufacturer: string;
 
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
+  @ApiProperty({
+    description: 'The year of the listed item',
+    required: true,
+    example: 1999,
+  })
+  @IsNumber()
   year: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The overall grade of the lsited item',
+    required: true,
+    example: 'AAA',
+  })
   @IsString()
   overall_grade: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The sub grades of the listed item',
+    required: true,
+    example: 'BBB',
+  })
   @IsString()
   sub_grades: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The autograph of the listed item',
+    required: true,
+    example: 'Foo autograph',
+  })
   @IsString()
   @IsOptional()
   autograph: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The subject of the listed item',
+    required: true,
+    example: 'Foo subject',
+  })
   @IsString()
   @IsOptional()
   subject: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The image url of the listed item',
+    required: true,
+    example: 'https://example.com/image.jpg',
+  })
   @IsString()
   @IsOptional()
   image_url: string;
@@ -808,7 +1095,11 @@ export class ListingDetails {
 }
 
 export class ListingUpdate {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The price of the listed item in cents',
+    required: true,
+    example: 10000,
+  })
   @IsNumber()
   price: number;
 

@@ -342,6 +342,7 @@ export class MarketplaceController {
   @ApiResponse({
     status: 200,
     description: 'Listing retrived',
+    type: ListingDetails,
   })
   @ApiResponse({
     status: 404,
@@ -362,6 +363,7 @@ export class MarketplaceController {
   @ApiResponse({
     status: 200,
     description: 'Listing retrived',
+    type: ListingDetails,
   })
   @ApiResponse({
     status: 404,
