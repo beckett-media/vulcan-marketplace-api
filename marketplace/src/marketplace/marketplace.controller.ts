@@ -397,7 +397,7 @@ export class MarketplaceController {
     return listingDetails;
   }
 
-  @Put('/listing/listing_id')
+  @Put('/listing/:listing_id')
   @ApiOperation({
     summary: 'Update listing for vaulted item',
   })

@@ -446,7 +446,7 @@ export class DatabaseService {
   // update listing
   async updateListing(listing_id: number, price: number): Promise<Listing> {
     const listing = await this.getListing(listing_id);
-    if (!listing) {
+    if (!listing || listing.status != ListingStatus.Listed) {
       throw new NotFoundException(`Listing ${listing_id} not found`);
     }
 

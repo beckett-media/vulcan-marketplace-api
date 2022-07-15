@@ -3,6 +3,7 @@ import { BadRequestException, Body, Post } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import { Group } from 'src/config/enum';
 import { AuthService } from './auth.service';
+import { AuthenticationRequest } from './dtos/auth.dto';
 import { OnlyAllowGroups } from './groups.decorator';
 import { GroupsGuard } from './groups.guard';
 import { JwtAuthGuard } from './jwt.authguard';
@@ -15,9 +16,14 @@ export class AuthController {
   @ApiOperation({
     summary: 'To get JWT token for test',
   })
-  async login(@Body() authenticateRequest: { name: string; password: string }) {
+  @ApiResponse({
+    status: 200,
+    description: 'Returns JWT token',
+  })
+  @ApiProduces('application/json')
+  async login(@Body() authenticationRequest: AuthenticationRequest) {
     try {
-      return await this.authService.authenticateUser(authenticateRequest);
+      return await this.authService.authenticateUser(authenticationRequest);
     } catch (e) {
       throw new BadRequestException(e.message);
     }

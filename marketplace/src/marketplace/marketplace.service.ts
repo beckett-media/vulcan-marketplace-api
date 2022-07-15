@@ -278,9 +278,9 @@ export class MarketplaceService {
     if (!user) {
       throw new NotFoundException(`User not found for ${request.user}`);
     }
-    if (!vaulting) {
+    if (!vaulting || vaulting.status != VaultingStatus.Minted) {
       throw new NotFoundException(
-        `Vaulting not found for ${request.vaulting_id}`,
+        `Vaulting not found for ${request.vaulting_id} or not minted|withdrawn`,
       );
     }
 

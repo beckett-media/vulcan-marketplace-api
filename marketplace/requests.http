@@ -197,10 +197,31 @@ GET https://dev.beckett.com:3300/marketplace/vaulting?user=12345678-7e3a-4623-a4
 
 
 ### Get vaulting by id
-GET https://dev.beckett.com:3300/marketplace/vaulting/2
+GET https://dev.beckett.com:3300/marketplace/vaulting/4
 
 ### withdraw vaulting
 DELETE https://dev.beckett.com:3300/marketplace/vaulting/2
+
+
+### list the vaulted item
+POST https://dev.beckett.com:3300/marketplace/listing
+Content-Type: application/json
+
+{
+  "vaulting_id": 4,
+  "user": "12345678-7e3a-4623-a496-0117f324a521",
+  "price": 12345
+}
+
+### Get the listed item
+GET https://dev.beckett.com:3300/marketplace/listing/1
+
+PUT https://dev.beckett.com:3300/marketplace/listing/1
+Content-Type: application/json
+
+{
+  "price": 12000
+}
 
 ### end
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
