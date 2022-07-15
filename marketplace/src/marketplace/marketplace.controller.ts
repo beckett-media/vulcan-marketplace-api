@@ -170,6 +170,7 @@ export class MarketplaceController {
     @Query('offset') offset: number,
     @Query('limit') limit: number,
   ): Promise<SubmissionDetails[]> {
+    //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissions(
       user,
       status,

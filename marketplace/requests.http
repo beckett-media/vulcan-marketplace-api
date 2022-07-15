@@ -53,11 +53,14 @@ Content-Type: application/json
 ### get single submission
 GET  http://127.0.0.1:3300/marketplace/submission/3
 
-### get all submission
+### get all submission from user
 GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521
 
+### get all submission from user ant limit
+GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521&status=3&offset=0&limit=2
+
 ### get all submission
-GET  http://127.0.0.1:3300/marketplace/submission?user=yifan&status=3&offset=0&limit=2
+GET  http://127.0.0.1:3300/marketplace/submission?status=4
 
 ### update submission
 PUT http://127.0.0.1:3300/marketplace/submission/5

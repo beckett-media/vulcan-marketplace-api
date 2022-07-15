@@ -132,15 +132,18 @@ export class DatabaseService {
     offset: number,
     limit: number,
   ): Promise<SubmissionDetails[]> {
-    // find user by uuid
-    const user = await this.userRepo.findOne({
-      where: { uuid: userUUID },
-    });
-    if (!user) {
-      throw new NotFoundException(`User ${userUUID} not found`);
+    var where_filter = {};
+    if (userUUID !== undefined) {
+      // find user by uuid
+      const user = await this.userRepo.findOne({
+        where: { uuid: userUUID },
+      });
+      if (!user) {
+        throw new NotFoundException(`User ${userUUID} not found`);
+      }
+      where_filter = { user: user.id };
     }
 
-    var where_filter = { user: user.id };
     if (status !== undefined) {
       where_filter['status'] = status;
     }
@@ -167,9 +170,23 @@ export class DatabaseService {
     items.forEach((item) => {
       itemMap.set(item.id, item);
     });
+
+    // get all user ids from items
+    const user_ids = items.map((item) => item.user);
+    // get all users from user_ids
+    const users = await this.userRepo.find({
+      where: { id: In(user_ids) },
+    });
+    // build a map of user_id to user
+    const userMap = new Map<number, User>();
+    users.forEach((user) => {
+      userMap.set(user.id, user);
+    });
+
     var submissionDetails: SubmissionDetails[] = [];
     submissions.forEach((submission) => {
       const item = itemMap.get(submission.item_id);
+      const user = userMap.get(item.user);
       submissionDetails.push(newSubmissionDetails(submission, item, user));
     });
 
