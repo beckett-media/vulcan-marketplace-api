@@ -168,6 +168,18 @@ export class MarketplaceService {
       );
     }
 
+    // check if item is already vaulted
+    try {
+      const existingVaulting = await this.databaseService.getVaultingByItemID(
+        request.item_id,
+      );
+      if (!!existingVaulting) {
+        throw new InternalServerErrorException(
+          `Vaulting ${existingVaulting.id} already exists for item ${request.item_id}`,
+        );
+      }
+    } catch (e) {}
+
     // convert request.image_base64 to buffer
     const image_buffer = Buffer.from(request.image_base64, 'base64');
     const s3URL = await this.awsService.uploadItemImage(
@@ -228,7 +240,7 @@ export class MarketplaceService {
     );
     if (!!listing && listing.status != ListingStatus.NotListed) {
       throw new InternalServerErrorException(
-        `Vaulting ${vaulting_id} has a listing`,
+        `Vaulting ${vaulting_id} has a active listing ${listing.id}`,
       );
     }
 
@@ -274,7 +286,18 @@ export class MarketplaceService {
     const vaulting = await this.databaseService.getVaulting(
       request.vaulting_id,
     );
-    // make sure user and item exist
+    const existingListing = await this.databaseService.getListingByVaultingID(
+      request.vaulting_id,
+    );
+
+    // check if vaulting is already listed
+    if (!!existingListing) {
+      throw new InternalServerErrorException(
+        `Vaulting ${request.vaulting_id} already has a listing ${existingListing.id}`,
+      );
+    }
+
+    // make sure user and vaulting exist
     if (!user) {
       throw new NotFoundException(`User not found for ${request.user}`);
     }
