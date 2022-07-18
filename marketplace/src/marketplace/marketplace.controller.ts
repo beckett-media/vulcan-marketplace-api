@@ -33,6 +33,9 @@ import {
   ListingRequest,
   ListingResponse,
   ListingUpdate,
+  ListListingsQuery,
+  ListSubmissionsQuery,
+  ListVaultingsQuery,
   SubmissionDetails,
   SubmissionRequest,
   SubmissionResponse,
@@ -130,30 +133,6 @@ export class MarketplaceController {
   @ApiOperation({
     summary: 'Get a list of submissions from a user',
   })
-  @ApiQuery({
-    name: 'user',
-    type: String,
-    description: 'User of the submission',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'status',
-    type: String,
-    description: 'Status of the submission',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'offset',
-    type: String,
-    description: 'offset for the query',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'limit',
-    type: String,
-    description: 'limit for the query',
-    required: false,
-  })
   @ApiResponse({
     status: 200,
     description: "Returns a list of user's submissions",
@@ -165,17 +144,15 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listSubmissions(
-    @Query('user') user: string,
-    @Query('status') status: number,
-    @Query('offset') offset: number,
-    @Query('limit') limit: number,
+    @Query() query: ListSubmissionsQuery,
   ): Promise<SubmissionDetails[]> {
     //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissions(
-      user,
-      status,
-      offset,
-      limit,
+      query.user,
+      query.status,
+      query.offset,
+      query.limit,
+      query.order,
     );
     return result;
   }
@@ -249,24 +226,6 @@ export class MarketplaceController {
   @ApiOperation({
     summary: 'Get a list of vaultings from a user',
   })
-  @ApiQuery({
-    name: 'user',
-    type: String,
-    description: 'User of the vaulting',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'offset',
-    type: String,
-    description: 'offset for the query',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'limit',
-    type: String,
-    description: 'limit for the query',
-    required: false,
-  })
   @ApiResponse({
     status: 200,
     description: 'Vaulting retrived',
@@ -278,14 +237,13 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listVaultings(
-    @Query('user') user: string,
-    @Query('offset') offset: number,
-    @Query('limit') limit: number,
+    @Query() query: ListVaultingsQuery,
   ): Promise<VaultingDetails[]> {
     const vaultingDetails = await this.marketplaceService.listVaultings(
-      user,
-      offset,
-      limit,
+      query.user,
+      query.offset,
+      query.limit,
+      query.order,
     );
     return vaultingDetails;
   }
@@ -372,14 +330,13 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listListings(
-    @Query('user') user: string,
-    @Query('offset') offset: number,
-    @Query('limit') limit: number,
+    @Query() query: ListListingsQuery,
   ): Promise<ListingDetails[]> {
     const listingDetails = await this.marketplaceService.listListings(
-      user,
-      offset,
-      limit,
+      query.user,
+      query.offset,
+      query.limit,
+      query.order,
     );
     return listingDetails;
   }

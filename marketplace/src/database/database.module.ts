@@ -27,9 +27,33 @@ function GetDBConnection(): TypeOrmModuleOptions {
       username: config['db']['username'],
       password: config['db']['password'],
     };
+  } else if (env === 'stage') {
+    return {
+      type: 'mysql',
+      database: config['db']['name'],
+      entities: [Submission, Item, Vaulting, User, Listing],
+      synchronize: config['db']['sync'],
+      keepConnectionAlive: true,
+      host: config['db']['host'],
+      port: config['db']['port'],
+      username: config['db']['username'],
+      password: config['db']['password'],
+    };
+  } else if (env === 'prod') {
+    return {
+      type: 'mysql',
+      database: config['db']['name'],
+      entities: [Submission, Item, Vaulting, User, Listing],
+      synchronize: config['db']['sync'],
+      keepConnectionAlive: true,
+      host: config['db']['host'],
+      port: config['db']['port'],
+      username: config['db']['username'],
+      password: config['db']['password'],
+    };
+  } else {
+    throw new Error(`Unknown environment ${env}`);
   }
-
-  return {};
 }
 
 @Module({

@@ -60,7 +60,7 @@ GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0
 GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521&status=3&offset=0&limit=2
 
 ### get all submission
-GET  http://127.0.0.1:3300/marketplace/submission?status=4
+GET  http://127.0.0.1:3300/marketplace/submission?order=DESC&status=6
 
 ### update submission
 PUT http://127.0.0.1:3300/marketplace/submission/5
@@ -102,7 +102,7 @@ Content-Type: application/json
 
 
 ### Get vaulting by user
-GET http://127.0.0.1:3300/marketplace/vaulting?user=12345678-7e3a-4623-a496-0117f324a521
+GET http://127.0.0.1:3300/marketplace/vaulting?order=asaa
 
 
 ### Get vaulting by id
@@ -111,6 +111,18 @@ GET http://127.0.0.1:3300/marketplace/vaulting/5
 ### withdraw vaulting
 DELETE   http://127.0.0.1:3300/marketplace/vaulting/5
 
+### list the vaulted item
+POST http://127.0.0.1:3300/marketplace/listing
+Content-Type: application/json
+
+{
+  "vaulting_id": 1,
+  "user": "12345678-7e3a-4623-a496-0117f324a521",
+  "price": 12345
+}
+
+### Get the listed item
+GET https://dev.beckett.com:3300/marketplace/listing
 
 
 #########################################################################################################################

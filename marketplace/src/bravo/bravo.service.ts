@@ -15,6 +15,7 @@ export class BravoService {
     description: string,
     imageFormat: string,
     imagebase64: string,
+    attributes: { [key: string]: any },
   ): Promise<number> {
     const env = process.env['runtime'];
     const config = configuration()[env];
@@ -31,6 +32,7 @@ export class BravoService {
       image: imagebase64,
       animation_format: '',
       animation: '',
+      attributes: attributes,
     };
     this.logger.log(
       `Mint new nft token by Bravo API: url => ${url}, header => ${JSON.stringify(

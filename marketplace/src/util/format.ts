@@ -164,3 +164,32 @@ export function trimForLoggin(body) {
 
   return _body;
 }
+
+export function getAttributes(item: Item) {
+  var attributes = {
+    grading_company: item.grading_company,
+    serial_number: item.serial_number,
+    title: item.title,
+    description: item.description,
+    genre: item.genre,
+    manufacturer: item.manufacturer,
+    year: item.year,
+    overall_grade: item.overall_grade,
+    sub_grades: item.sub_grades,
+    autograph: item.autograph,
+    subject: item.subject,
+  };
+
+  // remove attributes that are null or undefined
+  for (const key in attributes) {
+    if (
+      attributes[key] == null ||
+      attributes[key] == undefined ||
+      attributes[key] == ''
+    ) {
+      delete attributes[key];
+    }
+  }
+
+  return attributes;
+}

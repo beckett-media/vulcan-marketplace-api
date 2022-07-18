@@ -17,6 +17,7 @@ import {
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import {
+  getAttributes,
   newListingDetails,
   newSubmissionDetails,
   newVaultingDetails,
@@ -78,12 +79,14 @@ export class MarketplaceService {
     status: number,
     offset: number,
     limit: number,
+    order: string,
   ): Promise<SubmissionDetails[]> {
     const submissionDetails = await this.databaseService.listSubmissions(
       user,
       status,
       offset,
       limit,
+      order,
     );
     return submissionDetails;
   }
@@ -120,16 +123,13 @@ export class MarketplaceService {
     userUUID: string,
     offset: number,
     limit: number,
+    order: string,
   ): Promise<VaultingDetails[]> {
-    // get user by uuid
-    const user = await this.databaseService.getUserByUUID(userUUID);
-    if (!user) {
-      throw new NotFoundException(`User not found for ${userUUID}`);
-    }
     const vaultings = await this.databaseService.listVaultings(
-      user.id,
+      userUUID,
       offset,
       limit,
+      order,
     );
     // get item ids from vaultings
     const item_ids = vaultings.map((vaulting) => vaulting.item_id);
@@ -193,6 +193,7 @@ export class MarketplaceService {
     // get item by id
     const item = await this.databaseService.getItem(request.item_id);
 
+    const attributes = getAttributes(item);
     const mint_job_id = await this.bravoService.mintNFT(
       request.user,
       item.uuid,
@@ -200,6 +201,7 @@ export class MarketplaceService {
       item.description,
       request.image_format,
       request.image_base64,
+      attributes,
     );
 
     const vaulting = await this.databaseService.createNewVaulting(
@@ -225,6 +227,8 @@ export class MarketplaceService {
   }
 
   async withdrawVaulting(vaulting_id: number): Promise<VaultingDetails> {
+    //TODO: update submission to be withdrawn
+
     var vaultingDetails = await this.getVaulting(vaulting_id);
 
     // No withdrawal if not minted or already withdrawn
@@ -303,7 +307,7 @@ export class MarketplaceService {
     }
     if (!vaulting || vaulting.status != VaultingStatus.Minted) {
       throw new NotFoundException(
-        `Vaulting not found for ${request.vaulting_id} or not minted|withdrawn`,
+        `Vaulting not found for ${request.vaulting_id} (either not minted or withdrawn already)`,
       );
     }
 
@@ -354,17 +358,17 @@ export class MarketplaceService {
 
   // list all listings by user
   async listListings(
-    user_uuid: string,
+    userUUID: string,
     offset: number,
     limit: number,
+    order: string,
   ): Promise<ListingDetails[]> {
-    // get user by uuid
-    const user = await this.databaseService.getUserByUUID(user_uuid);
     // get all listings for user
     const listingDetails = await this.databaseService.listListings(
-      user.id,
+      userUUID,
       offset,
       limit,
+      order,
     );
     return listingDetails;
   }

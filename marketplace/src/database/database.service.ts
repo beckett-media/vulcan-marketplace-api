@@ -131,6 +131,7 @@ export class DatabaseService {
     status: number,
     offset: number,
     limit: number,
+    order: string,
   ): Promise<SubmissionDetails[]> {
     var where_filter = {};
     if (userUUID !== undefined) {
@@ -156,6 +157,11 @@ export class DatabaseService {
     };
     if (limit != undefined) {
       filter['take'] = limit;
+    }
+
+    // order by id
+    if (!!order) {
+      filter['order'] = { id: order };
     }
 
     const submissions = await this.submissionRepo.find(filter);
@@ -302,11 +308,23 @@ export class DatabaseService {
 
   // list vaulting items by user id
   async listVaultings(
-    user: number,
+    userUUID: string,
     offset: number,
     limit: number,
+    order: string,
   ): Promise<Vaulting[]> {
-    var where_filter = { user: user };
+    var where_filter = {};
+    if (userUUID !== undefined) {
+      // find user by uuid
+      const user = await this.userRepo.findOne({
+        where: { uuid: userUUID },
+      });
+      if (!user) {
+        throw new NotFoundException(`User ${userUUID} not found`);
+      }
+      where_filter = { user: user.id };
+    }
+
     if (offset == undefined) {
       offset = 0;
     }
@@ -317,6 +335,12 @@ export class DatabaseService {
     if (limit != undefined) {
       filter['take'] = limit;
     }
+
+    // order by id
+    if (!!order) {
+      filter['order'] = { id: order };
+    }
+
     const vaultings = await this.vaultingRepo.find(filter);
     return vaultings;
   }
@@ -479,17 +503,23 @@ export class DatabaseService {
   }
 
   async listListings(
-    user_id: number,
+    userUUID: string,
     offset: number,
     limit: number,
+    order: string,
   ): Promise<ListingDetails[]> {
-    // get user by id
-    const user = await this.userRepo.findOne(user_id);
-    if (!user) {
-      throw new NotFoundException(`User ${user_id} not found`);
+    var where_filter = {};
+    if (userUUID !== undefined) {
+      // find user by uuid
+      const user = await this.userRepo.findOne({
+        where: { uuid: userUUID },
+      });
+      if (!user) {
+        throw new NotFoundException(`User ${userUUID} not found`);
+      }
+      where_filter = { user: user.id };
     }
 
-    var where_filter = { user: user_id };
     if (offset == undefined) {
       offset = 0;
     }
@@ -499,6 +529,11 @@ export class DatabaseService {
     };
     if (limit != undefined) {
       filter['take'] = limit;
+    }
+
+    // order by id
+    if (!!order) {
+      filter['order'] = { id: order };
     }
 
     const listings = await this.listingRepo.find(filter);
@@ -527,10 +562,23 @@ export class DatabaseService {
       itemMap.set(item.id, item);
     });
 
+    // get all user ids from listings
+    const user_ids = listings.map((listing) => listing.user);
+    // get all users from user_ids
+    const users = await this.userRepo.find({
+      where: { id: In(user_ids) },
+    });
+    // build a map of user_id to user
+    const userMap = new Map<number, User>();
+    users.forEach((user) => {
+      userMap.set(user.id, user);
+    });
+
     var listingDetails: ListingDetails[] = [];
     listings.forEach((listing) => {
       const vaulting = vaultingMap.get(listing.vaulting_id);
       const item = itemMap.get(listing.vaulting_id);
+      const user = userMap.get(listing.user);
       listingDetails.push(newListingDetails(listing, item, user, vaulting));
     });
 

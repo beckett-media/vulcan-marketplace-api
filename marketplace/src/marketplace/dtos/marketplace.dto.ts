@@ -1,7 +1,9 @@
 import {
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsNumberString,
   IsOptional,
   IsString,
   Length,
@@ -191,6 +193,53 @@ export class SubmissionResponse {
   constructor(partial: Partial<SubmissionResponse>) {
     Object.assign(this, partial);
   }
+}
+
+export class ListSubmissionsQuery {
+  @ApiProperty({
+    description: 'The id of the user',
+    required: false,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  @IsOptional()
+  user: string;
+
+  @ApiProperty({
+    description: 'The status enum of the submission',
+    required: false,
+    example: 1,
+  })
+  @IsNumberString()
+  @IsOptional()
+  status: number;
+
+  @ApiProperty({
+    description: 'The offset of the query',
+    required: false,
+    example: 5,
+  })
+  @IsNumberString()
+  @IsOptional()
+  offset: number;
+
+  @ApiProperty({
+    description: 'The limit of the query',
+    required: false,
+    example: 10,
+  })
+  @IsNumberString()
+  @IsOptional()
+  limit: number;
+
+  @ApiProperty({
+    description: 'The order of the query',
+    required: false,
+    example: 'ASC or DESC',
+  })
+  @IsEnum(['ASC', 'DESC'])
+  @IsOptional()
+  order: string;
 }
 
 export class SubmissionDetails {
@@ -516,6 +565,44 @@ export class VaultingResponse {
   constructor(partial: Partial<VaultingResponse>) {
     Object.assign(this, partial);
   }
+}
+
+export class ListVaultingsQuery {
+  @ApiProperty({
+    description: 'The id of the user',
+    required: false,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  @IsOptional()
+  user: string;
+
+  @ApiProperty({
+    description: 'The offset of the query',
+    required: false,
+    example: 5,
+  })
+  @IsNumberString()
+  @IsOptional()
+  offset: number;
+
+  @ApiProperty({
+    description: 'The limit of the query',
+    required: false,
+    example: 10,
+  })
+  @IsNumberString()
+  @IsOptional()
+  limit: number;
+
+  @ApiProperty({
+    description: 'The order of the query',
+    required: false,
+    example: 'ASC or DESC',
+  })
+  @IsEnum(['ASC', 'DESC'])
+  @IsOptional()
+  order: string;
 }
 
 export class VaultingDetails {
@@ -910,6 +997,44 @@ export class ListingResponse {
   constructor(partial: Partial<ListingResponse>) {
     Object.assign(this, partial);
   }
+}
+
+export class ListListingsQuery {
+  @ApiProperty({
+    description: 'The id of the user',
+    required: false,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  @IsOptional()
+  user: string;
+
+  @ApiProperty({
+    description: 'The offset of the query',
+    required: false,
+    example: 5,
+  })
+  @IsNumberString()
+  @IsOptional()
+  offset: number;
+
+  @ApiProperty({
+    description: 'The limit of the query',
+    required: false,
+    example: 10,
+  })
+  @IsNumberString()
+  @IsOptional()
+  limit: number;
+
+  @ApiProperty({
+    description: 'The order of the query',
+    required: false,
+    example: 'ASC or DESC',
+  })
+  @IsEnum(['ASC', 'DESC'])
+  @IsOptional()
+  order: string;
 }
 
 export class ListingDetails {

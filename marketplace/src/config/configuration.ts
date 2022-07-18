@@ -1,174 +1,177 @@
 export default () => ({
   prod: {
-    api_port: 5000,
-    webhook_port: 5001,
+    api_port: process.env.MARKETPLACE_PROD_API_PORT || 5300,
+    auth_enabled: true,
     aws: {
-      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-prod',
+      AWS_PUBLIC_BUCKET_NAME:
+        process.env.MARKETPLACE_PROD_AWS_PUBLIC_BUCKET_NAME,
+      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_PROD_AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: process.env.MARKETPLACE_PROD_AWS_SECRET_ACCESS_KEY,
+      AWS_DEFAULT_REGION: process.env.MARKETPLACE_PROD_AWS_DEFAULT_REGION,
     },
-    redis: {
-      host: 'localhost',
-      port: 6379,
+    bravo: {
+      mint: {
+        collection: process.env.MARKETPLACE_PROD_BRAVO_MINT_COLLECTION,
+        url: process.env.MARKETPLACE_PROD_BRAVO_MINT_URL,
+        headers: { 'Content-Type': 'application/json' },
+      },
+      burn: {
+        collection: process.env.MARKETPLACE_PROD_BRAVO_BURN_COLLECTION,
+        url: process.env.MARKETPLACE_PROD_BRAVO_BURN_URL,
+        headers: { 'Content-Type': 'application/json' },
+      },
     },
-    queue: {
-      mint: 'beckett_mint_prod',
-      burn: 'beckett_burn_prod',
-      lock: 'beckett_lock_prod',
-      limiter: { max: 1, duration: 10 },
+    cognito: {
+      COGNITO_USER_POOL_ID: process.env.MARKETPLACE_PROD_COGNITO_USER_POOL_ID,
+      COGNITO_CLIENT_ID: process.env.MARKETPLACE_PROD_COGNITO_CLIENT_ID,
+      COGNITO_REGION: process.env.MARKETPLACE_PROD_COGNITO_REGION,
     },
     db: {
-      name: 'beckett_prod',
+      name: process.env.MARKETPLACE_PROD_DB_NAME,
       sync: false,
-      host: 'prod-beckett-vaulting-database.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
-      port: 3306,
-      username: process.env.DB_PROD_USERNAME,
-      password: process.env.DB_PROD_PASSWORD,
+      host: process.env.MARKETPLACE_PROD_DB_HOST,
+      port: process.env.MARKETPLACE_PROD_DB_PORT,
+      username: process.env.MARKETPLACE_PROD_DB_USERNAME,
+      password: process.env.MARKETPLACE_PROD_DB_PASSWORD,
     },
-    blockchain: {
-      tx_config: {},
-    },
-    min_token_id: 1,
-    network_mint_relayer: 'polygon_prod_mint',
-    network_lock_relayer: 'polygon_prod_lock',
-    network_burn_relayer: 'polygon_prod_burn',
-    pinata: 'prod',
-    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET_PROD,
-    check_palantir_request_auth: true,
   },
   stage: {
-    api_port: 4000,
-    webhook_port: 4001,
+    api_port: process.env.MARKETPLACE_STAGE_API_PORT || 4300,
+    auth_enabled: true,
     aws: {
-      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
+      AWS_PUBLIC_BUCKET_NAME:
+        process.env.MARKETPLACE_STAGE_AWS_PUBLIC_BUCKET_NAME,
+      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_STAGE_AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY:
+        process.env.MARKETPLACE_STAGE_AWS_SECRET_ACCESS_KEY,
+      AWS_DEFAULT_REGION: process.env.MARKETPLACE_STAGE_AWS_DEFAULT_REGION,
     },
-    redis: {
-      host: 'localhost',
-      port: 6379,
+    bravo: {
+      mint: {
+        collection: process.env.MARKETPLACE_STAGE_BRAVO_MINT_COLLECTION,
+        url: process.env.MARKETPLACE_STAGE_BRAVO_MINT_URL,
+        headers: { 'Content-Type': 'application/json' },
+      },
+      burn: {
+        collection: process.env.MARKETPLACE_STAGE_BRAVO_BURN_COLLECTION,
+        url: process.env.MARKETPLACE_STAGE_BRAVO_BURN_URL,
+        headers: { 'Content-Type': 'application/json' },
+      },
     },
-    queue: {
-      mint: 'beckett_mint_stage',
-      burn: 'beckett_burn_stage',
-      lock: 'beckett_lock_stage',
-      limiter: { max: 1, duration: 10 },
+    cognito: {
+      COGNITO_USER_POOL_ID: process.env.MARKETPLACE_STAGE_COGNITO_USER_POOL_ID,
+      COGNITO_CLIENT_ID: process.env.MARKETPLACE_STAGE_COGNITO_CLIENT_ID,
+      COGNITO_REGION: process.env.MARKETPLACE_STAGE_COGNITO_REGION,
     },
     db: {
-      name: 'beckett_stage',
+      name: process.env.MARKETPLACE_STAGE_DB_NAME,
       sync: false,
-      host: 'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
-      port: 3306,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
+      host: process.env.MARKETPLACE_STAGE_DB_HOST,
+      port: process.env.MARKETPLACE_STAGE_DB_PORT,
+      username: process.env.MARKETPLACE_STAGE_DB_USERNAME,
+      password: process.env.MARKETPLACE_STAGE_DB_PASSWORD,
     },
-    blockchain: {
-      tx_config: {},
-    },
-    min_token_id: 1,
-    network_mint_relayer: 'polygon_stage',
-    pinata: 'stage',
-    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
-    check_palantir_request_auth: false,
   },
   awsdev: {
-    api_port: 3300,
-    webhook_port: 3301,
+    api_port: process.env.MARKETPLACE_AWSDEV_API_PORT || 3300,
     auth_enabled: true,
     aws: {
-      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
-      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWS_ACCESS_KEY_ID,
-      AWS_SECRET_ACCESS_KEY: process.env.MARKETPLACE_AWS_SECRET_ACCESS_KEY,
-      AWS_DEFAULT_REGION: 'us-west-1',
-    },
-    cognito: {
-      COGNITO_USER_POOL_ID: 'us-west-1_QgCMUGduZ',
-      COGNITO_CLIENT_ID: '30apj4knq7ps2qsaldr6clpr9p',
-      COGNITO_REGION: 'us-west-1',
+      AWS_PUBLIC_BUCKET_NAME:
+        process.env.MARKETPLACE_AWSDEV_AWS_PUBLIC_BUCKET_NAME ||
+        'beckett-marketplace-dev',
+      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWSDEV_AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY:
+        process.env.MARKETPLACE_AWSDEV_AWS_SECRET_ACCESS_KEY,
+      AWS_DEFAULT_REGION:
+        process.env.MARKETPLACE_AWSDEV_AWS_DEFAULT_REGION || 'us-west-1',
     },
     bravo: {
       mint: {
-        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url: 'https://dev.beckett.com:3000/vaulting/mint',
+        collection:
+          process.env.MARKETPLACE_AWSDEV_BRAVO_MINT_COLLECTION ||
+          '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url:
+          process.env.MARKETPLACE_AWSDEV_BRAVO_MINT_URL ||
+          'https://dev.beckett.com:3000/vaulting/mint',
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url: 'https://dev.beckett.com:3000/vaulting/burn',
+        collection:
+          process.env.MARKETPLACE_AWSDEV_BRAVO_BURN_COLLECTION ||
+          '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url:
+          process.env.MARKETPLACE_AWSDEV_BRAVO_BURN_URL ||
+          'https://dev.beckett.com:3000/vaulting/burn',
         headers: { 'Content-Type': 'application/json' },
       },
     },
-    redis: {
-      host: 'localhost',
-      port: 6379,
-    },
-    queue: {
-      mint: 'beckett_mint_dev',
-      burn: 'beckett_burn_dev',
-      lock: 'beckett_lock_dev',
-      limiter: { max: 1, duration: 10 },
+    cognito: {
+      COGNITO_USER_POOL_ID:
+        process.env.MARKETPLACE_AWSDEV_COGNITO_USER_POOL_ID ||
+        'us-west-1_QgCMUGduZ',
+      COGNITO_CLIENT_ID:
+        process.env.MARKETPLACE_AWSDEV_COGNITO_CLIENT_ID ||
+        '30apj4knq7ps2qsaldr6clpr9p',
+      COGNITO_REGION:
+        process.env.MARKETPLACE_AWSDEV_COGNITO_REGION || 'us-west-1',
     },
     db: {
-      name: 'beckett_marketplace_dev',
+      name: process.env.MARKETPLACE_AWSDEV_DB_NAME || 'beckett_marketplace_dev',
       sync: true,
-      host: 'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
-      port: 3306,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
+      host:
+        process.env.MARKETPLACE_AWSDEV_DB_HOST ||
+        'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
+      port: process.env.MARKETPLACE_AWSDEV_DB_PORT || 3306,
+      username: process.env.MARKETPLACE_AWSDEV_DB_USERNAME,
+      password: process.env.MARKETPLACE_AWSDEV_DB_PASSWORD,
     },
-    blockchain: {
-      tx_config: {},
-    },
-    min_token_id: 1000000,
-    network_mint_relayer: 'mumbai',
-    pinata: 'dev',
-    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
-    check_palantir_request_auth: false,
   },
   dev: {
-    api_port: 3300,
-    webhook_port: 3301,
+    api_port: process.env.MARKETPLACE_DEV_API_PORT || 3300,
     auth_enabled: true,
-    cognito: {
-      COGNITO_USER_POOL_ID: 'us-west-1_QgCMUGduZ',
-      COGNITO_CLIENT_ID: '30apj4knq7ps2qsaldr6clpr9p',
-      COGNITO_REGION: 'us-west-1',
+    aws: {
+      AWS_PUBLIC_BUCKET_NAME:
+        process.env.MARKETPLACE_DEV_AWS_PUBLIC_BUCKET_NAME ||
+        'beckett-marketplace-dev',
+      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_DEV_AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: process.env.MARKETPLACE_DEV_AWS_SECRET_ACCESS_KEY,
+      AWS_DEFAULT_REGION:
+        process.env.MARKETPLACE_DEV_AWS_DEFAULT_REGION || 'us-west-1',
     },
     bravo: {
       mint: {
-        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url: 'http://localhost:3000/vaulting/mint',
+        collection:
+          process.env.MARKETPLACE_DEV_BRAVO_MINT_COLLECTION ||
+          '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url:
+          process.env.MARKETPLACE_DEV_BRAVO_MINT_URL ||
+          'http://localhost:3000/vaulting/mint',
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url: 'http://localhost:3000/vaulting/burn',
+        collection:
+          process.env.MARKETPLACE_DEV_BRAVO_BURN_COLLECTION ||
+          '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url:
+          process.env.MARKETPLACE_DEV_BRAVO_BURN_URL ||
+          'http://localhost:3000/vaulting/burn',
         headers: { 'Content-Type': 'application/json' },
       },
     },
-    aws: {
-      AWS_PUBLIC_BUCKET_NAME: 'beckett-marketplace-dev',
-      AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWS_ACCESS_KEY_ID,
-      AWS_SECRET_ACCESS_KEY: process.env.MARKETPLACE_AWS_SECRET_ACCESS_KEY,
-      AWS_DEFAULT_REGION: 'us-west-1',
-    },
-    redis: {
-      host: 'localhost',
-      port: 6379,
-    },
-    queue: {
-      mint: 'beckett_mint_dev',
-      burn: 'beckett_burn_dev',
-      lock: 'beckett_lock_dev',
-      limiter: { max: 1, duration: 10 },
+    cognito: {
+      COGNITO_USER_POOL_ID:
+        process.env.MARKETPLACE_DEV_COGNITO_USER_POOL_ID ||
+        'us-west-1_QgCMUGduZ',
+      COGNITO_CLIENT_ID:
+        process.env.MARKETPLACE_DEV_COGNITO_CLIENT_ID ||
+        '30apj4knq7ps2qsaldr6clpr9p',
+      COGNITO_REGION: process.env.MARKETPLACE_DEV_COGNITO_REGION || 'us-west-1',
     },
     db: {
-      name: 'beckett_marketplace_db_dev.sqlite',
+      name:
+        process.env.MARKETPLACE_DEV_DB_NAME ||
+        'beckett_marketplace_db_dev.sqlite',
       sync: true,
     },
-    blockchain: {
-      tx_config: {},
-    },
-    min_token_id: 1,
-    network_mint_relayer: 'mumbai',
-    pinata: 'dev',
-    webhook_shared_secret: process.env.BECKETT_AUTOTASK_SHARED_SECRET,
-    check_palantir_request_auth: false,
   },
 });

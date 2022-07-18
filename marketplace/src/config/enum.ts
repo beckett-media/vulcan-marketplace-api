@@ -60,3 +60,8 @@ export enum Group {
   Admin = 'admin',
   Superman = 'superman',
 }
+
+export enum QueryOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
