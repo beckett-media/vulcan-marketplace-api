@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -10,25 +9,14 @@ import {
   Put,
   Query,
   Request,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiExcludeEndpoint,
-  ApiOperation,
-  ApiParam,
-  ApiProduces,
-  ApiQuery,
-  ApiResponse,
-} from '@nestjs/swagger';
-import { OnlyAllowGroups } from 'src/auth/groups.decorator';
-import { GroupsGuard } from 'src/auth/groups.guard';
-import { JwtAuthGuard } from 'src/auth/jwt.authguard';
+import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import configuration from 'src/config/configuration';
-import { Group } from 'src/config/enum';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 
 import {
+  ActionLogDetails,
   ListingDetails,
   ListingRequest,
   ListingResponse,
@@ -355,23 +343,38 @@ export class MarketplaceController {
     return listingDetails;
   }
 
-  @Put('/listing/:listing_id')
+  @Get('/action/user/:uuid')
   @ApiOperation({
-    summary: 'Update listing for vaulted item',
+    summary:
+      "Get a list of user's actions for all entities (submissions, listings, vaultings, etc)",
   })
   @ApiResponse({
     status: 200,
-    description: 'Listing updated',
+    description:
+      'A list of user actions for all entities (submissions, listings, vaultings, etc)',
   })
   @ApiProduces('application/json')
-  async updateListing(
-    @Param('listing_id') listing_id: number,
-    @Body() body: ListingUpdate,
-  ): Promise<ListingDetails> {
-    const listingDetails = await this.marketplaceService.updateListing(
-      listing_id,
-      body,
-    );
-    return listingDetails;
+  async listUserActionLogs(
+    @Param('uuid') userUUID: number,
+  ): Promise<ActionLogDetails[]> {
+    return [];
+  }
+
+  @Get('/action/:entity/:id')
+  @ApiOperation({
+    summary: 'Get a list of all user actions associated with an entity',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'A list of all user actions associated with the specified entity (submissions, listings, vaultings, etc)',
+    type: ActionLogDetails,
+  })
+  @ApiProduces('application/json')
+  async listEntityActionLogs(
+    @Param('entity') entity: string,
+    @Param('id') id: number,
+  ): Promise<ActionLogDetails[]> {
+    return [];
   }
 }

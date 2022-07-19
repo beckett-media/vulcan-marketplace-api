@@ -2,7 +2,6 @@ import {
   Entity,
   Index,
   Column,
-  PrimaryColumn,
   BeforeInsert,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -161,6 +160,9 @@ export class Vaulting {
   @Column()
   status: number;
 
+  @Column({ nullable: true })
+  created_at: number;
+
   @Column()
   last_updated: number;
 
@@ -200,4 +202,35 @@ export class Listing {
 
   @Column()
   updated_at: number;
+}
+
+@Entity()
+@Index(['entity', 'entity_type'])
+@Index(['actor', 'actor_type'])
+@Index(['created_at'])
+@Index(['type'])
+export class ActionLog {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  type: number;
+
+  @Column()
+  actor: string;
+
+  @Column()
+  actor_type: number;
+
+  @Column()
+  entity: string;
+
+  @Column()
+  entity_type: number;
+
+  @Column()
+  created_at: number;
+
+  @Column()
+  extra: string;
 }

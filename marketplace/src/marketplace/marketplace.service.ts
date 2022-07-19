@@ -6,6 +6,9 @@ import {
 import { AwsService } from 'src/aws/aws.service';
 import { BravoService } from 'src/bravo/bravo.service';
 import {
+  ActionLogEntityTypeReadable,
+  ActionLogActorTypeReadable,
+  ActionLogTypeReadable,
   ListingStatus,
   ListingStatusReadable,
   SubmissionStatus,
@@ -18,11 +21,14 @@ import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import {
   getAttributes,
+  newActionLogDetails,
   newListingDetails,
   newSubmissionDetails,
   newVaultingDetails,
 } from 'src/util/format';
 import {
+  ActionLogDetails,
+  ActionLogRequest,
   ListingDetails,
   ListingRequest,
   ListingResponse,
@@ -371,5 +377,47 @@ export class MarketplaceService {
       order,
     );
     return listingDetails;
+  }
+
+  // create new action log
+  async newActionLog(request: ActionLogRequest): Promise<ActionLogDetails> {
+    // create new action log
+    const actionLog = await this.databaseService.createNewActionLog(request);
+    // return new action log details
+    return new ActionLogDetails({
+      id: actionLog.id,
+      type: actionLog.type,
+      type_desc: ActionLogTypeReadable[actionLog.type],
+      actor: actionLog.actor,
+      actor_type_desc: ActionLogActorTypeReadable[actionLog.actor_type],
+      entity: actionLog.entity,
+      entity_type_desc: ActionLogEntityTypeReadable[actionLog.entity_type],
+      created_at: actionLog.created_at,
+      extra: actionLog.extra,
+    });
+  }
+
+  // list all action logs by user
+  async listActionLogs(
+    type: number,
+    source: string,
+    entity: string,
+    offset: number,
+    limit: number,
+    order: string,
+  ): Promise<ActionLogDetails[]> {
+    // get all action logs for user
+    const actionLogs = await this.databaseService.listActionLogs(
+      type,
+      source,
+      entity,
+      offset,
+      limit,
+      order,
+    );
+
+    // transform action logs to action log details
+    const actionLogDetails = actionLogs.map(actionLog => {return newActionLogDetails(actionLog)});
+    return actionLogDetails;
   }
 }

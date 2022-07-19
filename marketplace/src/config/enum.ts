@@ -65,3 +65,55 @@ export enum QueryOrder {
   ASC = 'ASC',
   DESC = 'DESC',
 }
+
+export enum ActionLogType {
+  Submission = 1,
+  Vaulting = 2,
+  Listing = 3,
+  Withdrawal = 4,
+  Pricing = 5,
+  Sale = 6,
+  Purchase = 7,
+}
+
+export const ActionLogTypeReadable = {
+  1: 'Submission',
+  2: 'Vaulting',
+  3: 'Listing',
+  4: 'Withdrawal',
+  5: 'Pricing',
+  6: 'Sale',
+  7: 'Purchase',
+};
+
+export enum ActionLogActorType {
+  CognitoUser = 1,
+  CognitoAdmin = 2,
+  API = 3,
+}
+
+export const ActionLogActorTypeReadable = {
+  1: 'Cognito User',
+  2: 'Cognito Admin',
+  3: 'API',
+};
+
+export enum ActionLogEntityType {
+  Submission = 1,
+  Vaulting = 2,
+  Listing = 3,
+  Purchase = 4,
+}
+
+export const ActionLogEntityTypeReadable = {
+  1: 'Submission',
+  2: 'Vaulting',
+  3: 'Listing',
+  4: 'Purchase',
+};
+
+export enum ListActionLogType {
+  Actor = 0,
+  Entity = 1,
+  ActorAndEntity = 2,
+}

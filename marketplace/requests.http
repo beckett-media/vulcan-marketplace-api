@@ -129,6 +129,8 @@ GET https://dev.beckett.com:3300/marketplace/listing
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
+
+
 ## aws dev
 
 ### authenticate ADMIN to get jwt token
@@ -165,7 +167,7 @@ Content-Type: application/json
 {
   "user": "12345678-7e3a-4623-a496-0117f324a521",
   "grading_company": "Grading Company Foo",
-  "serial_number": "00000009-7e3a-4623-a496-0117f324a521",
+  "serial_number": "00000019-7e3a-4623-a496-0117f324a521",
   "title": "fake title",
   "description": "fake desc",
   "genre": "good day",
@@ -181,14 +183,14 @@ Content-Type: application/json
 }
 
 ### get single submission
-GET  https://dev.beckett.com:3300/marketplace/submission/1
+GET  https://dev.beckett.com:3300/marketplace/submission/12
 
 
 ### get all submission
 GET  https://dev.beckett.com:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521
 
 ### update submission
-PUT https://dev.beckett.com:3300/marketplace/submission/5
+PUT https://dev.beckett.com:3300/marketplace/submission/12
 Content-Type: application/json
 
 {
@@ -200,9 +202,9 @@ POST https://dev.beckett.com:3300/marketplace/vaulting
 Content-Type: application/json
 
 {
-  "item_id": 5,
+  "item_id": 12,
   "user": "12345678-7e3a-4623-a496-0117f324a521",
-  "submission_id": 5,
+  "submission_id": 12,
   "image_base64": "iVBORw0KGgoAAAANSUhEUgAAAeYAAAHSCAIAAAC2Gv8jAAAAA3NCSVQICAjb4U/gAAAAGXRFWHRTb2Z0d2FyZQBnbm9tZS1zY3JlZW5zaG907wO/PgAABoFJREFUeJzt1EENwCAAwMAxJZDgXyMW+JEmdwr66phrfwAU/K8DALhl2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QcQD7TQQJe1Y7+AAAAABJRU5ErkJggg==",
   "image_format": "png"
 }
@@ -212,7 +214,7 @@ GET https://dev.beckett.com:3300/marketplace/vaulting?user=12345678-7e3a-4623-a4
 
 
 ### Get vaulting by id
-GET https://dev.beckett.com:3300/marketplace/vaulting/4
+GET https://dev.beckett.com:3300/marketplace/vaulting/8
 
 ### withdraw vaulting
 DELETE https://dev.beckett.com:3300/marketplace/vaulting/2

@@ -1,7 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import configuration from '../config/configuration';
-import { Submission, Item, Vaulting, User, Listing } from './database.entity';
+import {
+  Submission,
+  Item,
+  Vaulting,
+  User,
+  Listing,
+  ActionLog,
+} from './database.entity';
 import { DatabaseService } from './database.service';
 
 function GetDBConnection(): TypeOrmModuleOptions {
@@ -11,7 +18,7 @@ function GetDBConnection(): TypeOrmModuleOptions {
     return {
       type: 'sqlite',
       database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing],
+      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
       synchronize: config['db']['sync'],
       keepConnectionAlive: true,
     };
@@ -19,7 +26,7 @@ function GetDBConnection(): TypeOrmModuleOptions {
     return {
       type: 'mysql',
       database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing],
+      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
       synchronize: config['db']['sync'],
       keepConnectionAlive: true,
       host: config['db']['host'],
@@ -31,7 +38,7 @@ function GetDBConnection(): TypeOrmModuleOptions {
     return {
       type: 'mysql',
       database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing],
+      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
       synchronize: config['db']['sync'],
       keepConnectionAlive: true,
       host: config['db']['host'],
@@ -43,7 +50,7 @@ function GetDBConnection(): TypeOrmModuleOptions {
     return {
       type: 'mysql',
       database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing],
+      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
       synchronize: config['db']['sync'],
       keepConnectionAlive: true,
       host: config['db']['host'],
@@ -60,7 +67,14 @@ function GetDBConnection(): TypeOrmModuleOptions {
   providers: [DatabaseService],
   imports: [
     TypeOrmModule.forRoot(GetDBConnection()),
-    TypeOrmModule.forFeature([Submission, Item, Vaulting, User, Listing]),
+    TypeOrmModule.forFeature([
+      Submission,
+      Item,
+      Vaulting,
+      User,
+      Listing,
+      ActionLog,
+    ]),
   ],
   exports: [DatabaseService],
 })

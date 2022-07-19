@@ -4,13 +4,18 @@ import {
   Vaulting,
   User,
   Listing,
+  ActionLog,
 } from 'src/database/database.entity';
 import {
+  ActionLogEntityTypeReadable,
+  ActionLogActorTypeReadable,
+  ActionLogTypeReadable,
   ListingStatusReadable,
   SubmissionStatusReadable,
   VaultingStatusReadable,
 } from 'src/config/enum';
 import {
+  ActionLogDetails,
   ListingDetails,
   SubmissionDetails,
   VaultingDetails,
@@ -163,6 +168,22 @@ export function trimForLoggin(body) {
   }
 
   return _body;
+}
+
+export function newActionLogDetails(actionLog: ActionLog): ActionLogDetails {
+  return new ActionLogDetails({
+    id: actionLog.id,
+    type: actionLog.type,
+    type_desc: ActionLogTypeReadable[actionLog.type],
+    actor_type: actionLog.actor_type,
+    actor_type_desc: ActionLogActorTypeReadable[actionLog.actor_type],
+    actor: actionLog.actor,
+    entity_type: actionLog.entity_type,
+    entity_type_desc: ActionLogEntityTypeReadable[actionLog.entity_type],
+    entity: actionLog.entity,
+    created_at: actionLog.created_at,
+    extra: actionLog.extra,
+  });
 }
 
 export function getAttributes(item: Item) {

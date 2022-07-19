@@ -4,6 +4,7 @@ import {
   Vaulting,
   User,
   Listing,
+  ActionLog,
 } from '../database/database.entity';
 import { Repository, getManager, In } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,12 +17,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import {
+  ActionLogRequest,
   ListingDetails,
   SubmissionDetails,
   SubmissionRequest,
   VaultingUpdate,
 } from 'src/marketplace/dtos/marketplace.dto';
 import {
+  ListActionLogType,
   ListingStatus,
   SubmissionStatus,
   VaultingStatus,
@@ -46,6 +49,7 @@ export class DatabaseService {
     @InjectRepository(Vaulting) private vaultingRepo: Repository<Vaulting>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Listing) private listingRepo: Repository<Listing>,
+    @InjectRepository(ActionLog) private actionLogRepo: Repository<ActionLog>,
   ) {}
 
   async maybeCreateNewUser(user_uuid: string, source: string): Promise<User> {
@@ -583,5 +587,81 @@ export class DatabaseService {
     });
 
     return listingDetails;
+  }
+
+  // create new action log
+  async createNewActionLog(request: ActionLogRequest): Promise<ActionLog> {
+    var actionLog: ActionLog;
+    try {
+      await getManager().transaction(
+        'SERIALIZABLE',
+        async (transactionalEntityManager) => {
+          const newActionLog = this.actionLogRepo.create({
+            type: request.type,
+            actor_type: request.actor_type,
+            actor: request.actor,
+            entity_type: request.entity_type,
+            entity: request.entity,
+            created_at: Math.round(Date.now() / 1000),
+            extra: request.extra,
+          });
+          actionLog = await this.actionLogRepo.save(newActionLog);
+        },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
+    return actionLog;
+  }
+
+  // list action logs for user
+  async listActionLogs(
+    type: number,
+    source: string,
+    entity: string,
+    offset: number,
+    limit: number,
+    order: string,
+  ): Promise<ActionLog[]> {
+    var where_filter = {};
+    switch(type) {
+      case ListActionLogType.Actor:
+        break;
+      case ListActionLogType.Entity:
+        break;
+      case ListActionLogType.ActorAndEntity:
+        break;
+    }
+
+
+    if (type !== undefined) {
+      where_filter['type'] = type;
+    }
+    if (source !== undefined) {
+      where_filter['source'] = source;
+    }
+    if (entity !== undefined) {
+      where_filter['entity'] = entity;
+    }
+
+    if (offset == undefined) {
+      offset = 0;
+    }
+    var filter = {
+      where: where_filter,
+      skip: offset,
+    };
+    if (limit != undefined) {
+      filter['take'] = limit;
+    }
+
+    // order by id
+    if (!!order) {
+      filter['order'] = { id: order };
+    }
+
+    const actionLogs = await this.actionLogRepo.find(filter);
+    return actionLogs;
   }
 }

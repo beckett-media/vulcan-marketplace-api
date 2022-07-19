@@ -1,15 +1,21 @@
 import {
-  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
   IsOptional,
   IsString,
-  Length,
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  ActionLogEntityType,
+  ActionLogEntityTypeReadable,
+  ActionLogActorType,
+  ActionLogActorTypeReadable,
+  ActionLogType,
+  ActionLogTypeReadable,
+} from 'src/config/enum';
 
 export class SubmissionRequest {
   @ApiProperty({
@@ -1229,6 +1235,154 @@ export class ListingUpdate {
   price: number;
 
   constructor(partial: Partial<ListingUpdate>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class ActionLogRequest {
+  @ApiProperty({
+    description: 'The type of the action',
+    required: true,
+    example: ActionLogType.Submission,
+  })
+  @IsEnum(ActionLogType)
+  type: number;
+
+  @ApiProperty({
+    description: 'The actor type of the action',
+    required: true,
+    example: ActionLogActorType.CognitoUser,
+  })
+  @IsEnum(ActionLogActorType)
+  actor_type: number;
+
+  @ApiProperty({
+    description: 'The actor id of the action',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  actor: string;
+
+  @ApiProperty({
+    description: 'The entity type of the action',
+    required: true,
+    example: ActionLogEntityType.Submission,
+  })
+  @IsString()
+  entity_type: number;
+
+  @ApiProperty({
+    description: 'The entity id of the action',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  entity: string;
+
+  @ApiProperty({
+    description: 'The extra information of the action',
+    required: false,
+    example: '{}',
+  })
+  @IsString()
+  extra: string;
+
+  constructor(partial: Partial<ActionLogRequest>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class ActionLogDetails {
+  @ApiProperty({
+    description: 'The id of the action',
+    required: true,
+    example: 1,
+  })
+  @IsNumber()
+  id: number;
+
+  @ApiProperty({
+    description: 'The enum of the action type',
+    required: true,
+    example: ActionLogType.Pricing,
+  })
+  @IsEnum(ActionLogType)
+  type: ActionLogType;
+
+  @ApiProperty({
+    description: 'The description of the action type',
+    required: true,
+    example: ActionLogTypeReadable[ActionLogType.Pricing],
+  })
+  @IsString()
+  type_desc: string;
+
+  @ApiProperty({
+    description: "The enum of the action's actor type",
+    required: true,
+    example: ActionLogActorType.CognitoUser,
+  })
+  @IsEnum(ActionLogActorType)
+  actor_type: ActionLogActorType;
+
+  @ApiProperty({
+    description: "The description of the action's actor type",
+    required: true,
+    example: ActionLogActorTypeReadable[ActionLogActorType.CognitoUser],
+  })
+  @IsString()
+  actor_type_desc: string;
+
+  @ApiProperty({
+    description: "The id of the action's actor",
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  actor: string;
+
+  @ApiProperty({
+    description: "The enum of the action's entity type",
+    required: true,
+    example: ActionLogEntityType.Listing,
+  })
+  @IsEnum(ActionLogEntityType)
+  entity_type: ActionLogEntityType;
+
+  @ApiProperty({
+    description: "The description of the action's entity type",
+    required: true,
+    example: ActionLogEntityTypeReadable[ActionLogEntityType.Listing],
+  })
+  @IsString()
+  entity_type_desc: string;
+
+  @ApiProperty({
+    description: "The id of the action's entity",
+    required: true,
+    example: '1',
+  })
+  @IsString()
+  entity: string;
+
+  @ApiProperty({
+    description: 'The timestamp of the action',
+    required: true,
+    example: 123456789,
+  })
+  @IsNumber()
+  created_at: number;
+
+  @ApiProperty({
+    description: 'The extra information related to the action in JSON format',
+    required: false,
+    example: "{'price': 10000}",
+  })
+  @IsString()
+  extra: string;
+
+  constructor(partial: Partial<ActionLogDetails>) {
     Object.assign(this, partial);
   }
 }
