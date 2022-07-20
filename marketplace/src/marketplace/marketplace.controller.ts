@@ -216,6 +216,29 @@ export class MarketplaceController {
     return vaultingDetails;
   }
 
+  // get vaulting by id
+  @Get('/vaulting/submission/:submission_id')
+  @ApiOperation({
+    summary: 'Get vaulting by submission id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vaulting retrived',
+    type: VaultingDetails,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vaulting not found',
+  })
+  @ApiProduces('application/json')
+  async getVaultingBySubmissionID(
+    @Param('submission_id') submission_id: number,
+  ): Promise<VaultingDetails> {
+    const vaultingDetails =
+      await this.marketplaceService.getVaultingBySubmissionID(submission_id);
+    return vaultingDetails;
+  }
+
   // get vaulting by user id
   @Get('/vaulting')
   @ApiOperation({

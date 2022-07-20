@@ -390,6 +390,22 @@ export class DatabaseService {
     return vaulting;
   }
 
+  async getVaultingBySubmissionID(submission_id: number): Promise<Vaulting> {
+    const submission = await this.submissionRepo.findOne(submission_id);
+    if (!submission) {
+      throw new NotFoundException(`Submission not found for ${submission_id}`);
+    }
+    const vaulting = await this.vaultingRepo.findOne({
+      where: { item_id: submission.item_id },
+    });
+    if (!vaulting) {
+      throw new NotFoundException(
+        `Vaulting not found for submission ${submission_id}`,
+      );
+    }
+    return vaulting;
+  }
+
   async updateVaulting(vaultingUpdate: VaultingUpdate): Promise<Vaulting> {
     const vaulting = await this.getVaultingByItemUUID(vaultingUpdate.item_uuid);
     if (!vaulting) {

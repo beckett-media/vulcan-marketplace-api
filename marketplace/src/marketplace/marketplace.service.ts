@@ -342,6 +342,17 @@ export class MarketplaceService {
     return newVaultingDetails(vaulting, item, user);
   }
 
+  async getVaultingBySubmissionID(
+    submission_id: number,
+  ): Promise<VaultingDetails> {
+    const vaulting = await this.databaseService.getVaultingBySubmissionID(
+      submission_id,
+    );
+    const item = await this.databaseService.getItem(vaulting.item_id);
+    const user = await this.databaseService.getUser(vaulting.user);
+    return newVaultingDetails(vaulting, item, user);
+  }
+
   async updateVaulting(
     vaultingUpdate: VaultingUpdate,
   ): Promise<VaultingDetails> {
