@@ -214,6 +214,10 @@ export class DatabaseService {
 
   async updateSubmission(submission_id: number, status: number) {
     const submission = await this.submissionRepo.findOne(submission_id);
+    if (!submission) {
+      throw new NotFoundException(`Submission ${submission_id} not found`);
+    }
+
     submission.status = status;
     if (status === SubmissionStatus.Received) {
       submission.received_at = Math.round(Date.now() / 1000);
@@ -396,42 +400,43 @@ export class DatabaseService {
 
     // if we don't have collection, update the whole vaulting object
     // otherwise update only the status
-    if (vaultingUpdate.type == VaultingUpdateType.Mint) {
-      let newVaulting = {
-        chain_id: vaultingUpdate.chain_id,
-        collection: vaultingUpdate.collection,
-        token_id: vaultingUpdate.token_id,
-        mint_tx_hash: vaultingUpdate.mint_tx_hash,
-        minted_at: Math.round(Date.now() / 1000),
-        status: vaultingUpdate.status,
-        last_updated: Math.round(Date.now() / 1000),
-      };
+    var newVaulting = {};
+    switch (vaultingUpdate.type) {
+      case VaultingUpdateType.Minted:
+        newVaulting = {
+          chain_id: vaultingUpdate.chain_id,
+          collection: vaultingUpdate.collection,
+          token_id: vaultingUpdate.token_id,
+          mint_tx_hash: vaultingUpdate.mint_tx_hash,
+          minted_at: Math.round(Date.now() / 1000),
+          status: vaultingUpdate.status,
+          last_updated: Math.round(Date.now() / 1000),
+        };
 
-      if (vaultingUpdate.status == VaultingStatus.Withdrawn) {
-        newVaulting['burned_at'] = Math.round(Date.now() / 1000);
-      }
+        if (vaultingUpdate.status == VaultingStatus.Withdrawn) {
+          newVaulting['burned_at'] = Math.round(Date.now() / 1000);
+        }
 
-      Object.assign(vaulting, newVaulting);
-    }
+        Object.assign(vaulting, newVaulting);
+        break;
+      case VaultingUpdateType.Burned:
+        newVaulting = {
+          burn_tx_hash: vaultingUpdate.burn_tx_hash,
+          burned_at: Math.round(Date.now() / 1000),
+          status: vaultingUpdate.status,
+          last_updated: Math.round(Date.now() / 1000),
+        };
 
-    if (vaultingUpdate.type == VaultingUpdateType.Burn) {
-      let newVaulting = {
-        burn_tx_hash: vaultingUpdate.burn_tx_hash,
-        burned_at: Math.round(Date.now() / 1000),
-        status: vaultingUpdate.status,
-        last_updated: Math.round(Date.now() / 1000),
-      };
-
-      Object.assign(vaulting, newVaulting);
-    }
-
-    if (vaultingUpdate.type == VaultingUpdateType.ToBurn) {
-      let newVaulting = {
-        burn_job_id: vaultingUpdate.burn_job_id,
-        status: VaultingStatus.Withdrawing,
-        last_updated: Math.round(Date.now() / 1000),
-      };
-      Object.assign(vaulting, newVaulting);
+        Object.assign(vaulting, newVaulting);
+        break;
+      case VaultingUpdateType.ToBurn:
+        newVaulting = {
+          burn_job_id: vaultingUpdate.burn_job_id,
+          status: VaultingStatus.Withdrawing,
+          last_updated: Math.round(Date.now() / 1000),
+        };
+        Object.assign(vaulting, newVaulting);
+        break;
     }
 
     await this.vaultingRepo.save(vaulting);
@@ -617,32 +622,31 @@ export class DatabaseService {
 
   // list action logs for user
   async listActionLogs(
-    type: number,
-    source: string,
+    listType: number,
+    actor: string,
+    actor_type: number,
     entity: string,
+    entity_type: number,
     offset: number,
     limit: number,
     order: string,
   ): Promise<ActionLog[]> {
     var where_filter = {};
-    switch(type) {
+    switch (listType) {
       case ListActionLogType.Actor:
+        where_filter = { actor: actor, actor_type: actor_type };
         break;
       case ListActionLogType.Entity:
+        where_filter = { entity: entity, entity_type: entity_type };
         break;
       case ListActionLogType.ActorAndEntity:
+        where_filter = {
+          actor: actor,
+          entity: entity,
+          actor_type: actor_type,
+          entity_type: entity_type,
+        };
         break;
-    }
-
-
-    if (type !== undefined) {
-      where_filter['type'] = type;
-    }
-    if (source !== undefined) {
-      where_filter['source'] = source;
-    }
-    if (entity !== undefined) {
-      where_filter['entity'] = entity;
     }
 
     if (offset == undefined) {
@@ -655,13 +659,37 @@ export class DatabaseService {
     if (limit != undefined) {
       filter['take'] = limit;
     }
-
     // order by id
     if (!!order) {
       filter['order'] = { id: order };
     }
 
     const actionLogs = await this.actionLogRepo.find(filter);
+
+    // find all users for action logs
+    const userIds = actionLogs.map((actionLog) => Number(actionLog.actor));
+    // remove NaN from userIds
+    userIds.forEach((userId, index) => {
+      if (isNaN(userId)) {
+        userIds.splice(index, 1);
+      }
+    });
+    const users = await this.userRepo.find({
+      where: { id: In(userIds) },
+    });
+    // build a map of user_id to user
+    const userMap = new Map<string, string>();
+    users.forEach((user) => {
+      userMap.set(user.id.toString(), user.uuid);
+    });
+    // replace actor with user_uuid in action logs
+    actionLogs.forEach((actionLog) => {
+      const uuid = userMap.get(actionLog.actor);
+      if (uuid) {
+        actionLog.actor = uuid;
+      }
+    });
+
     return actionLogs;
   }
 }

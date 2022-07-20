@@ -38,9 +38,9 @@ export enum VaultingStatus {
 
 export enum VaultingUpdateType {
   ToMint = 0,
-  Mint = 1,
+  Minted = 1,
   ToBurn = 2,
-  Burn = 3,
+  Burned = 3,
 }
 
 export enum ListingStatus {
@@ -68,22 +68,26 @@ export enum QueryOrder {
 
 export enum ActionLogType {
   Submission = 1,
-  Vaulting = 2,
-  Listing = 3,
-  Withdrawal = 4,
-  Pricing = 5,
-  Sale = 6,
-  Purchase = 7,
+  SubmissionUpdate = 2,
+  Vaulting = 3,
+  VaultingUpdate = 4,
+  Listing = 5,
+  ListingUpdate = 6,
+  Withdrawal = 7,
+  Pricing = 8,
+  Sale = 9,
 }
 
 export const ActionLogTypeReadable = {
-  1: 'Submission',
-  2: 'Vaulting',
-  3: 'Listing',
-  4: 'Withdrawal',
-  5: 'Pricing',
-  6: 'Sale',
-  7: 'Purchase',
+  1: 'New Submission',
+  2: 'Submission Update',
+  3: 'New Vaulting',
+  4: 'Vaulting Update',
+  5: 'New Listing',
+  6: 'Listing Update',
+  7: 'Withdrawal Vaulting',
+  8: 'Set Price',
+  9: 'Listing Sale',
 };
 
 export enum ActionLogActorType {

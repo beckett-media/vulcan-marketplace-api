@@ -35,7 +35,7 @@ Content-Type: application/json
 {
   "user": "12345678-7e3a-4623-a496-0117f324a521",
   "grading_company": "Grading Company Foo",
-  "serial_number": "00000009-7e3a-4623-a496-0117f324a521",
+  "serial_number": "00000003-7e3a-4623-a946-0117f324a521",
   "title": "fake title",
   "description": "fake desc",
   "genre": "good day",
@@ -51,19 +51,19 @@ Content-Type: application/json
 }
 
 ### get single submission
-GET  http://127.0.0.1:3300/marketplace/submission/3
+GET  http://127.0.0.1:3300/marketplace/submission/10
 
 ### get all submission from user
 GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521
 
 ### get all submission from user ant limit
-GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521&status=3&offset=0&limit=2
+GET  http://127.0.0.1:3300/marketplace/submission?user=12345678-7e3a-4623-a496-0117f324a521
 
 ### get all submission
 GET  http://127.0.0.1:3300/marketplace/submission?order=DESC&status=6
 
 ### update submission
-PUT http://127.0.0.1:3300/marketplace/submission/5
+PUT http://127.0.0.1:3300/marketplace/submission/10
 Content-Type: application/json
 
 {
@@ -75,9 +75,9 @@ POST http://127.0.0.1:3300/marketplace/vaulting
 Content-Type: application/json
 
 {
-  "item_id": 5,
+  "item_id": 10,
   "user": "12345678-7e3a-4623-a496-0117f324a521",
-  "submission_id": 5,
+  "submission_id": 10,
   "image_base64": "iVBORw0KGgoAAAANSUhEUgAAAeYAAAHSCAIAAAC2Gv8jAAAAA3NCSVQICAjb4U/gAAAAGXRFWHRTb2Z0d2FyZQBnbm9tZS1zY3JlZW5zaG907wO/PgAABoFJREFUeJzt1EENwCAAwMAxJZDgXyMW+JEmdwr66phrfwAU/K8DALhl2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QYdkAGZYNkGHZABmWDZBh2QAZlg2QcQD7TQQJe1Y7+AAAAABJRU5ErkJggg==",
   "image_format": "png"
 }
@@ -106,29 +106,53 @@ GET http://127.0.0.1:3300/marketplace/vaulting?order=asaa
 
 
 ### Get vaulting by id
-GET http://127.0.0.1:3300/marketplace/vaulting/5
+GET http://127.0.0.1:3300/marketplace/vaulting/7
 
 ### withdraw vaulting
-DELETE   http://127.0.0.1:3300/marketplace/vaulting/5
+DELETE   http://127.0.0.1:3300/marketplace/vaulting/7
 
 ### list the vaulted item
 POST http://127.0.0.1:3300/marketplace/listing
 Content-Type: application/json
 
 {
-  "vaulting_id": 1,
+  "vaulting_id": 8,
   "user": "12345678-7e3a-4623-a496-0117f324a521",
   "price": 12345
 }
 
-### Get the listed item
-GET https://dev.beckett.com:3300/marketplace/listing
+### list the vaulted item
+GET http://127.0.0.1:3300/marketplace/listing/2
 
 
+### change the price of the listing
+PUT http://127.0.0.1:3300/marketplace/listing/2
+Content-Type: application/json
+
+{
+  "price": 12000
+}
+
+### change the price of the listing
+DELETE http://127.0.0.1:3300/marketplace/listing/2
+Content-Type: application/json
+
+{}
+
+### Get user actions
+GET http://127.0.0.1:3300/marketplace/action/user/12345678-7e3a-4623-a496-0117f324a521
+
+
+### Get entity actions
+GET http://127.0.0.1:3300/marketplace/action/listing/2
+
+
+
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
+
 
 
 ## aws dev

@@ -1386,3 +1386,32 @@ export class ActionLogDetails {
     Object.assign(this, partial);
   }
 }
+
+export class ListActionLogsQuery {
+  @ApiProperty({
+    description: 'The offset of the query',
+    required: false,
+    example: 5,
+  })
+  @IsNumberString()
+  @IsOptional()
+  offset: number;
+
+  @ApiProperty({
+    description: 'The limit of the query',
+    required: false,
+    example: 10,
+  })
+  @IsNumberString()
+  @IsOptional()
+  limit: number;
+
+  @ApiProperty({
+    description: 'The order of the query',
+    required: false,
+    example: 'ASC or DESC',
+  })
+  @IsEnum(['ASC', 'DESC'])
+  @IsOptional()
+  order: string;
+}

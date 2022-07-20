@@ -170,6 +170,26 @@ export function trimForLoggin(body) {
   return _body;
 }
 
+export function trimRequestWithImage(request: any) {
+  var _request = Object.assign({}, request);
+  // loop through body and params and shorten base64 data
+  for (const key in _request) {
+    // remove image
+    if (key.includes('base64')) {
+      // shorten base64 data
+      _request[key] = _request[key].substring(0, 100) + '......';
+    }
+
+    // trim image
+    if (key.includes('image') && _request[key].length > base64Threshold) {
+      // shorten base64 data
+      _request[key] = _request[key].substring(0, 100) + '......';
+    }
+  }
+
+  return _request;
+}
+
 export function newActionLogDetails(actionLog: ActionLog): ActionLogDetails {
   return new ActionLogDetails({
     id: actionLog.id,

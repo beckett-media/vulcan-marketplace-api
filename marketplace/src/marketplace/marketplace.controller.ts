@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -13,6 +14,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import configuration from 'src/config/configuration';
+import {
+  ActionLogActorType,
+  ActionLogEntityType,
+  ListActionLogType,
+} from 'src/config/enum';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 
 import {
@@ -20,7 +26,7 @@ import {
   ListingDetails,
   ListingRequest,
   ListingResponse,
-  ListingUpdate,
+  ListActionLogsQuery,
   ListListingsQuery,
   ListSubmissionsQuery,
   ListVaultingsQuery,
@@ -32,6 +38,7 @@ import {
   VaultingRequest,
   VaultingResponse,
   VaultingUpdate,
+  ListingUpdate,
 } from './dtos/marketplace.dto';
 import { MarketplaceService } from './marketplace.service';
 
@@ -355,9 +362,43 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async listUserActionLogs(
-    @Param('uuid') userUUID: number,
+    @Param('uuid') userUUID: string,
+    @Query() query: ListActionLogsQuery,
   ): Promise<ActionLogDetails[]> {
-    return [];
+    const user = await this.marketplaceService.getUserByUUID(userUUID);
+    const actor = user.id.toString();
+
+    const actionLogs = await this.marketplaceService.listActionLogs(
+      ListActionLogType.Actor,
+      ActionLogActorType.CognitoUser,
+      actor,
+      0,
+      '',
+      query.offset,
+      query.limit,
+      query.order,
+    );
+    return actionLogs;
+  }
+
+  @Put('/listing/:listing_id')
+  @ApiOperation({
+    summary: 'Update listing for vaulted item',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Listing updated',
+  })
+  @ApiProduces('application/json')
+  async updateListing(
+    @Param('listing_id') listing_id: number,
+    @Body() body: ListingUpdate,
+  ): Promise<ListingDetails> {
+    const listingDetails = await this.marketplaceService.updateListing(
+      listing_id,
+      body,
+    );
+    return listingDetails;
   }
 
   @Get('/action/:entity/:id')
@@ -373,8 +414,36 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async listEntityActionLogs(
     @Param('entity') entity: string,
-    @Param('id') id: number,
+    @Param('id') id: string,
+    @Query() query: ListActionLogsQuery,
   ): Promise<ActionLogDetails[]> {
-    return [];
+    var entityType: number;
+    switch (entity) {
+      case 'submission':
+        entityType = ActionLogEntityType.Submission;
+        break;
+      case 'listing':
+        entityType = ActionLogEntityType.Listing;
+        break;
+      case 'vaulting':
+        entityType = ActionLogEntityType.Vaulting;
+        break;
+      default:
+        throw new BadRequestException(
+          'Invalid entity type. Must be one of submission, listing, or vaulting',
+        );
+    }
+
+    const actionLogs = await this.marketplaceService.listActionLogs(
+      ListActionLogType.Entity,
+      0,
+      '',
+      entityType,
+      id,
+      query.offset,
+      query.limit,
+      query.order,
+    );
+    return actionLogs;
   }
 }

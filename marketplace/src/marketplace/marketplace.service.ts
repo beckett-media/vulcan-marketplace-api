@@ -6,6 +6,9 @@ import {
 import { AwsService } from 'src/aws/aws.service';
 import { BravoService } from 'src/bravo/bravo.service';
 import {
+  ActionLogActorType,
+  ActionLogType,
+  ActionLogEntityType,
   ActionLogEntityTypeReadable,
   ActionLogActorTypeReadable,
   ActionLogTypeReadable,
@@ -17,6 +20,7 @@ import {
   VaultingStatusReadable,
   VaultingUpdateType,
 } from 'src/config/enum';
+import { User } from 'src/database/database.entity';
 import { DatabaseService } from 'src/database/database.service';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import {
@@ -25,6 +29,7 @@ import {
   newListingDetails,
   newSubmissionDetails,
   newVaultingDetails,
+  trimRequestWithImage,
 } from 'src/util/format';
 import {
   ActionLogDetails,
@@ -42,6 +47,9 @@ import {
   VaultingUpdate,
 } from './dtos/marketplace.dto';
 
+const MARKETPLACE_API_ACTOR = 'Marketplace API';
+const VAULTING_API_ACTOR = 'Vaulting API';
+
 @Injectable()
 export class MarketplaceService {
   private readonly logger = new DetailedLogger('MarketplaceService', {
@@ -53,6 +61,11 @@ export class MarketplaceService {
     private awsService: AwsService,
     private bravoService: BravoService,
   ) {}
+
+  async getUserByUUID(userUUID: string): Promise<User> {
+    const user = await this.databaseService.getUserByUUID(userUUID);
+    return user;
+  }
 
   async submitItem(request: SubmissionRequest): Promise<SubmissionResponse> {
     // convert request.image_base64 to buffer
@@ -70,6 +83,19 @@ export class MarketplaceService {
       request,
       s3URL,
     );
+
+    // record user action
+    const trimmedRequest = trimRequestWithImage(request);
+    const user = await this.databaseService.getUserByUUID(request.user);
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoUser,
+      actor: user.id.toString(),
+      entity_type: ActionLogEntityType.Submission,
+      entity: result.submission_id.toString(),
+      type: ActionLogType.Submission,
+      extra: JSON.stringify(trimmedRequest),
+    });
+    await this.newActionLog(actionLogRequest);
 
     return new SubmissionResponse({
       user: request.user,
@@ -105,6 +131,19 @@ export class MarketplaceService {
       submission_id,
       status,
     );
+
+    // record user action
+    // TODO: actor should be the admin user id
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoAdmin,
+      actor: submission.user.toString(),
+      entity_type: ActionLogEntityType.Submission,
+      entity: submission.id.toString(),
+      type: ActionLogType.SubmissionUpdate,
+      extra: JSON.stringify({ status: status }),
+    });
+    await this.newActionLog(actionLogRequest);
+
     if (!submission) {
       throw new InternalServerErrorException('Submission not found');
     } else {
@@ -217,11 +256,34 @@ export class MarketplaceService {
       s3URL,
     );
 
+    // record user action
+    const trimmedRequest = trimRequestWithImage(request);
+    var actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoUser,
+      actor: user.id.toString(),
+      entity_type: ActionLogEntityType.Vaulting,
+      entity: vaulting.id.toString(),
+      type: ActionLogType.Vaulting,
+      extra: JSON.stringify(trimmedRequest),
+    });
+    await this.newActionLog(actionLogRequest);
+
     // update submission status
     await this.databaseService.updateSubmission(
       request.submission_id,
       SubmissionStatus.Vaulted,
     );
+
+    // record user action
+    actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoUser,
+      actor: user.id.toString(),
+      entity_type: ActionLogEntityType.Submission,
+      entity: request.submission_id.toString(),
+      type: ActionLogType.SubmissionUpdate,
+      extra: JSON.stringify({ status: SubmissionStatus.Vaulted }),
+    });
+    await this.newActionLog(actionLogRequest);
 
     return new VaultingResponse({
       id: vaulting.id,
@@ -250,7 +312,8 @@ export class MarketplaceService {
     );
     if (!!listing && listing.status != ListingStatus.NotListed) {
       throw new InternalServerErrorException(
-        `Vaulting ${vaulting_id} has a active listing ${listing.id}`,
+        `Vaulting ${vaulting_id} has an active listing ` +
+          `${listing.id}. No withdrawal allowed.`,
       );
     }
 
@@ -285,6 +348,38 @@ export class MarketplaceService {
     const vaulting = await this.databaseService.updateVaulting(vaultingUpdate);
     const item = await this.databaseService.getItem(vaulting.item_id);
     const user = await this.databaseService.getUser(vaulting.user);
+
+    // record user action
+    var actionLogType: number;
+    var actor_type: number;
+    var actor: string;
+    switch (vaultingUpdate.type) {
+      case VaultingUpdateType.Minted:
+        actionLogType = ActionLogType.VaultingUpdate;
+        actor_type = ActionLogActorType.API;
+        actor = VAULTING_API_ACTOR;
+        break;
+      case VaultingUpdateType.Burned:
+        actionLogType = ActionLogType.Withdrawal;
+        actor_type = ActionLogActorType.API;
+        actor = VAULTING_API_ACTOR;
+        break;
+      case VaultingUpdateType.ToBurn:
+        actionLogType = ActionLogType.Withdrawal;
+        actor_type = ActionLogActorType.CognitoUser;
+        actor = vaulting.user.toString();
+        break;
+    }
+    var actionLogRequest = new ActionLogRequest({
+      actor_type: actor_type,
+      actor: actor,
+      entity_type: ActionLogEntityType.Vaulting,
+      entity: vaulting.id.toString(),
+      type: actionLogType,
+      extra: JSON.stringify(vaultingUpdate),
+    });
+    await this.newActionLog(actionLogRequest);
+
     return newVaultingDetails(vaulting, item, user);
   }
 
@@ -323,6 +418,18 @@ export class MarketplaceService {
       request.vaulting_id,
       request.price,
     );
+
+    // record user action
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoUser,
+      actor: user.id.toString(),
+      entity_type: ActionLogEntityType.Listing,
+      entity: listing.id.toString(),
+      type: ActionLogType.Listing,
+      extra: JSON.stringify(request),
+    });
+    await this.newActionLog(actionLogRequest);
+
     // return new listing details
     return new ListingResponse({
       id: listing.id,
@@ -343,6 +450,18 @@ export class MarketplaceService {
       listing_id,
       listingUpdate.price,
     );
+
+    // record user action
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoUser,
+      actor: listing.user.toString(),
+      entity_type: ActionLogEntityType.Listing,
+      entity: listing.id.toString(),
+      type: ActionLogType.ListingUpdate,
+      extra: JSON.stringify(listingUpdate),
+    });
+    await this.newActionLog(actionLogRequest);
+
     const vaulting = await this.databaseService.getVaulting(
       listing.vaulting_id,
     );
@@ -399,8 +518,10 @@ export class MarketplaceService {
 
   // list all action logs by user
   async listActionLogs(
-    type: number,
-    source: string,
+    listType: number,
+    actorType: number,
+    actor: string,
+    entityType: number,
     entity: string,
     offset: number,
     limit: number,
@@ -408,16 +529,20 @@ export class MarketplaceService {
   ): Promise<ActionLogDetails[]> {
     // get all action logs for user
     const actionLogs = await this.databaseService.listActionLogs(
-      type,
-      source,
+      listType,
+      actor,
+      actorType,
       entity,
+      entityType,
       offset,
       limit,
       order,
     );
 
     // transform action logs to action log details
-    const actionLogDetails = actionLogs.map(actionLog => {return newActionLogDetails(actionLog)});
+    const actionLogDetails = actionLogs.map((actionLog) => {
+      return newActionLogDetails(actionLog);
+    });
     return actionLogDetails;
   }
 }
