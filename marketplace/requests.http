@@ -105,11 +105,14 @@ Content-Type: application/json
 GET http://127.0.0.1:3300/marketplace/vaulting?order=asaa
 
 
+### Get vaulting by submission id
+GET http://127.0.0.1:3300/marketplace/vaulting/submission/11
+
 ### Get vaulting by id
 GET http://127.0.0.1:3300/marketplace/vaulting/7
 
 ### withdraw vaulting
-DELETE   http://127.0.0.1:3300/marketplace/vaulting/7
+DELETE http://127.0.0.1:3300/marketplace/vaulting/7
 
 ### list the vaulted item
 POST http://127.0.0.1:3300/marketplace/listing

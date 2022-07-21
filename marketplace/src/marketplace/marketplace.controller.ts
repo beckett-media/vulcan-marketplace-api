@@ -6,6 +6,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseEnumPipe,
   Post,
   Put,
   Query,
@@ -228,15 +229,19 @@ export class MarketplaceController {
   })
   @ApiResponse({
     status: 404,
-    description: 'Vaulting not found',
+    description: 'Submission not found',
   })
   @ApiProduces('application/json')
   async getVaultingBySubmissionID(
     @Param('submission_id') submission_id: number,
-  ): Promise<VaultingDetails> {
+  ): Promise<VaultingDetails[]> {
     const vaultingDetails =
       await this.marketplaceService.getVaultingBySubmissionID(submission_id);
-    return vaultingDetails;
+    // if no vaulting found, return null
+    if (vaultingDetails == null) {
+      return [];
+    }
+    return [vaultingDetails];
   }
 
   // get vaulting by user id

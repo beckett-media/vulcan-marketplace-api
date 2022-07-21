@@ -348,6 +348,10 @@ export class MarketplaceService {
     const vaulting = await this.databaseService.getVaultingBySubmissionID(
       submission_id,
     );
+    // if no vaulting found, return null
+    if (!vaulting) {
+      return null;
+    }
     const item = await this.databaseService.getItem(vaulting.item_id);
     const user = await this.databaseService.getUser(vaulting.user);
     return newVaultingDetails(vaulting, item, user);

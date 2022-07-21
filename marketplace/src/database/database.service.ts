@@ -398,11 +398,6 @@ export class DatabaseService {
     const vaulting = await this.vaultingRepo.findOne({
       where: { item_id: submission.item_id },
     });
-    if (!vaulting) {
-      throw new NotFoundException(
-        `Vaulting not found for submission ${submission_id}`,
-      );
-    }
     return vaulting;
   }
 
