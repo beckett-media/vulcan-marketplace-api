@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import got from 'got/dist/source';
-import configuration from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 import { trimForLoggin } from 'src/util/format';
 
@@ -17,7 +17,7 @@ export class BravoService {
     imagebase64: string,
     attributes: { [key: string]: any },
   ): Promise<number> {
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     const url = config['bravo']['mint']['url'];
     const headers = config['bravo']['mint']['headers'];
@@ -63,7 +63,7 @@ export class BravoService {
     collection: string,
     tokenId: number,
   ): Promise<number> {
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     const url = config['bravo']['burn']['url'];
     const headers = config['bravo']['burn']['headers'];

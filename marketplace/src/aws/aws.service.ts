@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
 import { v4 as uuid } from 'uuid';
-import configuration from '../config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 
 @Injectable()
 export class AwsService {
@@ -12,7 +12,7 @@ export class AwsService {
     prefix: string,
     image_format: string,
   ) {
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     const s3Config = {
       accessKeyId: config['aws']['AWS_ACCESS_KEY_ID'],

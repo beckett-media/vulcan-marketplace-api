@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import configuration from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
 import { DetailedLogger } from 'src/logger/detailed.logger';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err, user, info) {
     // You can throw an exception based on either "info" or "err" arguments
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     const authEnabled = config['auth_enabled'];
     if (authEnabled) {

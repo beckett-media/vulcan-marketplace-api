@@ -5,13 +5,13 @@ import {
   CognitoUserPool,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js';
-import configuration from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
 
 @Injectable()
 export class AuthService {
   private userPool: CognitoUserPool;
   constructor() {
-    const env = process.env['runtime'];
+    const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     this.userPool = new CognitoUserPool({
       UserPoolId: config['cognito']['COGNITO_USER_POOL_ID'],

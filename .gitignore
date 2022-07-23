@@ -38,4 +38,5 @@ lerna-debug.log*
 *.sqlite
 *dotgit
 yarn.lock
-package.lock
+*/package.lock
+*/package-json.lock

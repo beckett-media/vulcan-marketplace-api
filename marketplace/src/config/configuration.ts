@@ -131,47 +131,33 @@ export default () => ({
     auth_enabled: true,
     aws: {
       AWS_PUBLIC_BUCKET_NAME:
-        process.env.MARKETPLACE_DEV_AWS_PUBLIC_BUCKET_NAME ||
-        'beckett-marketplace-dev',
+        process.env.MARKETPLACE_DEV_AWS_PUBLIC_BUCKET_NAME,
       AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_DEV_AWS_ACCESS_KEY_ID,
       AWS_SECRET_ACCESS_KEY: process.env.MARKETPLACE_DEV_AWS_SECRET_ACCESS_KEY,
-      AWS_DEFAULT_REGION:
-        process.env.MARKETPLACE_DEV_AWS_DEFAULT_REGION || 'us-west-1',
+      AWS_DEFAULT_REGION: process.env.MARKETPLACE_DEV_AWS_DEFAULT_REGION,
     },
     bravo: {
       mint: {
-        collection:
-          process.env.MARKETPLACE_DEV_BRAVO_MINT_COLLECTION ||
-          '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url:
-          process.env.MARKETPLACE_DEV_BRAVO_MINT_URL ||
-          'http://localhost:3000/vaulting/mint',
+        collection: process.env.MARKETPLACE_DEV_BRAVO_MINT_COLLECTION,
+        url: process.env.MARKETPLACE_DEV_BRAVO_MINT_URL,
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        collection:
-          process.env.MARKETPLACE_DEV_BRAVO_BURN_COLLECTION ||
-          '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url:
-          process.env.MARKETPLACE_DEV_BRAVO_BURN_URL ||
-          'http://localhost:3000/vaulting/burn',
+        collection: process.env.MARKETPLACE_DEV_BRAVO_BURN_COLLECTION,
+        url: process.env.MARKETPLACE_DEV_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
     },
     cognito: {
-      COGNITO_USER_POOL_ID:
-        process.env.MARKETPLACE_DEV_COGNITO_USER_POOL_ID ||
-        'us-west-1_QgCMUGduZ',
-      COGNITO_CLIENT_ID:
-        process.env.MARKETPLACE_DEV_COGNITO_CLIENT_ID ||
-        '30apj4knq7ps2qsaldr6clpr9p',
-      COGNITO_REGION: process.env.MARKETPLACE_DEV_COGNITO_REGION || 'us-west-1',
+      COGNITO_USER_POOL_ID: process.env.MARKETPLACE_DEV_COGNITO_USER_POOL_ID,
+      COGNITO_CLIENT_ID: process.env.MARKETPLACE_DEV_COGNITO_CLIENT_ID,
+      COGNITO_REGION: process.env.MARKETPLACE_DEV_COGNITO_REGION,
     },
     db: {
-      name:
-        process.env.MARKETPLACE_DEV_DB_NAME ||
-        'beckett_marketplace_db_dev.sqlite',
+      name: process.env.MARKETPLACE_DEV_DB_NAME,
       sync: true,
     },
   },
 });
+
+export const RUNTIME_ENV = 'MARKETPLACE_RUNTIME';

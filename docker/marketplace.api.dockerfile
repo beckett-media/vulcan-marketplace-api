@@ -8,7 +8,9 @@ RUN yarn install
 
 # marketplace API port
 EXPOSE 3300
+EXPOSE 4300
+EXPOSE 5300
 
 # start the marketplace API server in development mode
 WORKDIR /opt/marketplace
-ENTRYPOINT ["npm", "run", "start:dev"]
+ENTRYPOINT ["npm", "run", "start"]

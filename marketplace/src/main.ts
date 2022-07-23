@@ -6,7 +6,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import configuration from './config/configuration';
+import configuration, { RUNTIME_ENV } from './config/configuration';
 import { MarketplaceModule } from './marketplace/marketplace.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 
@@ -32,7 +32,7 @@ function setupApp(app: INestApplication) {
 }
 
 async function bootstrap() {
-  const config = configuration()[process.env['runtime']];
+  const config = configuration()[process.env[RUNTIME_ENV]];
   // create and setup marketplace server
   const marketplaceServer = express();
   const marketplaceApp = await NestFactory.create(
