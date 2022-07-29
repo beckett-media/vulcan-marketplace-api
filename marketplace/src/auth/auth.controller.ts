@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { BadRequestException, Body, Post } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
-import { Group } from 'src/config/enum';
+import { Group } from '../config/enum';
 import { AuthService } from './auth.service';
 import { AuthenticationRequest } from './dtos/auth.dto';
 import { OnlyAllowGroups } from './groups.decorator';

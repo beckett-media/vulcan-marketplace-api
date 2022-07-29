@@ -40,6 +40,9 @@ export class Submission {
   image: string;
 
   @Column()
+  image_rev: string;
+
+  @Column()
   created_at: number;
 
   @Column()
@@ -117,6 +120,9 @@ export class Item {
 
   @Column()
   est_value: number;
+
+  @Column()
+  status: number;
 }
 
 @Entity()
@@ -160,11 +166,11 @@ export class Vaulting {
   @Column()
   status: number;
 
-  @Column({ nullable: true })
+  @Column()
   created_at: number;
 
   @Column()
-  last_updated: number;
+  updated_at: number;
 
   @Column()
   minted_at: number;

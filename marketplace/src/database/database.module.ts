@@ -11,55 +11,65 @@ import {
 } from './database.entity';
 import { DatabaseService } from './database.service';
 
-function GetDBConnection(): TypeOrmModuleOptions {
+export function GetDBConnection(): TypeOrmModuleOptions {
   let env = process.env[RUNTIME_ENV];
   let config = configuration()[env];
-  if (env === 'dev') {
-    return {
-      type: 'sqlite',
-      database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
-      synchronize: config['db']['sync'],
-      keepConnectionAlive: true,
-    };
-  } else if (env === 'awsdev') {
-    return {
-      type: 'mysql',
-      database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
-      synchronize: config['db']['sync'],
-      keepConnectionAlive: true,
-      host: config['db']['host'],
-      port: config['db']['port'],
-      username: config['db']['username'],
-      password: config['db']['password'],
-    };
-  } else if (env === 'stage') {
-    return {
-      type: 'mysql',
-      database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
-      synchronize: config['db']['sync'],
-      keepConnectionAlive: true,
-      host: config['db']['host'],
-      port: config['db']['port'],
-      username: config['db']['username'],
-      password: config['db']['password'],
-    };
-  } else if (env === 'prod') {
-    return {
-      type: 'mysql',
-      database: config['db']['name'],
-      entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
-      synchronize: config['db']['sync'],
-      keepConnectionAlive: true,
-      host: config['db']['host'],
-      port: config['db']['port'],
-      username: config['db']['username'],
-      password: config['db']['password'],
-    };
-  } else {
-    throw new Error(`Unknown environment ${env}`);
+
+  switch (env) {
+    case 'test':
+      return {
+        type: 'sqlite',
+        database: config['db']['name'],
+        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        synchronize: config['db']['sync'],
+        keepConnectionAlive: true,
+      };
+    case 'dev':
+      return {
+        type: 'sqlite',
+        database: config['db']['name'],
+        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        synchronize: config['db']['sync'],
+        keepConnectionAlive: true,
+      };
+    case 'awsdev':
+      return {
+        type: 'mysql',
+        database: config['db']['name'],
+        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        synchronize: config['db']['sync'],
+        keepConnectionAlive: true,
+        host: config['db']['host'],
+        port: config['db']['port'],
+        username: config['db']['username'],
+        password: config['db']['password'],
+      };
+    case 'stage':
+      return {
+        type: 'mysql',
+        database: config['db']['name'],
+        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        synchronize: config['db']['sync'],
+        keepConnectionAlive: true,
+        host: config['db']['host'],
+        port: config['db']['port'],
+        username: config['db']['username'],
+        password: config['db']['password'],
+      };
+    case 'prod':
+      return {
+        type: 'mysql',
+        database: config['db']['name'],
+        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        synchronize: config['db']['sync'],
+        keepConnectionAlive: true,
+        host: config['db']['host'],
+        port: config['db']['port'],
+        username: config['db']['username'],
+        password: config['db']['password'],
+      };
+    default:
+      throw new Error(`Unknown environment ${env}`);
   }
 }
 

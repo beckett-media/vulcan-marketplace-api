@@ -7,6 +7,12 @@ export enum SubmissionStatus {
   Vaulted = 5,
 }
 
+export enum ItemStatus {
+  Submitted = 1,
+  Received = 2,
+  Vaulted = 3,
+}
+
 export const SubmissionStatusReadable = {
   0: 'Failed',
   1: 'Submitted',

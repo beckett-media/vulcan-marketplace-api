@@ -3,8 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { passportJwtSecret } from 'jwks-rsa';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

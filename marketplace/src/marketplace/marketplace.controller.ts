@@ -14,13 +14,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 import {
   ActionLogActorType,
   ActionLogEntityType,
   ListActionLogType,
-} from 'src/config/enum';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+} from '../config/enum';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 import {
   ActionLogDetails,

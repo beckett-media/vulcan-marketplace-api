@@ -33,6 +33,7 @@ export default () => ({
       port: process.env.MARKETPLACE_PROD_DB_PORT,
       username: process.env.MARKETPLACE_PROD_DB_USERNAME,
       password: process.env.MARKETPLACE_PROD_DB_PASSWORD,
+      isolation: 'REPEATABLE READ',
     },
   },
   stage: {
@@ -70,6 +71,7 @@ export default () => ({
       port: process.env.MARKETPLACE_STAGE_DB_PORT,
       username: process.env.MARKETPLACE_STAGE_DB_USERNAME,
       password: process.env.MARKETPLACE_STAGE_DB_PASSWORD,
+      isolation: 'REPEATABLE READ',
     },
   },
   awsdev: {
@@ -124,6 +126,7 @@ export default () => ({
       port: process.env.MARKETPLACE_AWSDEV_DB_PORT || 3306,
       username: process.env.MARKETPLACE_AWSDEV_DB_USERNAME,
       password: process.env.MARKETPLACE_AWSDEV_DB_PASSWORD,
+      isolation: 'REPEATABLE READ',
     },
   },
   dev: {
@@ -156,6 +159,43 @@ export default () => ({
     db: {
       name: process.env.MARKETPLACE_DEV_DB_NAME,
       sync: true,
+      isolation: 'SERIALIZABLE',
+    },
+  },
+  test: {
+    api_port: 3300,
+    auth_enabled: false,
+    aws: {
+      AWS_PUBLIC_BUCKET_NAME: 'NOTUSED',
+      AWS_ACCESS_KEY_ID: 'NOTUSED',
+      AWS_SECRET_ACCESS_KEY: 'NOTUSED',
+      AWS_DEFAULT_REGION: 'NOTUSED',
+    },
+    bravo: {
+      mint: {
+        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url: 'https://dev.beckett.com:3000/vaulting/mint',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      burn: {
+        collection: '0x599b70873851c5ef6d52A613c574D6F688A53524',
+        url: 'https://dev.beckett.com:3000/vaulting/burn',
+        headers: { 'Content-Type': 'application/json' },
+      },
+    },
+    cognito: {
+      COGNITO_USER_POOL_ID: 'us-west-1_QgCMUGduZ',
+      COGNITO_CLIENT_ID: '30apj4knq7ps2qsaldr6clpr9p',
+      COGNITO_REGION: 'us-west-1',
+    },
+    db: {
+      name: 'beckett_marketplace_db_test.sqlite',
+      sync: true,
+      host: 'NOTUSED',
+      port: 3306,
+      username: 'NOTUSED',
+      password: 'NOTUSED',
+      isolation: 'SERIALIZABLE',
     },
   },
 });

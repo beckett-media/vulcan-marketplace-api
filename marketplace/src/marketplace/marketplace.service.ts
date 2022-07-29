@@ -3,8 +3,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { AwsService } from 'src/aws/aws.service';
-import { BravoService } from 'src/bravo/bravo.service';
+import { AwsService } from '../aws/aws.service';
+import { BravoService } from '../bravo/bravo.service';
 import {
   ActionLogActorType,
   ActionLogType,
@@ -19,10 +19,10 @@ import {
   VaultingStatus,
   VaultingStatusReadable,
   VaultingUpdateType,
-} from 'src/config/enum';
-import { User } from 'src/database/database.entity';
-import { DatabaseService } from 'src/database/database.service';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+} from '../config/enum';
+import { Submission, User } from '../database/database.entity';
+import { DatabaseService } from '../database/database.service';
+import { DetailedLogger } from '../logger/detailed.logger';
 import {
   getAttributes,
   newActionLogDetails,
@@ -30,7 +30,7 @@ import {
   newSubmissionDetails,
   newVaultingDetails,
   trimRequestWithImage,
-} from 'src/util/format';
+} from '../util/format';
 import {
   ActionLogDetails,
   ActionLogRequest,
@@ -67,22 +67,53 @@ export class MarketplaceService {
     return user;
   }
 
-  async submitItem(request: SubmissionRequest): Promise<SubmissionResponse> {
-    // convert request.image_base64 to buffer
-    const image_buffer = Buffer.from(request.image_base64, 'base64');
-    const s3URL = await this.awsService.uploadItemImage(
-      image_buffer,
-      'submission',
-      request.image_format,
-    );
-
-    if (!s3URL) {
-      throw new InternalServerErrorException('Image upload failed');
+  async uploadImages(request: SubmissionRequest): Promise<[string, string]> {
+    var imagePath = '';
+    var imagePathRev = '';
+    if (request.image_base64 != '') {
+      if (request.image_format == '') {
+        throw new InternalServerErrorException('Image format not specified');
+      }
+      const image_buffer = Buffer.from(request.image_base64, 'base64');
+      imagePath = await this.awsService.uploadItemImage(
+        image_buffer,
+        'submission',
+        request.image_format,
+      );
+    } else {
+      imagePath = request.image_path || '';
     }
-    const result = await this.databaseService.createNewSubmission(
-      request,
-      s3URL,
-    );
+
+    if (request.image_rev_base64 != '') {
+      if (request.image_rev_format == '') {
+        throw new InternalServerErrorException(
+          'Back image format not specified',
+        );
+      }
+      const image_rev_buffer = Buffer.from(request.image_rev_base64, 'base64');
+      imagePathRev = await this.awsService.uploadItemImage(
+        image_rev_buffer,
+        'submission',
+        request.image_rev_format,
+      );
+    } else {
+      imagePathRev = request.image_rev_path || '';
+    }
+
+    this.logger.log(`Uploaded images: ${imagePath} ${imagePathRev}`);
+    return [imagePath, imagePathRev];
+  }
+
+  async submitItem(request: SubmissionRequest): Promise<SubmissionResponse> {
+    const [imagePath, imagePathRev] = await this.uploadImages(request);
+
+    if (!imagePath && !imagePathRev) {
+      throw new InternalServerErrorException('No image specified');
+    }
+    const result = await this.databaseService.createNewSubmission(request, [
+      imagePath,
+      imagePathRev,
+    ]);
 
     // record user action
     const trimmedRequest = trimRequestWithImage(request);
@@ -123,15 +154,7 @@ export class MarketplaceService {
     return submissionDetails;
   }
 
-  async updateSubmission(
-    submission_id: number,
-    status: number,
-  ): Promise<SubmissionDetails> {
-    const submission = await this.databaseService.updateSubmission(
-      submission_id,
-      status,
-    );
-
+  async actionLogForSubmisson(submission: Submission, newStatus: number) {
     // record user action
     // TODO: actor should be the admin user id
     const actionLogRequest = new ActionLogRequest({
@@ -140,12 +163,41 @@ export class MarketplaceService {
       entity_type: ActionLogEntityType.Submission,
       entity: submission.id.toString(),
       type: ActionLogType.SubmissionUpdate,
-      extra: JSON.stringify({ status: status }),
+      extra: JSON.stringify({ status: newStatus }),
     });
     await this.newActionLog(actionLogRequest);
+  }
+
+  async updateSubmission(
+    submission_id: number,
+    status: number,
+  ): Promise<SubmissionDetails> {
+    // if submission exists
+    var submission = await this.databaseService.getSubmission(submission_id);
+    if (!submission) {
+      throw new NotFoundException(`Submission ${submission_id} not found`);
+    } else {
+      // if submission's status is not received, then approval should fail
+      if (
+        status == SubmissionStatus.Approved &&
+        submission.status !== SubmissionStatus.Received
+      ) {
+        throw new InternalServerErrorException(
+          `Submission ${submission_id} is not received yet. Cannot approve.`,
+        );
+      }
+    }
+
+    submission = await this.databaseService.updateSubmission(
+      submission_id,
+      status,
+    );
+
+    // record user action
+    this.actionLogForSubmisson(submission, status);
 
     if (!submission) {
-      throw new InternalServerErrorException('Submission not found');
+      throw new InternalServerErrorException('Submission update failed');
     } else {
       const item = await this.databaseService.getItem(submission.item_id);
       const user = await this.databaseService.getUser(submission.user);

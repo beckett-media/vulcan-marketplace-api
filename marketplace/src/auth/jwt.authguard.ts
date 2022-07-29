@@ -4,8 +4,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
+import { DetailedLogger } from '../logger/detailed.logger';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

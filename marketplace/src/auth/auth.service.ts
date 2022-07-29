@@ -5,7 +5,7 @@ import {
   CognitoUserPool,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 
 @Injectable()
 export class AuthService {

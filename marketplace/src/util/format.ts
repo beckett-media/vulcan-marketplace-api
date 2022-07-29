@@ -5,7 +5,7 @@ import {
   User,
   Listing,
   ActionLog,
-} from 'src/database/database.entity';
+} from '../database/database.entity';
 import {
   ActionLogEntityTypeReadable,
   ActionLogActorTypeReadable,
@@ -13,13 +13,13 @@ import {
   ListingStatusReadable,
   SubmissionStatusReadable,
   VaultingStatusReadable,
-} from 'src/config/enum';
+} from '../config/enum';
 import {
   ActionLogDetails,
   ListingDetails,
   SubmissionDetails,
   VaultingDetails,
-} from 'src/marketplace/dtos/marketplace.dto';
+} from '../marketplace/dtos/marketplace.dto';
 
 export function newSubmissionDetails(
   submission: Submission,

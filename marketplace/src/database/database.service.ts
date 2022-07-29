@@ -15,22 +15,25 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DetailedLogger } from 'src/logger/detailed.logger';
+import { DetailedLogger } from '../logger/detailed.logger';
 import {
   ActionLogRequest,
   ListingDetails,
   SubmissionDetails,
   SubmissionRequest,
   VaultingUpdate,
-} from 'src/marketplace/dtos/marketplace.dto';
+} from '../marketplace/dtos/marketplace.dto';
 import {
+  ItemStatus,
   ListActionLogType,
   ListingStatus,
   SubmissionStatus,
   VaultingStatus,
   VaultingUpdateType,
-} from 'src/config/enum';
-import { newListingDetails, newSubmissionDetails } from 'src/util/format';
+} from '../config/enum';
+import { newListingDetails, newSubmissionDetails } from '../util/format';
+import configuration, { RUNTIME_ENV } from 'src/config/configuration';
+import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 
 const DEFAULT_USER_SOURCE = 'cognito';
 const INIT_COLLECTION = '';
@@ -41,6 +44,7 @@ export class DatabaseService {
   private readonly logger = new DetailedLogger('DatabaseService', {
     timestamp: true,
   });
+  private isolation = 'REPEATABLE READ' as IsolationLevel;
 
   constructor(
     @InjectRepository(Submission)
@@ -50,7 +54,12 @@ export class DatabaseService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Listing) private listingRepo: Repository<Listing>,
     @InjectRepository(ActionLog) private actionLogRepo: Repository<ActionLog>,
-  ) {}
+  ) {
+    // read isolation setting from configuration
+    let env = process.env[RUNTIME_ENV];
+    let config = configuration()[env];
+    this.isolation = config['db']['isolation'];
+  }
 
   async maybeCreateNewUser(user_uuid: string, source: string): Promise<User> {
     const user = await this.userRepo.findOne({
@@ -68,16 +77,17 @@ export class DatabaseService {
     return user;
   }
 
-  async createNewSubmission(submission: SubmissionRequest, s3URL: string) {
+  async createNewSubmission(
+    submission: SubmissionRequest,
+    imagePaths: [string, string],
+  ) {
     var submission_id: number;
     var item_id: number;
     var uuid: string;
     var status: number;
-    var defaultImage =
-      'https://beckett-marketplace-dev.s3.us-west-1.amazonaws.com/baseball-cards-gettyimages-161023632.jpg';
     try {
       await getManager().transaction(
-        'SERIALIZABLE',
+        this.isolation,
         async (transactionalEntityManager) => {
           const user = await this.maybeCreateNewUser(
             submission.user,
@@ -98,6 +108,7 @@ export class DatabaseService {
             autograph: submission.autograph,
             subject: submission.subject,
             est_value: submission.est_value,
+            status: ItemStatus.Submitted,
           });
           const itemSaved = await this.itemRepo.save(newItem);
           item_id = itemSaved.id;
@@ -105,8 +116,9 @@ export class DatabaseService {
           const newSubmission = this.submissionRepo.create({
             user: user.id,
             item_id: itemSaved.id,
-            status: 1,
-            image: s3URL || defaultImage,
+            status: SubmissionStatus.Submitted,
+            image: imagePaths[0],
+            image_rev: imagePaths[1],
             created_at: Math.round(Date.now() / 1000),
             received_at: 0,
             approved_at: 0,
@@ -219,15 +231,18 @@ export class DatabaseService {
     }
 
     submission.status = status;
-    if (status === SubmissionStatus.Received) {
-      submission.received_at = Math.round(Date.now() / 1000);
+    switch (status) {
+      case SubmissionStatus.Received:
+        submission.received_at = Math.round(Date.now() / 1000);
+        break;
+      case SubmissionStatus.Approved:
+        submission.approved_at = Math.round(Date.now() / 1000);
+        break;
+      case SubmissionStatus.Rejected:
+        submission.rejected_at = Math.round(Date.now() / 1000);
+        break;
     }
-    if (status === SubmissionStatus.Approved) {
-      submission.approved_at = Math.round(Date.now() / 1000);
-    }
-    if (status === SubmissionStatus.Rejected) {
-      submission.rejected_at = Math.round(Date.now() / 1000);
-    }
+
     await this.submissionRepo.save(submission);
     return submission;
   }
@@ -302,7 +317,7 @@ export class DatabaseService {
             image: s3url,
             minted_at: 0,
             burned_at: 0,
-            last_updated: Math.round(Date.now() / 1000),
+            updated_at: Math.round(Date.now() / 1000),
           });
           vaulting = await this.vaultingRepo.save(newVaulting);
         },

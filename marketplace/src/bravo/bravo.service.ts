@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import got from 'got/dist/source';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
-import { DetailedLogger } from 'src/logger/detailed.logger';
-import { trimForLoggin } from 'src/util/format';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
+import { DetailedLogger } from '../logger/detailed.logger';
+import { trimForLoggin } from '../util/format';
 
 @Injectable()
 export class BravoService {

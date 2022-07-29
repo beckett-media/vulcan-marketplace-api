@@ -15,7 +15,7 @@ import {
   ActionLogActorTypeReadable,
   ActionLogType,
   ActionLogTypeReadable,
-} from 'src/config/enum';
+} from '../../config/enum';
 
 export class SubmissionRequest {
   @ApiProperty({
@@ -141,6 +141,42 @@ export class SubmissionRequest {
   })
   @IsString()
   image_format: string;
+
+  @ApiProperty({
+    description:
+      'The image path (static asset of the site) of the submitted item',
+    required: false,
+    example: 'path/to/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  image_path: string;
+
+  @ApiProperty({
+    description: "The base64 encoding of the submitted item's back image ",
+    required: true,
+    example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
+  })
+  @IsString()
+  image_rev_base64: string;
+
+  @ApiProperty({
+    description: 'The back image format of the submitted item',
+    required: true,
+    example: 'jpg',
+  })
+  @IsString()
+  image_rev_format: string;
+
+  @ApiProperty({
+    description:
+      'The back image path (static asset of the site) of the submitted item',
+    required: false,
+    example: 'path/to/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  image_rev_path: string;
 
   constructor(partial: Partial<SubmissionRequest>) {
     Object.assign(this, partial);

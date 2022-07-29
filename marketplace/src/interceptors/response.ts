@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { trimForLoggin } from 'src/util/format';
+import { trimForLoggin } from '../util/format';
 
 export interface Response<T> {
   data: T;

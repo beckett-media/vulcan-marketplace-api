@@ -11,7 +11,7 @@ export class AwsService {
     dataBuffer: Buffer,
     prefix: string,
     image_format: string,
-  ) {
+  ): Promise<string> {
     const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
     const s3Config = {
