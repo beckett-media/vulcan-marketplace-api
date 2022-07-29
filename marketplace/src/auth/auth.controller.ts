@@ -21,7 +21,6 @@ import { OnlyAllowGroups } from './groups.decorator';
 import { GroupsGuard } from './groups.guard';
 import { JwtAuthGuard } from './jwt.authguard';
 
-@ApiBearerAuth()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
