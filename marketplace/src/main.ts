@@ -23,6 +23,12 @@ function setupApp(app: INestApplication) {
 
   // swagger documents
   const docConfig = new DocumentBuilder()
+    .addSecurity('JWT', {
+      type: 'apiKey',
+      in: 'header',
+      name: 'Authorization',
+    })
+    .addSecurityRequirements('JWT')
     .setTitle('Marketplace API')
     .setDescription('The Marketplace API documents')
     .setVersion('1.0')

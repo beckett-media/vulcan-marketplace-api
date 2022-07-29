@@ -198,7 +198,8 @@ const mockItems = [
   },
 ];
 
-const owner_uuid = '00000001-0000-0000-0000-000000000000';
+// headless@beckett.com
+const owner_uuid = 'bfa700b5-5ac9-4574-b989-b6513d077f35';
 
 // transform a single mock card into a submission request
 const mockCardToSubmission = (card) => {
@@ -241,8 +242,8 @@ const mockCardsToSubmissions = (cards) => {
 const submissionRequests = mockCardsToSubmissions(mockItems);
 console.log(JSON.stringify(submissionRequests.length));
 
-//const url = 'http://127.0.0.1:3300/marketplace/submission';
-const url = 'https://dev.beckett.com:3300/marketplace/submission';
+const url = 'http://127.0.0.1:3300/marketplace/submission';
+//const url = 'https://dev.beckett.com:3300/marketplace/submission';
 const headers = { 'Content-Type': 'application/json' };
 
 // for each submission request, submit it to the server

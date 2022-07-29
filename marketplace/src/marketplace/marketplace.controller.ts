@@ -11,13 +11,24 @@ import {
   Put,
   Query,
   Request,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiHeader,
+  ApiOperation,
+  ApiProduces,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { assertOwnerOrAdmin } from '../util/assert';
+import { OnlyAllowGroups } from '../auth/groups.decorator';
+import { GroupsGuard } from '../auth/groups.guard';
+import { JwtAuthGuard } from '../auth/jwt.authguard';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import {
   ActionLogActorType,
   ActionLogEntityType,
+  Group,
   ListActionLogType,
 } from '../config/enum';
 import { DetailedLogger } from '../logger/detailed.logger';
@@ -42,6 +53,7 @@ import {
   ListingUpdate,
 } from './dtos/marketplace.dto';
 import { MarketplaceService } from './marketplace.service';
+import { assert } from 'console';
 
 function InProd() {
   return 'prod' == process.env[RUNTIME_ENV];
@@ -77,6 +89,8 @@ export class MarketplaceController {
   }
 
   @Get('/submission/:submission_id')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get submission by id',
   })
@@ -94,14 +108,16 @@ export class MarketplaceController {
     @Param('submission_id') submission_id: number,
     @Request() request: any,
   ): Promise<SubmissionDetails> {
-    this.logger.log(JSON.stringify(request.user));
     const submissionDetails = await this.marketplaceService.getSubmission(
       submission_id,
     );
+    assertOwnerOrAdmin(request.user, submissionDetails);
     return submissionDetails;
   }
 
   @Put('/submission/:submission_id')
+  @OnlyAllowGroups(Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Update submission status by id (mainly used by admin)',
   })
@@ -118,7 +134,12 @@ export class MarketplaceController {
   async updateSubmission(
     @Body() body: SubmissionStatusUpdate,
     @Param('submission_id') submission_id: number,
+    @Request() request: any,
   ): Promise<SubmissionDetails> {
+    const submission = await this.marketplaceService.getSubmission(
+      submission_id,
+    );
+
     const submissionDetails = await this.marketplaceService.updateSubmission(
       submission_id,
       body.status,
@@ -127,6 +148,8 @@ export class MarketplaceController {
   }
 
   @Get('/submission')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get a list of submissions from a user',
   })
@@ -142,7 +165,10 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async listSubmissions(
     @Query() query: ListSubmissionsQuery,
+    @Request() request: any,
   ): Promise<SubmissionDetails[]> {
+    assertOwnerOrAdmin(request.user, query);
+
     //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissions(
       query.user,
@@ -155,6 +181,8 @@ export class MarketplaceController {
   }
 
   @Post('/submission')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Submit new item to marketplace',
   })

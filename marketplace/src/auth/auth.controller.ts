@@ -7,7 +7,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { BadRequestException, Body, Post } from '@nestjs/common';
-import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiProduces,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Group } from '../config/enum';
 import { AuthService } from './auth.service';
 import { AuthenticationRequest } from './dtos/auth.dto';
@@ -15,6 +21,7 @@ import { OnlyAllowGroups } from './groups.decorator';
 import { GroupsGuard } from './groups.guard';
 import { JwtAuthGuard } from './jwt.authguard';
 
+@ApiBearerAuth()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {

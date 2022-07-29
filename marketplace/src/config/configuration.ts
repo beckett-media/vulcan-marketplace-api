@@ -110,10 +110,10 @@ export default () => ({
     cognito: {
       COGNITO_USER_POOL_ID:
         process.env.MARKETPLACE_AWSDEV_COGNITO_USER_POOL_ID ||
-        'us-west-1_QgCMUGduZ',
+        'us-west-1_rrW6uRNXW',
       COGNITO_CLIENT_ID:
         process.env.MARKETPLACE_AWSDEV_COGNITO_CLIENT_ID ||
-        '30apj4knq7ps2qsaldr6clpr9p',
+        '2cq0oolf1nuqjtk0snc29reeh5',
       COGNITO_REGION:
         process.env.MARKETPLACE_AWSDEV_COGNITO_REGION || 'us-west-1',
     },
@@ -184,8 +184,8 @@ export default () => ({
       },
     },
     cognito: {
-      COGNITO_USER_POOL_ID: 'us-west-1_QgCMUGduZ',
-      COGNITO_CLIENT_ID: '30apj4knq7ps2qsaldr6clpr9p',
+      COGNITO_USER_POOL_ID: 'us-west-1_rrW6uRNXW',
+      COGNITO_CLIENT_ID: '2cq0oolf1nuqjtk0snc29reeh5',
       COGNITO_REGION: 'us-west-1',
     },
     db: {

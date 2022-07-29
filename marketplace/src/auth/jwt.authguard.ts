@@ -1,6 +1,7 @@
 import {
   ExecutionContext,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -37,10 +38,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           `Invalid client_id: ${user['client_id']}`,
         );
       }
-
       if (err || !user) {
         throw err || new UnauthorizedException();
       }
+
       return user;
     } else {
       return { user: '', groups: [] };
