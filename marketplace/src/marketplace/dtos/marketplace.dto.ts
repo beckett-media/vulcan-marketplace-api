@@ -476,8 +476,15 @@ export class SubmissionDetails {
     example: 'https://example.com/image.jpg',
   })
   @IsString()
-  @IsOptional()
   image_url: string;
+
+  @ApiProperty({
+    description: 'The back image url of the submitted item',
+    required: true,
+    example: 'https://example.com/image.jpg',
+  })
+  @IsString()
+  image_rev_url: string;
 
   constructor(partial: Partial<SubmissionDetails>) {
     Object.assign(this, partial);

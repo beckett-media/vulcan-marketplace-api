@@ -46,6 +46,7 @@ export function newSubmissionDetails(
     subject: item.subject,
     est_value: item.est_value,
     image_url: submission.image,
+    image_rev_url: submission.image_rev,
     created_at: submission.created_at,
     received_at: submission.received_at,
     approved_at: submission.approved_at,
