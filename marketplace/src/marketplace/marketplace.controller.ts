@@ -111,7 +111,7 @@ export class MarketplaceController {
     const submissionDetails = await this.marketplaceService.getSubmission(
       submission_id,
     );
-    assertOwnerOrAdmin(request.user, submissionDetails);
+    assertOwnerOrAdmin(request.user, submissionDetails, this.logger);
     return submissionDetails;
   }
 
@@ -167,7 +167,7 @@ export class MarketplaceController {
     @Query() query: ListSubmissionsQuery,
     @Request() request: any,
   ): Promise<SubmissionDetails[]> {
-    assertOwnerOrAdmin(request.user, query);
+    assertOwnerOrAdmin(request.user, query, this.logger);
 
     //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissions(

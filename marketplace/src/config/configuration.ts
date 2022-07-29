@@ -76,7 +76,7 @@ export default () => ({
   },
   awsdev: {
     api_port: process.env.MARKETPLACE_AWSDEV_API_PORT || 3300,
-    auth_enabled: true,
+    auth_enabled: false,
     aws: {
       AWS_PUBLIC_BUCKET_NAME:
         process.env.MARKETPLACE_AWSDEV_AWS_PUBLIC_BUCKET_NAME ||
@@ -131,7 +131,7 @@ export default () => ({
   },
   dev: {
     api_port: process.env.MARKETPLACE_DEV_API_PORT || 3300,
-    auth_enabled: true,
+    auth_enabled: false,
     aws: {
       AWS_PUBLIC_BUCKET_NAME:
         process.env.MARKETPLACE_DEV_AWS_PUBLIC_BUCKET_NAME,
