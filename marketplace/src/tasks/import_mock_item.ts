@@ -241,7 +241,8 @@ const mockCardsToSubmissions = (cards) => {
 const submissionRequests = mockCardsToSubmissions(mockItems);
 console.log(JSON.stringify(submissionRequests.length));
 
-const url = 'http://127.0.0.1:3300/marketplace/submission';
+//const url = 'http://127.0.0.1:3300/marketplace/submission';
+const url = 'https://dev.beckett.com:3300/marketplace/submission';
 const headers = { 'Content-Type': 'application/json' };
 
 // for each submission request, submit it to the server
