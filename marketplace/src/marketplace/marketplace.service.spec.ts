@@ -27,7 +27,7 @@ import {
   newSubmissionRequest,
   newVaultingUpdateRequest,
 } from '../util/testing';
-import { ListingRequest } from './dtos/marketplace.dto';
+import { ListingRequest, ListingUpdate } from './dtos/marketplace.dto';
 
 describe('MarketplaceService', () => {
   let service: MarketplaceService;
@@ -251,10 +251,13 @@ describe('MarketplaceService', () => {
     expect(vaultingDetails2.token_id).toBe(1234);
     expect(vaultingDetails2.burn_tx_hash).toBe(vaultingUpdate.burn_tx_hash);
     expect(vaultingDetails2.burned_at).toBeDefined();
+    expect(vaultingDetails2.status).toBe(VaultingStatus.Withdrawn);
+    expect(vaultingDetails2.status_desc).toBe(
+      VaultingStatusReadable[VaultingStatus.Withdrawn],
+    );
   });
 
   it('should create new listing', async () => {
-    // create submission
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
     const submissionRequest = newSubmissionRequest(userUUID, 'sn1');
@@ -290,7 +293,7 @@ describe('MarketplaceService', () => {
       price: 12345,
     });
 
-    // vaulting object in minting status can not be listed
+    // vaulting object need to be of minted status before listing
     await expect(service.newListing(listingRequest)).rejects.toThrow(
       `Vaulting not found for ${vaulting.id} (either not minted or withdrawn already)`,
     );
@@ -312,5 +315,84 @@ describe('MarketplaceService', () => {
     expect(listing.status_desc).toBe(
       ListingStatusReadable[ListingStatus.Listed],
     );
+
+    // can not withdraw the vaulting if listing is active
+    await expect(service.withdrawVaulting(vaulting.id)).rejects.toThrow(
+      `Vaulting ${vaulting.id} has an active listing ${listing.id}. No withdrawal allowed.`,
+    );
+  });
+
+  it('should update listing price', async () => {
+    // create submission
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1');
+    const submissionResponse = await service.submitItem(submissionRequest);
+    const submission = await service.getSubmission(
+      submissionResponse.submission_id,
+    );
+    await service.updateSubmission(submission.id, SubmissionStatus.Received);
+    await service.updateSubmission(submission.id, SubmissionStatus.Approved);
+
+    // create vaulting
+    const vaultingRequest = {
+      item_id: submission.item_id,
+      user: userUUID,
+      submission_id: submission.id,
+      image_base64: 'fake_base64',
+      image_format: 'fake_format',
+    };
+    const vaulting = await service.newVaulting(vaultingRequest);
+    expect(vaulting).toBeDefined();
+    expect(vaulting.item_id).toBe(submission.item_id);
+    expect(vaulting.item_id).toBeDefined();
+    expect(vaulting.item_uuid).toBe(submission.item_uuid);
+    expect(vaulting.item_uuid).toBeDefined();
+    expect(vaulting.user).toBe(userUUID);
+    expect(vaulting.status).toBe(1);
+    expect(vaulting.status_desc).toBe('Minting');
+
+    // create new listing
+    const listingRequest = new ListingRequest({
+      vaulting_id: vaulting.id,
+      user: userUUID,
+      price: 12345,
+    });
+
+    // vaulting object need to be of minted status before listing
+    await expect(service.newListing(listingRequest)).rejects.toThrow(
+      `Vaulting not found for ${vaulting.id} (either not minted or withdrawn already)`,
+    );
+
+    // update vaulting to be minted
+    const vaultingUpdate = newVaultingUpdateRequest(
+      VaultingUpdateType.Minted,
+      vaulting.item_uuid,
+    );
+    await service.updateVaulting(vaultingUpdate);
+
+    // list the vaulting again
+    const listing = await service.newListing(listingRequest);
+    expect(listing).toBeDefined();
+    expect(listing.vaulting_id).toBe(vaulting.id);
+    expect(listing.user).toBe(userUUID);
+    expect(listing.price).toBe(12345);
+    expect(listing.status).toBe(ListingStatus.Listed);
+    expect(listing.status_desc).toBe(
+      ListingStatusReadable[ListingStatus.Listed],
+    );
+
+    // update listing price
+    const newPrice = 123456;
+    const listingUpdate = new ListingUpdate({ price: newPrice });
+    const updatedListing = await service.updateListing(
+      listing.id,
+      listingUpdate,
+    );
+    expect(updatedListing).toBeDefined();
+    expect(updatedListing.id).toBe(listing.id);
+    expect(updatedListing.price).toBe(newPrice);
+    expect(updatedListing.status).toBe(ListingStatus.Listed);
+    expect(updatedListing.created_at).toBeDefined();
+    expect(updatedListing.updated_at).toBeDefined();
   });
 });

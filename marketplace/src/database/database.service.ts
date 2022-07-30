@@ -436,8 +436,8 @@ export class DatabaseService {
           token_id: vaultingUpdate.token_id,
           mint_tx_hash: vaultingUpdate.mint_tx_hash,
           minted_at: Math.round(Date.now() / 1000),
-          status: vaultingUpdate.status,
-          last_updated: Math.round(Date.now() / 1000),
+          status: VaultingStatus.Minted,
+          updated_at: Math.round(Date.now() / 1000),
         };
 
         if (vaultingUpdate.status == VaultingStatus.Withdrawn) {
@@ -450,8 +450,8 @@ export class DatabaseService {
         newVaulting = {
           burn_tx_hash: vaultingUpdate.burn_tx_hash,
           burned_at: Math.round(Date.now() / 1000),
-          status: vaultingUpdate.status,
-          last_updated: Math.round(Date.now() / 1000),
+          status: VaultingStatus.Withdrawn,
+          updated_at: Math.round(Date.now() / 1000),
         };
 
         Object.assign(vaulting, newVaulting);
@@ -460,7 +460,7 @@ export class DatabaseService {
         newVaulting = {
           burn_job_id: vaultingUpdate.burn_job_id,
           status: VaultingStatus.Withdrawing,
-          last_updated: Math.round(Date.now() / 1000),
+          updated_at: Math.round(Date.now() / 1000),
         };
         Object.assign(vaulting, newVaulting);
         break;
