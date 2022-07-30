@@ -32,7 +32,7 @@ import {
   VaultingUpdateType,
 } from '../config/enum';
 import { newListingDetails, newSubmissionDetails } from '../util/format';
-import configuration, { RUNTIME_ENV } from 'src/config/configuration';
+import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 
 const DEFAULT_USER_SOURCE = 'cognito';
@@ -318,6 +318,7 @@ export class DatabaseService {
             minted_at: 0,
             burned_at: 0,
             updated_at: Math.round(Date.now() / 1000),
+            created_at: Math.round(Date.now() / 1000),
           });
           vaulting = await this.vaultingRepo.save(newVaulting);
         },

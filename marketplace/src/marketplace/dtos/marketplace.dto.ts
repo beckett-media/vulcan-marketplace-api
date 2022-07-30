@@ -681,14 +681,6 @@ export class VaultingDetails {
   token_id: number;
 
   @ApiProperty({
-    description: 'The id of the submission',
-    example: 1,
-    required: true,
-  })
-  @IsNumber()
-  submission_id: number;
-
-  @ApiProperty({
     description: 'The uuid of the user who vaulted the item',
     required: true,
     example: '12345678-0000-0000-0000-000000000000',

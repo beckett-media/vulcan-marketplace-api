@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -177,6 +178,13 @@ export class MarketplaceService {
     if (!submission) {
       throw new NotFoundException(`Submission ${submission_id} not found`);
     } else {
+      // if submission status is already the same as the new status
+      if (submission.status == status) {
+        throw new BadRequestException(
+          `Submission ${submission_id} already has status ${SubmissionStatusReadable[status]}`,
+        );
+      }
+
       // if submission's status is not received, then approval should fail
       if (
         status == SubmissionStatus.Approved &&
@@ -341,6 +349,7 @@ export class MarketplaceService {
       id: vaulting.id,
       user: user.uuid,
       item_id: vaulting.item_id,
+      item_uuid: item.uuid,
       status: vaulting.status,
       status_desc: VaultingStatusReadable[vaulting.status],
     });

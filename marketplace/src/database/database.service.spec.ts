@@ -25,9 +25,6 @@ describe('DatabaseService', () => {
   let service: DatabaseService;
 
   beforeEach(async () => {
-    // set runtime env to test
-    process.env[RUNTIME_ENV] = 'test';
-
     const module: TestingModule = await Test.createTestingModule({
       exports: [DatabaseService],
       providers: [DatabaseService],
@@ -74,7 +71,10 @@ describe('DatabaseService', () => {
 
     // loop through submissions and create them
     for (const submission of submissions) {
-      const result = await service.createNewSubmission(submission, s3url);
+      const result = await service.createNewSubmission(submission, [
+        s3url,
+        s3url,
+      ]);
       expect(result.status).toBe(SubmissionStatus.Submitted);
     }
 
