@@ -8,6 +8,8 @@ import {
   User,
   Listing,
   ActionLog,
+  Inventory,
+  SubmissionOrder,
 } from './database.entity';
 import { DatabaseService } from './database.service';
 
@@ -20,7 +22,17 @@ export function GetDBConnection(): TypeOrmModuleOptions {
       return {
         type: 'sqlite',
         database: config['db']['name'],
-        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        entities: [
+          Submission,
+          SubmissionOrder,
+          Item,
+          Vaulting,
+          User,
+          Listing,
+          ActionLog,
+          Inventory,
+          SubmissionOrder,
+        ],
         synchronize: config['db']['sync'],
         keepConnectionAlive: true,
       };
@@ -28,7 +40,17 @@ export function GetDBConnection(): TypeOrmModuleOptions {
       return {
         type: 'sqlite',
         database: config['db']['name'],
-        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        entities: [
+          Submission,
+          SubmissionOrder,
+          Item,
+          Vaulting,
+          User,
+          Listing,
+          ActionLog,
+          Inventory,
+          SubmissionOrder,
+        ],
         synchronize: config['db']['sync'],
         keepConnectionAlive: true,
       };
@@ -36,7 +58,17 @@ export function GetDBConnection(): TypeOrmModuleOptions {
       return {
         type: 'mysql',
         database: config['db']['name'],
-        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        entities: [
+          Submission,
+          SubmissionOrder,
+          Item,
+          Vaulting,
+          User,
+          Listing,
+          ActionLog,
+          Inventory,
+          SubmissionOrder,
+        ],
         synchronize: config['db']['sync'],
         keepConnectionAlive: true,
         host: config['db']['host'],
@@ -48,7 +80,17 @@ export function GetDBConnection(): TypeOrmModuleOptions {
       return {
         type: 'mysql',
         database: config['db']['name'],
-        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        entities: [
+          Submission,
+          SubmissionOrder,
+          Item,
+          Vaulting,
+          User,
+          Listing,
+          ActionLog,
+          Inventory,
+          SubmissionOrder,
+        ],
         synchronize: config['db']['sync'],
         keepConnectionAlive: true,
         host: config['db']['host'],
@@ -60,7 +102,17 @@ export function GetDBConnection(): TypeOrmModuleOptions {
       return {
         type: 'mysql',
         database: config['db']['name'],
-        entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+        entities: [
+          Submission,
+          SubmissionOrder,
+          Item,
+          Vaulting,
+          User,
+          Listing,
+          ActionLog,
+          Inventory,
+          SubmissionOrder,
+        ],
         synchronize: config['db']['sync'],
         keepConnectionAlive: true,
         host: config['db']['host'],
@@ -84,6 +136,8 @@ export function GetDBConnection(): TypeOrmModuleOptions {
       User,
       Listing,
       ActionLog,
+      Inventory,
+      SubmissionOrder,
     ]),
   ],
   exports: [DatabaseService],

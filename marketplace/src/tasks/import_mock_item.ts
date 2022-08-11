@@ -1,6 +1,4 @@
-import { ConsoleLogger } from '@nestjs/common';
 import got from 'got/dist/source';
-import { SubmissionRequest } from '../marketplace/dtos/marketplace.dto';
 
 const mockItems = [
   {
@@ -199,12 +197,14 @@ const mockItems = [
 ];
 
 // headless@beckett.com
-const owner_uuid = 'bfa700b5-5ac9-4574-b989-b6513d077f35';
+const owner_uuid = '00000001-5ac9-4574-b989-b6513d077f35';
+const order_uuid = '00000001-0000-0000-0000-000000000000';
 
 // transform a single mock card into a submission request
 const mockCardToSubmission = (card) => {
-  var submissionRequest = new SubmissionRequest({
+  var submissionRequest = {
     user: owner_uuid,
+    order_uuid: order_uuid,
     grading_company: '',
     serial_number: '',
     title: card.title,
@@ -223,7 +223,7 @@ const mockCardToSubmission = (card) => {
     image_rev_format: '',
     image_path: card.image_url,
     image_rev_path: card.imgRev,
-  });
+  };
   return submissionRequest;
 };
 
@@ -233,7 +233,6 @@ const mockCardsToSubmissions = (cards) => {
   cards.forEach((card) => {
     const submission = mockCardToSubmission(card);
     submissions.push(submission);
-    console.log(JSON.stringify(submission));
   });
 
   return submissions;
@@ -242,15 +241,19 @@ const mockCardsToSubmissions = (cards) => {
 const submissionRequests = mockCardsToSubmissions(mockItems);
 console.log(JSON.stringify(submissionRequests.length));
 
-//const url = 'http://127.0.0.1:3300/marketplace/submission';
-const url = 'https://dev.beckett.com:3300/marketplace/submission';
+const url = 'http://127.0.0.1:3300/marketplace/submission';
+//const url = 'https://dev.beckett.com:3300/marketplace/submission';
 const headers = { 'Content-Type': 'application/json' };
 
 // for each submission request, submit it to the server
 async function main() {
   for (var i = 0; i < submissionRequests.length; i++) {
+    console.log(JSON.stringify(submissionRequests[i]));
     const response = await got
-      .post(url, { json: submissionRequests[i], headers: headers })
+      .post(url, {
+        json: submissionRequests[i],
+        headers: headers,
+      })
       .json();
     console.log(`API response => ${JSON.stringify(response)}`);
   }

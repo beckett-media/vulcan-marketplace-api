@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DatabaseService } from '../database/database.service';
-import { SubmissionStatus } from '../config/enum';
+import {
+  SubmissionOrderStatus,
+  SubmissionStatus,
+  SubmissionUpdateType,
+} from '../config/enum';
 import { RUNTIME_ENV } from '../config/configuration';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import {
@@ -10,13 +14,25 @@ import {
   User,
   Listing,
   ActionLog,
+  Inventory,
+  SubmissionOrder,
 } from '../database/database.entity';
 import { clearDB, newSubmissionRequest } from '../util/testing';
+import { IsVariableWidth } from 'class-validator';
 
 const DBConnection = {
   type: 'sqlite',
   database: 'beckett_marketplace_test.sqlite',
-  entities: [Submission, Item, Vaulting, User, Listing, ActionLog],
+  entities: [
+    Submission,
+    Item,
+    Vaulting,
+    User,
+    Listing,
+    ActionLog,
+    Inventory,
+    SubmissionOrder,
+  ],
   synchronize: true,
   keepConnectionAlive: true,
 } as TypeOrmModuleOptions;
@@ -37,6 +53,8 @@ describe('DatabaseService', () => {
           User,
           Listing,
           ActionLog,
+          Inventory,
+          SubmissionOrder,
         ]),
       ],
     }).compile();
@@ -59,23 +77,164 @@ describe('DatabaseService', () => {
     expect(user1.id).toBe(user2.id);
   });
 
+  it('should create multiple orders', async () => {
+    // create array of submissions
+    const submissions1 = [
+      newSubmissionRequest(
+        'user1',
+        'sn1',
+        true,
+        '00000000-0000-0000-0000-000000000001',
+      ),
+      newSubmissionRequest(
+        'user1',
+        'sn2',
+        true,
+        '00000000-0000-0000-0000-000000000001',
+      ),
+      newSubmissionRequest(
+        'user1',
+        'sn3',
+        false,
+        '00000000-0000-0000-0000-000000000001',
+      ),
+    ];
+
+    const submissions2 = [
+      newSubmissionRequest(
+        'user1',
+        'sn4',
+        true,
+        '00000000-0000-0000-0000-000000000002',
+      ),
+      newSubmissionRequest(
+        'user1',
+        'sn5',
+        true,
+        '00000000-0000-0000-0000-000000000002',
+      ),
+      newSubmissionRequest(
+        'user1',
+        'sn6',
+        true,
+        '00000000-0000-0000-0000-000000000002',
+      ),
+    ];
+
+    const submissions3 = [
+      newSubmissionRequest(
+        'user1',
+        'sn7',
+        true,
+        '00000000-0000-0000-0000-000000000003',
+      ),
+      newSubmissionRequest(
+        'user1',
+        'sn8',
+        true,
+        '00000000-0000-0000-0000-000000000003',
+      ),
+      newSubmissionRequest(
+        'user1',
+        'sn9',
+        false,
+        '00000000-0000-0000-0000-000000000003',
+      ),
+    ];
+
+    var order_id: number;
+    // loop through submissions and create them
+    for (const submission of submissions1) {
+      const result = await service.createNewSubmission(submission, ['', '']);
+      order_id = result.order_id;
+      expect(result.status).toBe(SubmissionStatus.Submitted);
+    }
+    for (const submission of submissions2) {
+      const result = await service.createNewSubmission(submission, ['', '']);
+      order_id = result.order_id;
+      expect(result.status).toBe(SubmissionStatus.Submitted);
+    }
+    for (const submission of submissions3) {
+      const result = await service.createNewSubmission(submission, ['', '']);
+      order_id = result.order_id;
+      expect(result.status).toBe(SubmissionStatus.Submitted);
+    }
+
+    // list submission orders
+    var orders = await service.listSubmissionOrders(
+      'user1',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(orders.length).toBe(3);
+
+    for (const order of orders) {
+      expect(order.submissions.length).toBe(3);
+      expect(order.status).toBe(SubmissionOrderStatus.Created);
+    }
+
+    // add one more submission to order group 1
+    var submission = newSubmissionRequest(
+      'user1',
+      'sn3',
+      false,
+      '00000000-0000-0000-0000-000000000001',
+    );
+    const result = await service.createNewSubmission(submission, ['', '']);
+    orders = await service.listSubmissionOrders(
+      'user1',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(orders[0].submissions.length).toBe(4);
+
+    // specify limit and offset
+    const limit = 2;
+    const offset = 1;
+    orders = await service.listSubmissionOrders(
+      'user1',
+      undefined,
+      offset,
+      limit,
+      'DESC',
+    );
+    // expect only 2 orders
+    expect(orders.length).toBe(2);
+    expect(orders[0].submissions.length).toBe(3);
+    expect(orders[1].submissions.length).toBe(4);
+  });
+
   it('should create/list/update submissions', async () => {
     const s3url = 'fake s3url';
     // create array of submissions
     const submissions = [
-      newSubmissionRequest('user1', 'sn1'),
-      newSubmissionRequest('user2', 'sn2'),
-      newSubmissionRequest('user3', 'sn3'),
-      newSubmissionRequest('user1', 'sn4'),
+      newSubmissionRequest('user1', 'sn1', true, ''),
+      newSubmissionRequest('user2', 'sn2', true, ''),
+      newSubmissionRequest('user3', 'sn3', false, ''),
+      newSubmissionRequest('user1', 'sn4', false, ''),
     ];
 
+    var order_id: number;
     // loop through submissions and create them
     for (const submission of submissions) {
       const result = await service.createNewSubmission(submission, [
         s3url,
         s3url,
       ]);
+      order_id = result.order_id;
       expect(result.status).toBe(SubmissionStatus.Submitted);
+    }
+
+    // list submission order
+    const submissionsCreated = await service.listSubmissionsForOrder(order_id);
+    expect(submissionsCreated.length).toBe(submissions.length);
+    // for all submissions, check that their order id is the same as the one we created
+    for (const submission of submissionsCreated) {
+      expect(submission.order_id).toBe(order_id);
     }
 
     var status, offset, limit, order;
@@ -185,7 +344,13 @@ describe('DatabaseService', () => {
     // update submission
     const submissionID = user1Submissions3[0].id;
     const submissionBefore = await service.getSubmission(submissionID);
-    await service.updateSubmission(submissionID, SubmissionStatus.Received);
+    await service.updateSubmission(
+      submissionID,
+      SubmissionUpdateType.Status,
+      SubmissionStatus.Received,
+      '',
+      '',
+    );
     const submissionAfter = await service.getSubmission(submissionID);
     expect(submissionBefore.status).toBe(SubmissionStatus.Submitted);
     expect(submissionAfter.status).toBe(SubmissionStatus.Received);

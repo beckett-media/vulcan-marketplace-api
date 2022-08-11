@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  CACHE_MANAGER,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -20,8 +22,14 @@ import {
   VaultingStatus,
   VaultingStatusReadable,
   VaultingUpdateType,
+  SubmissionUpdateType,
 } from '../config/enum';
-import { Submission, User } from '../database/database.entity';
+import {
+  Item,
+  Submission,
+  SubmissionOrder,
+  User,
+} from '../database/database.entity';
 import { DatabaseService } from '../database/database.service';
 import { DetailedLogger } from '../logger/detailed.logger';
 import {
@@ -29,6 +37,7 @@ import {
   newActionLogDetails,
   newListingDetails,
   newSubmissionDetails,
+  newSubmissionOrderDetails,
   newVaultingDetails,
   trimRequestWithImage,
 } from '../util/format';
@@ -40,15 +49,18 @@ import {
   ListingResponse,
   ListingUpdate,
   SubmissionDetails,
+  SubmissionImage,
+  SubmissionOrderDetails,
   SubmissionRequest,
   SubmissionResponse,
+  SubmissionUpdate,
   VaultingDetails,
   VaultingRequest,
   VaultingResponse,
   VaultingUpdate,
 } from './dtos/marketplace.dto';
+import { Cache } from 'cache-manager';
 
-const MARKETPLACE_API_ACTOR = 'Marketplace API';
 const VAULTING_API_ACTOR = 'Vaulting API';
 
 @Injectable()
@@ -61,6 +73,7 @@ export class MarketplaceService {
     private databaseService: DatabaseService,
     private awsService: AwsService,
     private bravoService: BravoService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getUserByUUID(userUUID: string): Promise<User> {
@@ -68,7 +81,7 @@ export class MarketplaceService {
     return user;
   }
 
-  async uploadImages(request: SubmissionRequest): Promise<[string, string]> {
+  async uploadImages(request: SubmissionImage): Promise<[string, string]> {
     var imagePath = '';
     var imagePathRev = '';
     if (request.image_base64 != '') {
@@ -101,7 +114,7 @@ export class MarketplaceService {
       imagePathRev = request.image_rev_path || '';
     }
 
-    this.logger.log(`Uploaded images: ${imagePath} ${imagePathRev}`);
+    this.logger.log(`Uploaded images: [${imagePath}], [${imagePathRev}]`);
     return [imagePath, imagePathRev];
   }
 
@@ -109,7 +122,7 @@ export class MarketplaceService {
     const [imagePath, imagePathRev] = await this.uploadImages(request);
 
     if (!imagePath && !imagePathRev) {
-      throw new InternalServerErrorException('No image specified');
+      this.logger.log('No image specified');
     }
     const result = await this.databaseService.createNewSubmission(request, [
       imagePath,
@@ -134,6 +147,7 @@ export class MarketplaceService {
       submission_id: result.submission_id,
       item_id: result.item_id,
       status: result.status,
+      order_id: result.order_id,
       status_desc: SubmissionStatusReadable[result.status],
     });
   }
@@ -152,6 +166,7 @@ export class MarketplaceService {
       limit,
       order,
     );
+
     return submissionDetails;
   }
 
@@ -171,38 +186,68 @@ export class MarketplaceService {
 
   async updateSubmission(
     submission_id: number,
-    status: number,
+    submissionUpdate: SubmissionUpdate,
   ): Promise<SubmissionDetails> {
     // if submission exists
     var submission = await this.databaseService.getSubmission(submission_id);
+    var imagePath, imagePathRev: string;
     if (!submission) {
       throw new NotFoundException(`Submission ${submission_id} not found`);
     } else {
-      // if submission status is already the same as the new status
-      if (submission.status == status) {
-        throw new BadRequestException(
-          `Submission ${submission_id} already has status ${SubmissionStatusReadable[status]}`,
-        );
-      }
+      switch (submissionUpdate.type) {
+        case SubmissionUpdateType.Status:
+          // if submission status is already the same as the new status
+          if (submission.status == submissionUpdate.status) {
+            throw new BadRequestException(
+              `Submission ${submission_id} already has status ${
+                SubmissionStatusReadable[submissionUpdate.status]
+              }`,
+            );
+          }
 
-      // if submission's status is not received, then approval should fail
-      if (
-        status == SubmissionStatus.Approved &&
-        submission.status !== SubmissionStatus.Received
-      ) {
-        throw new InternalServerErrorException(
-          `Submission ${submission_id} is not received yet. Cannot approve.`,
-        );
+          // if submission's status is not received, then approval should fail
+          if (
+            submissionUpdate.status == SubmissionStatus.Approved &&
+            submission.status !== SubmissionStatus.Received
+          ) {
+            throw new InternalServerErrorException(
+              `Submission ${submission_id} is not received yet. Cannot approve.`,
+            );
+          }
+
+          // record user action
+          this.actionLogForSubmisson(submission, submissionUpdate.status);
+          break;
+        case SubmissionUpdateType.Image:
+          [imagePath, imagePathRev] = await this.uploadImages(
+            submissionUpdate as SubmissionImage,
+          );
+          const trimmedRequest = trimRequestWithImage(submissionUpdate);
+          const user = await this.databaseService.getUser(submission.user);
+          const actionLogRequest = new ActionLogRequest({
+            actor_type: ActionLogActorType.CognitoAdmin,
+            actor: user.id.toString(),
+            entity_type: ActionLogEntityType.Submission,
+            entity: submission.id.toString(),
+            type: ActionLogType.SubmissionUpdate,
+            extra: JSON.stringify(trimmedRequest),
+          });
+          await this.newActionLog(actionLogRequest);
+          break;
+        default:
+          throw new InternalServerErrorException(
+            `Submission update type ${submissionUpdate.type} not supported`,
+          );
       }
     }
 
     submission = await this.databaseService.updateSubmission(
       submission_id,
-      status,
+      submissionUpdate.type,
+      submissionUpdate.status,
+      imagePath,
+      imagePathRev,
     );
-
-    // record user action
-    this.actionLogForSubmisson(submission, status);
 
     if (!submission) {
       throw new InternalServerErrorException('Submission update failed');
@@ -218,10 +263,120 @@ export class MarketplaceService {
     if (!submission) {
       throw new InternalServerErrorException('Submission not found');
     } else {
-      const item = await this.databaseService.getItem(submission.item_id);
-      const user = await this.databaseService.getUser(submission.user);
+      var item = await this.databaseService.getItem(submission.item_id);
+      var user = await this.databaseService.getUser(submission.user);
       return newSubmissionDetails(submission, item, user);
     }
+  }
+
+  async getSubmissionOrder(
+    submission_order_id: number,
+  ): Promise<SubmissionOrderDetails> {
+    const submissionOrder = await this.databaseService.getSubmissionOrder(
+      submission_order_id,
+    );
+    const submissions = await this.databaseService.listSubmissionsForOrder(
+      submission_order_id,
+    );
+
+    // get item ids from submissions
+    const item_ids = submissions.map((submission) => submission.item_id);
+    const items = await this.databaseService.listItems(item_ids);
+    // build a map from item id to item
+    const itemMap = new Map<number, Item>();
+    items.forEach((item) => {
+      itemMap.set(item.id, item);
+    });
+    // get user ids from submissions
+    const user_ids = submissions.map((submission) => submission.user);
+    const users = await this.databaseService.listUsers(user_ids);
+    // build a map from user id to user
+    const userMap = new Map<number, User>();
+    users.forEach((user) => {
+      userMap.set(user.id, user);
+    });
+    const orderUser = await this.databaseService.getUser(submissionOrder.user);
+
+    // formt the result
+    return newSubmissionOrderDetails(
+      submissionOrder,
+      orderUser,
+      submissions,
+      itemMap,
+      userMap,
+    );
+  }
+
+  async listSubmissionOrders(
+    user: string,
+    status: number,
+    offset: number,
+    limit: number,
+    order: string,
+  ): Promise<SubmissionOrderDetails[]> {
+    const submissionOrderDetails =
+      await this.databaseService.listSubmissionOrders(
+        user,
+        status,
+        offset,
+        limit,
+        order,
+      );
+
+    return submissionOrderDetails;
+  }
+
+  async updateSubmissionOrder(
+    order_id: number,
+    status: number,
+  ): Promise<SubmissionOrderDetails> {
+    // get submission order by id
+    const submissionOrder = await this.databaseService.getSubmissionOrder(
+      order_id,
+    );
+    if (!submissionOrder) {
+      throw new NotFoundException(`Submission order ${order_id} not found`);
+    }
+    // if submission order status is not the same as the new status, update it
+    var updatedSubmissionOrder: SubmissionOrder;
+    if (submissionOrder.status != status) {
+      updatedSubmissionOrder = await this.databaseService.updateSubmissionOrder(
+        order_id,
+        status,
+      );
+    }
+
+    // get submissions for the order
+    const submissions = await this.databaseService.listSubmissionsForOrder(
+      order_id,
+    );
+    // get item ids from submissions
+    const item_ids = submissions.map((submission) => submission.item_id);
+    const items = await this.databaseService.listItems(item_ids);
+    // build a map from item id to item
+    const itemMap = new Map<number, Item>();
+    items.forEach((item) => {
+      itemMap.set(item.id, item);
+    });
+    // get user ids from submissions
+    const user_ids = submissions.map((submission) => submission.user);
+    const users = await this.databaseService.listUsers(user_ids);
+    // build a map from user id to user
+    const userMap = new Map<number, User>();
+    users.forEach((user) => {
+      userMap.set(user.id, user);
+    });
+    // get order user
+    const user = await this.databaseService.getUser(submissionOrder.user);
+
+    // formt the result
+    return newSubmissionOrderDetails(
+      submissionOrder,
+      user,
+      submissions,
+      itemMap,
+      userMap,
+    );
   }
 
   async listVaultings(
@@ -331,7 +486,10 @@ export class MarketplaceService {
     // update submission status
     await this.databaseService.updateSubmission(
       request.submission_id,
+      SubmissionUpdateType.Status,
       SubmissionStatus.Vaulted,
+      '',
+      '',
     );
 
     // record user action

@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module } from '@nestjs/common';
 import { MarketplaceService } from './marketplace.service';
 import { MarketplaceController } from './marketplace.controller';
 import { ResponseInterceptor } from '../interceptors/response';
@@ -10,6 +10,7 @@ import { AwsService } from '../aws/aws.service';
 import { BravoModule } from '../bravo/bravo.module';
 import { BravoService } from '../bravo/bravo.service';
 import { RequestLoggerMiddleware } from '../middleware/logger';
+import { InventoryModule } from 'src/inventory/inventory.module';
 
 @Module({
   controllers: [MarketplaceController],
@@ -22,7 +23,14 @@ import { RequestLoggerMiddleware } from '../middleware/logger';
       useClass: ResponseInterceptor,
     },
   ],
-  imports: [DatabaseModule, AwsModule, BravoModule, AuthModule],
+  imports: [
+    DatabaseModule,
+    AwsModule,
+    BravoModule,
+    AuthModule,
+    InventoryModule,
+    CacheModule.register(),
+  ],
 })
 export class MarketplaceModule {
   configure(consumer: MiddlewareConsumer) {

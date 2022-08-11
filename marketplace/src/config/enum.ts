@@ -7,10 +7,25 @@ export enum SubmissionStatus {
   Vaulted = 5,
 }
 
+export enum ItemType {
+  card = 1,
+  comic = 2,
+}
+
+export const ItemTypeReadable = {
+  1: 'Card',
+  2: 'Comic',
+};
+
 export enum ItemStatus {
   Submitted = 1,
   Received = 2,
   Vaulted = 3,
+}
+
+export enum SubmissionUpdateType {
+  Status = 1,
+  Image = 2,
 }
 
 export const SubmissionStatusReadable = {
@@ -127,3 +142,17 @@ export enum ListActionLogType {
   Entity = 1,
   ActorAndEntity = 2,
 }
+
+export enum InventoryStatus {
+  InStock = 1,
+}
+
+export enum SubmissionOrderStatus {
+  Created = 1,
+  Processed = 2,
+}
+
+export const SubmissionOrderStatusReadable = {
+  1: 'Created',
+  2: 'Processed',
+};

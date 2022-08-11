@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   ActionLog,
+  Inventory,
   Item,
   Listing,
   Submission,
+  SubmissionOrder,
   User,
   Vaulting,
 } from '../database/database.entity';
@@ -11,8 +13,10 @@ import { DatabaseService } from '../database/database.service';
 import {
   ListingStatus,
   ListingStatusReadable,
+  SubmissionOrderStatus,
   SubmissionStatus,
   SubmissionStatusReadable,
+  SubmissionUpdateType,
   VaultingStatus,
   VaultingStatusReadable,
   VaultingUpdateType,
@@ -21,13 +25,21 @@ import { MarketplaceService } from './marketplace.service';
 import { AwsService } from '../aws/aws.service';
 import { BravoService } from '../bravo/bravo.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GetDBConnection } from '../database/database.module';
+import { DatabaseModule, GetDBConnection } from '../database/database.module';
 import {
   clearDB,
+  imageBaseball,
+  imageBlackBox,
   newSubmissionRequest,
   newVaultingUpdateRequest,
 } from '../util/testing';
-import { ListingRequest, ListingUpdate } from './dtos/marketplace.dto';
+import {
+  ListingRequest,
+  ListingUpdate,
+  SubmissionOrderUpdate,
+  SubmissionUpdate,
+} from './dtos/marketplace.dto';
+import { CacheModule } from '@nestjs/common';
 
 describe('MarketplaceService', () => {
   let service: MarketplaceService;
@@ -74,6 +86,8 @@ describe('MarketplaceService', () => {
         MarketplaceService,
       ],
       imports: [
+        DatabaseModule,
+        CacheModule.register(),
         TypeOrmModule.forRoot(GetDBConnection()),
         TypeOrmModule.forFeature([
           Submission,
@@ -82,6 +96,8 @@ describe('MarketplaceService', () => {
           User,
           Listing,
           ActionLog,
+          Inventory,
+          SubmissionOrder,
         ]),
       ],
     }).compile();
@@ -95,7 +111,7 @@ describe('MarketplaceService', () => {
   it('should create new submission', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1');
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
     const submission = await service.submitItem(submissionRequest);
     expect(submission).toBeDefined();
     expect(submission.user).toBe(userUUID);
@@ -121,60 +137,124 @@ describe('MarketplaceService', () => {
   it('should not approve if submission not received', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1');
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
     const submission = await service.submitItem(submissionRequest);
+    const submissionUpdateApproved = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Approved,
+    });
 
     // approve submission should fail
     await expect(
       service.updateSubmission(
         submission.submission_id,
-        SubmissionStatus.Approved,
+        submissionUpdateApproved,
       ),
     ).rejects.toThrow(
       `Submission ${submission.submission_id} is not received yet. Cannot approve.`,
     );
 
+    const submissionUpdateReceived = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Received,
+    });
     // first update submission to be received
     await service.updateSubmission(
       submission.submission_id,
-      SubmissionStatus.Received,
+      submissionUpdateReceived,
     );
 
     // approve submission should succeed
     const submissionDetails = await service.updateSubmission(
       submission.submission_id,
-      SubmissionStatus.Approved,
+      submissionUpdateApproved,
     );
     expect(submissionDetails.status).toBe(SubmissionStatus.Approved);
     expect(submissionDetails.approved_at).toBeDefined();
     expect(submissionDetails.id).toBe(submission.submission_id);
   });
 
+  it('should update submission order status', async () => {
+    // create submission
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', false, '');
+    const submission = await service.submitItem(submissionRequest);
+
+    // update submission order status
+    const submissionOrderDetails = await service.updateSubmissionOrder(
+      submission.order_id,
+      SubmissionOrderStatus.Processed,
+    );
+
+    // get updated submission order
+    const submissionOrder = await service.getSubmissionOrder(
+      submission.order_id,
+    );
+    expect(submissionOrder.status).toBe(SubmissionOrderStatus.Processed);
+  });
+
+  it('should update submission image', async () => {
+    // create submission
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', false, '');
+    const submission = await service.submitItem(submissionRequest);
+    const submissionDetailsBefore = await service.getSubmission(
+      submission.submission_id,
+    );
+    expect(submissionDetailsBefore.image_url).toBe('');
+    expect(submissionDetailsBefore.image_rev_url).toBe('');
+
+    // update submission image
+    const submissionUpdate = new SubmissionUpdate({
+      type: SubmissionUpdateType.Image,
+      image_base64: imageBaseball,
+      image_format: 'jpg',
+      image_rev_base64: imageBlackBox,
+      image_rev_format: 'jpg',
+    });
+
+    // update submission image
+    const submissionDetails = await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdate,
+    );
+    expect(submissionDetails.image_url).toBe('fake_url');
+    expect(submissionDetails.image_rev_url).toBe('fake_url');
+  });
+
   it('should create new vaulting and update existing ones', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1');
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
     const submission = await service.submitItem(submissionRequest);
+    const submissionUpdateApproved = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Approved,
+    });
+    const submissionUpdateReceived = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Received,
+    });
     await expect(
       service.updateSubmission(
         submission.submission_id,
-        SubmissionStatus.Approved,
+        submissionUpdateApproved,
       ),
     ).rejects.toThrow(
       `Submission ${submission.submission_id} is not received yet. Cannot approve.`,
     );
     await service.updateSubmission(
       submission.submission_id,
-      SubmissionStatus.Received,
+      submissionUpdateReceived,
     );
     await service.updateSubmission(
       submission.submission_id,
-      SubmissionStatus.Approved,
+      submissionUpdateApproved,
     );
     await expect(
       service.updateSubmission(
         submission.submission_id,
-        SubmissionStatus.Approved,
+        submissionUpdateApproved,
       ),
     ).rejects.toThrow(
       `Submission ${submission.submission_id} already has status ${
@@ -260,13 +340,21 @@ describe('MarketplaceService', () => {
   it('should create new listing', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1');
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
     const submissionResponse = await service.submitItem(submissionRequest);
     const submission = await service.getSubmission(
       submissionResponse.submission_id,
     );
-    await service.updateSubmission(submission.id, SubmissionStatus.Received);
-    await service.updateSubmission(submission.id, SubmissionStatus.Approved);
+    const submissionUpdateApproved = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Approved,
+    });
+    const submissionUpdateReceived = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Received,
+    });
+    await service.updateSubmission(submission.id, submissionUpdateReceived);
+    await service.updateSubmission(submission.id, submissionUpdateApproved);
 
     // create vaulting
     const vaultingRequest = {
@@ -325,13 +413,21 @@ describe('MarketplaceService', () => {
   it('should update listing price', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1');
+    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
     const submissionResponse = await service.submitItem(submissionRequest);
     const submission = await service.getSubmission(
       submissionResponse.submission_id,
     );
-    await service.updateSubmission(submission.id, SubmissionStatus.Received);
-    await service.updateSubmission(submission.id, SubmissionStatus.Approved);
+    const submissionUpdateApproved = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Approved,
+    });
+    const submissionUpdateReceived = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Received,
+    });
+    await service.updateSubmission(submission.id, submissionUpdateReceived);
+    await service.updateSubmission(submission.id, submissionUpdateApproved);
 
     // create vaulting
     const vaultingRequest = {

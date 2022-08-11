@@ -15,6 +15,9 @@ import {
   ActionLogActorTypeReadable,
   ActionLogType,
   ActionLogTypeReadable,
+  ItemType,
+  SubmissionUpdateType,
+  SubmissionOrderStatus,
 } from '../../config/enum';
 
 export class SubmissionRequest {
@@ -26,6 +29,79 @@ export class SubmissionRequest {
   @IsString()
   @MinLength(1)
   user: string;
+
+  @ApiProperty({
+    description: 'The uuid of the submission order',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  @MinLength(1)
+  order_uuid: string;
+
+  @ApiProperty({
+    description: 'The enum type of the submission: 1 - card, 2 - comic',
+    required: true,
+    example: 1,
+  })
+  @IsEnum(ItemType)
+  type: ItemType;
+
+  @ApiProperty({
+    description: 'The description of the enum type of the submission',
+    required: true,
+    example: 1,
+  })
+  @IsString()
+  type_desc: string;
+
+  @ApiProperty({
+    description: 'The player of the submitted card',
+    required: true,
+    example: 'Willie Mays',
+  })
+  @IsString()
+  player: string;
+
+  @ApiProperty({
+    description: 'The sport of the submitted card',
+    required: true,
+    example: 'Baseball',
+  })
+  @IsString()
+  sport: string;
+
+  @ApiProperty({
+    description: 'The name of the card set',
+    required: true,
+    example: 'World Series 2000',
+  })
+  @IsString()
+  set_name: string;
+
+  @ApiProperty({
+    description: 'The number of the submitted card',
+    required: true,
+    example: '#12345',
+  })
+  @IsString()
+  card_number: string;
+
+  @ApiProperty({
+    description: 'The issue number of the submitted comic',
+    required: true,
+    example: '#2022-12',
+  })
+  @IsString()
+  issue: string;
+
+  @ApiProperty({
+    description: 'The publisher of the issue',
+    required: true,
+    example: 'Marvel',
+  })
+  @IsString()
+  publisher: string;
 
   @ApiProperty({
     description: 'The grading company of the submitted the item',
@@ -209,6 +285,14 @@ export class SubmissionResponse {
   item_id: number;
 
   @ApiProperty({
+    description: 'The id of the submission order',
+    required: true,
+    example: 99,
+  })
+  @IsNumber()
+  order_id: number;
+
+  @ApiProperty({
     description: 'The uuid of the submission',
     required: true,
     example: '12345678-0000-0000-0000-000000000000',
@@ -239,7 +323,7 @@ export class SubmissionResponse {
 
 export class ListSubmissionsQuery {
   @ApiProperty({
-    description: 'The id of the user',
+    description: 'The uuid of the user',
     required: false,
     example: '12345678-0000-0000-0000-000000000000',
   })
@@ -282,6 +366,110 @@ export class ListSubmissionsQuery {
   @IsEnum(['ASC', 'DESC'])
   @IsOptional()
   order: string;
+}
+
+export class ListSubmissionOrdersQuery {
+  @ApiProperty({
+    description: 'The uuid of the user',
+    required: false,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  @IsOptional()
+  user: string;
+
+  @ApiProperty({
+    description: 'The status enum of the submission order',
+    required: false,
+    example: 1,
+  })
+  @IsNumberString()
+  @IsOptional()
+  status: number;
+
+  @ApiProperty({
+    description: 'The offset of the query',
+    required: false,
+    example: 5,
+  })
+  @IsNumberString()
+  @IsOptional()
+  offset: number;
+
+  @ApiProperty({
+    description: 'The limit of the query',
+    required: false,
+    example: 10,
+  })
+  @IsNumberString()
+  @IsOptional()
+  limit: number;
+
+  @ApiProperty({
+    description: 'The order of the query',
+    required: false,
+    example: 'ASC or DESC',
+  })
+  @IsEnum(['ASC', 'DESC'])
+  @IsOptional()
+  order: string;
+}
+
+export class SubmissionOrderDetails {
+  @ApiProperty({
+    description: 'The id of the submission order',
+    required: true,
+    example: 1,
+  })
+  @IsNumber()
+  id: number;
+
+  @ApiProperty({
+    description: 'The uuid of the user',
+    required: true,
+    example: '12345678-0000-0000-0000-000000000000',
+  })
+  @IsString()
+  user: string;
+
+  @ApiProperty({
+    description: 'The current status of the submitted order',
+    required: true,
+    example: 1,
+  })
+  @IsNumber()
+  status: number;
+
+  @ApiProperty({
+    description: 'The description of current status of the submitted order',
+    required: true,
+    example: 'Submitted',
+  })
+  @IsString()
+  @MinLength(1)
+  status_desc: string;
+
+  @ApiProperty({
+    description: 'The timestamp of the creation of the submission order',
+    required: true,
+    example: 1657074424,
+  })
+  @IsNumber()
+  created_at: number;
+
+  @ApiProperty({
+    description: 'The timestamp of the last update of the submission order',
+    required: true,
+    example: 1657074424,
+  })
+  @IsNumber()
+  updated_at: number;
+
+  @ApiProperty({
+    description: 'The list of the submissions in the order',
+    required: true,
+  })
+  submissions: SubmissionDetails[];
 }
 
 export class SubmissionDetails {
@@ -334,6 +522,14 @@ export class SubmissionDetails {
   rejected_at: number;
 
   @ApiProperty({
+    description: 'The timestamp of the update of the submitted item',
+    required: true,
+    example: 1657074424,
+  })
+  @IsNumber()
+  updated_at: number;
+
+  @ApiProperty({
     description: 'The current status of the submitted item',
     required: true,
     example: 1,
@@ -351,6 +547,14 @@ export class SubmissionDetails {
   status_desc: string;
 
   @ApiProperty({
+    description: 'The id of the submission order',
+    required: true,
+    example: 1,
+  })
+  @IsNumber()
+  order_id: number;
+
+  @ApiProperty({
     description: 'The id of the submitted item',
     required: true,
     example: 1,
@@ -365,6 +569,70 @@ export class SubmissionDetails {
   })
   @IsString()
   item_uuid: string;
+
+  @ApiProperty({
+    description: 'The enum type of the item: 1 - card, 2 - comic',
+    required: true,
+    example: 1,
+  })
+  @IsEnum(ItemType)
+  type: ItemType;
+
+  @ApiProperty({
+    description: 'The description of the enum type of the item',
+    required: true,
+    example: 'Card',
+  })
+  @IsString()
+  type_desc: string;
+
+  @ApiProperty({
+    description: 'The player of the submitted card',
+    required: true,
+    example: 'Willie Mays',
+  })
+  @IsString()
+  player: string;
+
+  @ApiProperty({
+    description: 'The sport of the submitted card',
+    required: true,
+    example: 'Baseball',
+  })
+  @IsString()
+  sport: string;
+
+  @ApiProperty({
+    description: 'The name of the card set',
+    required: true,
+    example: 'World Series 2000',
+  })
+  @IsString()
+  set_name: string;
+
+  @ApiProperty({
+    description: 'The number of the submitted card',
+    required: true,
+    example: '#12345',
+  })
+  @IsString()
+  card_number: string;
+
+  @ApiProperty({
+    description: 'The issue number of the submitted comic',
+    required: true,
+    example: '#2022-12',
+  })
+  @IsString()
+  issue: string;
+
+  @ApiProperty({
+    description: 'The publisher of the issue',
+    required: true,
+    example: 'Marvel',
+  })
+  @IsString()
+  publisher: string;
 
   @ApiProperty({
     description: 'The grading company of the submitted item',
@@ -491,7 +759,117 @@ export class SubmissionDetails {
   }
 }
 
-export class SubmissionStatusUpdate {
+export class SubmissionImage {
+  @ApiProperty({
+    description: "The base64 encoding of item's image ",
+    required: true,
+    example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
+  })
+  @IsString()
+  image_base64: string;
+
+  @ApiProperty({
+    description: 'The image format of the item',
+    required: true,
+    example: 'jpg',
+  })
+  @IsString()
+  image_format: string;
+
+  @ApiProperty({
+    description: "The base64 encoding of item's back image ",
+    required: true,
+    example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
+  })
+  @IsString()
+  image_rev_base64: string;
+
+  @ApiProperty({
+    description: 'The back image format of the item',
+    required: true,
+    example: 'jpg',
+  })
+  @IsString()
+  image_rev_format: string;
+
+  @ApiProperty({
+    description: 'The image path (static asset of the site) of the item',
+    required: false,
+    example: 'path/to/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  image_path: string;
+
+  @ApiProperty({
+    description: 'The back image path (static asset of the site) of the item',
+    required: false,
+    example: 'path/to/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  image_rev_path: string;
+
+  constructor(partial: Partial<SubmissionImage>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class SubmissionOrderUpdate {
+  @ApiProperty({
+    description: 'The enum of the order status',
+    required: true,
+    example: 1,
+  })
+  @IsEnum(SubmissionOrderStatus)
+  status: SubmissionOrderStatus;
+
+  constructor(partial: Partial<SubmissionOrderUpdate>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class SubmissionUpdate {
+  @ApiProperty({
+    description: 'The enum of update type, 1 - status, 2 - image',
+    required: true,
+    example: 1,
+  })
+  @IsEnum(SubmissionUpdateType)
+  type: SubmissionUpdateType;
+
+  @ApiProperty({
+    description: "The base64 encoding of item's image ",
+    required: true,
+    example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
+  })
+  @IsString()
+  image_base64: string;
+
+  @ApiProperty({
+    description: 'The image format of the item',
+    required: true,
+    example: 'jpg',
+  })
+  @IsString()
+  image_format: string;
+
+  @ApiProperty({
+    description: "The base64 encoding of item's back image ",
+    required: true,
+    example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
+  })
+  @IsString()
+  image_rev_base64: string;
+
+  @ApiProperty({
+    description: 'The back image format of the item',
+    required: true,
+    example: 'jpg',
+  })
+  @IsString()
+  image_rev_format: string;
+
   @ApiProperty({
     description: 'The status enum number',
     required: true,
@@ -500,7 +878,25 @@ export class SubmissionStatusUpdate {
   @IsNumber()
   status: number;
 
-  constructor(partial: Partial<SubmissionStatusUpdate>) {
+  @ApiProperty({
+    description: 'The image path (static asset of the site) of the item',
+    required: false,
+    example: 'path/to/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  image_path: string;
+
+  @ApiProperty({
+    description: 'The back image path (static asset of the site) of the item',
+    required: false,
+    example: 'path/to/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  image_rev_path: string;
+
+  constructor(partial: Partial<SubmissionUpdate>) {
     Object.assign(this, partial);
   }
 }
@@ -760,6 +1156,70 @@ export class VaultingDetails {
   })
   @IsString()
   item_uuid: string;
+
+  @ApiProperty({
+    description: 'The enum type of the item: 1 - card, 2 - comic',
+    required: true,
+    example: 1,
+  })
+  @IsEnum(ItemType)
+  item_type: ItemType;
+
+  @ApiProperty({
+    description: 'The description of the enum type of the item',
+    required: true,
+    example: 'Card',
+  })
+  @IsString()
+  item_type_desc: string;
+
+  @ApiProperty({
+    description: 'The player of the submitted card',
+    required: true,
+    example: 'Willie Mays',
+  })
+  @IsString()
+  player: string;
+
+  @ApiProperty({
+    description: 'The sport of the submitted card',
+    required: true,
+    example: 'Baseball',
+  })
+  @IsString()
+  sport: string;
+
+  @ApiProperty({
+    description: 'The name of the card set',
+    required: true,
+    example: 'World Series 2000',
+  })
+  @IsString()
+  set_name: string;
+
+  @ApiProperty({
+    description: 'The number of the submitted card',
+    required: true,
+    example: '#12345',
+  })
+  @IsString()
+  card_number: string;
+
+  @ApiProperty({
+    description: 'The issue number of the submitted comic',
+    required: true,
+    example: '#2022-12',
+  })
+  @IsString()
+  issue: string;
+
+  @ApiProperty({
+    description: 'The publisher of the issue',
+    required: true,
+    example: 'Marvel',
+  })
+  @IsString()
+  publisher: string;
 
   @ApiProperty({
     description: 'The grading company of the vaulted item',
@@ -1149,6 +1609,70 @@ export class ListingDetails {
   })
   @IsString()
   item_uuid: string;
+
+  @ApiProperty({
+    description: 'The enum type of the item: 1 - card, 2 - comic',
+    required: true,
+    example: 1,
+  })
+  @IsEnum(ItemType)
+  item_type: ItemType;
+
+  @ApiProperty({
+    description: 'The description of the enum type of the item',
+    required: true,
+    example: 'Card',
+  })
+  @IsString()
+  item_type_desc: string;
+
+  @ApiProperty({
+    description: 'The player of the submitted card',
+    required: true,
+    example: 'Willie Mays',
+  })
+  @IsString()
+  player: string;
+
+  @ApiProperty({
+    description: 'The sport of the submitted card',
+    required: true,
+    example: 'Baseball',
+  })
+  @IsString()
+  sport: string;
+
+  @ApiProperty({
+    description: 'The name of the card set',
+    required: true,
+    example: 'World Series 2000',
+  })
+  @IsString()
+  set_name: string;
+
+  @ApiProperty({
+    description: 'The number of the submitted card',
+    required: true,
+    example: '#12345',
+  })
+  @IsString()
+  card_number: string;
+
+  @ApiProperty({
+    description: 'The issue number of the submitted comic',
+    required: true,
+    example: '#2022-12',
+  })
+  @IsString()
+  issue: string;
+
+  @ApiProperty({
+    description: 'The publisher of the issue',
+    required: true,
+    example: 'Marvel',
+  })
+  @IsString()
+  publisher: string;
 
   @ApiProperty({
     description: 'The grading company of the listed item',

@@ -1,3 +1,4 @@
+import { ItemType } from '../config/enum';
 import {
   Entity,
   Index,
@@ -6,20 +7,27 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-/*
-Category as Comic, Card enum
-Grading Company enum
-Serial Number
-Description as Title
-Genre as Football, Baseball, Pokemon, World Series optional
-Manufacturer optional
-Year optional
-Overall grade optional
-Sub-grades optional
-Autograph optional
-Subject optional
-Image, need to define formats/file size
-*/
+@Entity()
+@Index(['user', 'status'])
+export class SubmissionOrder {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  user: number;
+
+  @Column()
+  uuid: string;
+
+  @Column()
+  status: number;
+
+  @Column()
+  created_at: number;
+
+  @Column({ default: 0 })
+  updated_at: number;
+}
 
 @Entity()
 @Index(['user', 'item_id'], { unique: true })
@@ -30,11 +38,17 @@ export class Submission {
   @Column()
   user: number;
 
+  @Column({ default: 0 })
+  order_id: number;
+
   @Column()
   item_id: number;
 
   @Column()
   status: number;
+
+  @Column({ length: 500, default: '' })
+  extra: string;
 
   @Column()
   image: string;
@@ -53,6 +67,9 @@ export class Submission {
 
   @Column()
   approved_at: number;
+
+  @Column({ default: 0 })
+  updated_at: number;
 }
 
 @Entity()
@@ -84,6 +101,27 @@ export class Item {
 
   @Column()
   user: number;
+
+  @Column({ default: ItemType.card })
+  type: number;
+
+  @Column({ default: '' })
+  issue: string;
+
+  @Column({ default: '' })
+  publisher: string;
+
+  @Column({ default: '' })
+  player: string;
+
+  @Column({ default: '' })
+  sport: string;
+
+  @Column({ default: '' })
+  set_name: string;
+
+  @Column({ default: '' })
+  card_number: string;
 
   @Column()
   grading_company: string;
@@ -199,6 +237,47 @@ export class Listing {
 
   @Column()
   price: number;
+
+  @Column()
+  status: number;
+
+  @Column()
+  created_at: number;
+
+  @Column()
+  updated_at: number;
+}
+
+@Entity()
+@Index(['item_id'])
+@Index(['vault', 'zone', 'shelf'])
+export class Inventory {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  item_id: number;
+
+  @Column({ default: '' })
+  vault: string;
+
+  @Column({ default: '' })
+  zone: string;
+
+  @Column({ default: 0 })
+  shelf: number;
+
+  @Column({ default: 0 })
+  box: number;
+
+  @Column({ default: 0 })
+  box_row: number;
+
+  @Column({ default: 0 })
+  gallery_row: number;
+
+  @Column({ default: 0 })
+  gallery_position: number;
 
   @Column()
   status: number;

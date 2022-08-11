@@ -5,6 +5,7 @@ import {
   User,
   Listing,
   ActionLog,
+  SubmissionOrder,
 } from '../database/database.entity';
 import {
   ActionLogEntityTypeReadable,
@@ -13,13 +14,39 @@ import {
   ListingStatusReadable,
   SubmissionStatusReadable,
   VaultingStatusReadable,
+  SubmissionOrderStatus,
+  SubmissionOrderStatusReadable,
+  ItemTypeReadable,
 } from '../config/enum';
 import {
   ActionLogDetails,
   ListingDetails,
   SubmissionDetails,
+  SubmissionOrderDetails,
   VaultingDetails,
 } from '../marketplace/dtos/marketplace.dto';
+
+export function newSubmissionOrderDetails(
+  order: SubmissionOrder,
+  user: User,
+  submissions: Submission[],
+  items: Map<number, Item>,
+  users: Map<number, User>,
+): SubmissionOrderDetails {
+  return {
+    id: order.id,
+    status: order.status,
+    status_desc: SubmissionOrderStatusReadable[order.status],
+    created_at: order.created_at,
+    updated_at: order.updated_at,
+    user: user.uuid,
+    submissions: submissions.map((submission) => {
+      const item = items.get(submission.item_id);
+      const user = users.get(submission.user);
+      return newSubmissionDetails(submission, item, user);
+    }),
+  };
+}
 
 export function newSubmissionDetails(
   submission: Submission,
@@ -29,10 +56,19 @@ export function newSubmissionDetails(
   return new SubmissionDetails({
     id: submission.id,
     user: user.uuid,
+    order_id: submission.order_id,
     item_id: item.id,
     item_uuid: item.uuid,
     status: submission.status,
     status_desc: SubmissionStatusReadable[submission.status],
+    type: item.type,
+    type_desc: ItemTypeReadable[item.type],
+    issue: item.issue,
+    publisher: item.publisher,
+    player: item.player,
+    sport: item.sport,
+    set_name: item.set_name,
+    card_number: item.card_number,
     grading_company: item.grading_company,
     serial_number: item.serial_number,
     title: item.title,
@@ -51,6 +87,7 @@ export function newSubmissionDetails(
     received_at: submission.received_at,
     approved_at: submission.approved_at,
     rejected_at: submission.rejected_at,
+    updated_at: submission.updated_at,
   });
 }
 
@@ -64,6 +101,14 @@ export function newVaultingDetails(
     user: user.uuid,
     item_id: item.id,
     item_uuid: item.uuid,
+    item_type: item.type,
+    item_type_desc: ItemTypeReadable[item.type],
+    issue: item.issue,
+    publisher: item.publisher,
+    player: item.player,
+    sport: item.sport,
+    set_name: item.set_name,
+    card_number: item.card_number,
     collection: vaulting.collection,
     token_id: vaulting.token_id,
     grading_company: item.grading_company,
@@ -105,6 +150,14 @@ export function newListingDetails(
     updated_at: listing.updated_at,
     item_id: item.id,
     item_uuid: item.uuid,
+    item_type: item.type,
+    item_type_desc: ItemTypeReadable[item.type],
+    issue: item.issue,
+    publisher: item.publisher,
+    player: item.player,
+    sport: item.sport,
+    set_name: item.set_name,
+    card_number: item.card_number,
     grading_company: item.grading_company,
     serial_number: item.serial_number,
     title: item.title,

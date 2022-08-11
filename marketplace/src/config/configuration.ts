@@ -130,6 +130,7 @@ export default () => ({
     },
   },
   dev: {
+    api_ip: process.env.MARKETPLACE_DEV_API_IP || '127.0.0.1',
     api_port: process.env.MARKETPLACE_DEV_API_PORT || 3300,
     auth_enabled: false,
     aws: {

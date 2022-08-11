@@ -5,6 +5,8 @@ import {
   User,
   Listing,
   ActionLog,
+  Inventory,
+  SubmissionOrder,
 } from '../database/database.entity';
 import { Repository, getManager, In } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,20 +22,29 @@ import {
   ActionLogRequest,
   ListingDetails,
   SubmissionDetails,
+  SubmissionOrderDetails,
   SubmissionRequest,
   VaultingUpdate,
 } from '../marketplace/dtos/marketplace.dto';
 import {
+  InventoryStatus,
   ItemStatus,
   ListActionLogType,
   ListingStatus,
+  SubmissionOrderStatus,
   SubmissionStatus,
+  SubmissionUpdateType,
   VaultingStatus,
   VaultingUpdateType,
 } from '../config/enum';
-import { newListingDetails, newSubmissionDetails } from '../util/format';
+import {
+  newListingDetails,
+  newSubmissionDetails,
+  newSubmissionOrderDetails,
+} from '../util/format';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
+import { InventoryRequest } from '../inventory/dtos/inventory.dto';
 
 const DEFAULT_USER_SOURCE = 'cognito';
 const INIT_COLLECTION = '';
@@ -54,6 +65,9 @@ export class DatabaseService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Listing) private listingRepo: Repository<Listing>,
     @InjectRepository(ActionLog) private actionLogRepo: Repository<ActionLog>,
+    @InjectRepository(Inventory) private inventoryRepo: Repository<Inventory>,
+    @InjectRepository(SubmissionOrder)
+    private submissionOrderRepo: Repository<SubmissionOrder>,
   ) {
     // read isolation setting from configuration
     let env = process.env[RUNTIME_ENV];
@@ -77,6 +91,26 @@ export class DatabaseService {
     return user;
   }
 
+  async maybeCreateSubmissionOrder(
+    user: number,
+    uuid: string,
+  ): Promise<SubmissionOrder> {
+    const order = await this.submissionOrderRepo.findOne({
+      where: { uuid: uuid },
+    });
+    if (!order) {
+      const newOrder = this.submissionOrderRepo.create({
+        user: user,
+        uuid: uuid,
+        status: SubmissionOrderStatus.Created,
+        created_at: Math.round(Date.now() / 1000),
+      });
+      await this.submissionOrderRepo.save(newOrder);
+      return newOrder;
+    }
+    return order;
+  }
+
   async createNewSubmission(
     submission: SubmissionRequest,
     imagePaths: [string, string],
@@ -85,6 +119,7 @@ export class DatabaseService {
     var item_id: number;
     var uuid: string;
     var status: number;
+    var order_id: number;
     try {
       await getManager().transaction(
         this.isolation,
@@ -93,9 +128,21 @@ export class DatabaseService {
             submission.user,
             DEFAULT_USER_SOURCE,
           );
+          const submissionOrder = await this.maybeCreateSubmissionOrder(
+            user.id,
+            submission.order_uuid,
+          );
+          order_id = submissionOrder.id;
           const newItem = this.itemRepo.create({
             uuid: uuidv4(),
             user: user.id,
+            type: submission.type,
+            issue: submission.issue,
+            publisher: submission.publisher,
+            player: submission.player,
+            sport: submission.sport,
+            set_name: submission.set_name,
+            card_number: submission.card_number,
             grading_company: submission.grading_company,
             serial_number: submission.serial_number,
             title: submission.title,
@@ -115,6 +162,7 @@ export class DatabaseService {
           uuid = itemSaved.uuid;
           const newSubmission = this.submissionRepo.create({
             user: user.id,
+            order_id: submissionOrder.id,
             item_id: itemSaved.id,
             status: SubmissionStatus.Submitted,
             image: imagePaths[0],
@@ -139,6 +187,7 @@ export class DatabaseService {
       item_id: item_id,
       uuid: uuid,
       status: status,
+      order_id: order_id,
     };
   }
 
@@ -224,27 +273,58 @@ export class DatabaseService {
     return submission;
   }
 
-  async updateSubmission(submission_id: number, status: number) {
+  async updateSubmission(
+    submission_id: number,
+    type: SubmissionUpdateType,
+    status: number,
+    image: string,
+    imageRev: string,
+  ) {
     const submission = await this.submissionRepo.findOne(submission_id);
     if (!submission) {
       throw new NotFoundException(`Submission ${submission_id} not found`);
     }
-
-    submission.status = status;
-    switch (status) {
-      case SubmissionStatus.Received:
-        submission.received_at = Math.round(Date.now() / 1000);
-        break;
-      case SubmissionStatus.Approved:
-        submission.approved_at = Math.round(Date.now() / 1000);
-        break;
-      case SubmissionStatus.Rejected:
-        submission.rejected_at = Math.round(Date.now() / 1000);
-        break;
+    switch (type) {
+      case SubmissionUpdateType.Status:
+        submission.status = status;
+        switch (status) {
+          case SubmissionStatus.Received:
+            submission.received_at = Math.round(Date.now() / 1000);
+            break;
+          case SubmissionStatus.Approved:
+            submission.approved_at = Math.round(Date.now() / 1000);
+            break;
+          case SubmissionStatus.Rejected:
+            submission.rejected_at = Math.round(Date.now() / 1000);
+            break;
+        }
+      case SubmissionUpdateType.Image:
+        // update only when image is not empty
+        if (image) {
+          submission.image = image;
+        }
+        if (imageRev) {
+          submission.image_rev = imageRev;
+        }
+        submission.updated_at = Math.round(Date.now() / 1000);
     }
 
     await this.submissionRepo.save(submission);
     return submission;
+  }
+
+  async updateSubmissionOrder(
+    order_id: number,
+    status: number,
+  ): Promise<SubmissionOrder> {
+    const submissionOrder = await this.submissionOrderRepo.findOne(order_id);
+    if (!submissionOrder) {
+      throw new NotFoundException(`Submission order ${order_id} not found`);
+    }
+    submissionOrder.status = status;
+    submissionOrder.updated_at = Math.round(Date.now() / 1000);
+    await this.submissionOrderRepo.save(submissionOrder);
+    return submissionOrder;
   }
 
   // list items by item ids
@@ -301,7 +381,7 @@ export class DatabaseService {
     var vaulting: Vaulting;
     try {
       await getManager().transaction(
-        'SERIALIZABLE',
+        this.isolation,
         async (transactionalEntityManager) => {
           const newVaulting = this.vaultingRepo.create({
             user: user,
@@ -500,7 +580,7 @@ export class DatabaseService {
     var listing: Listing;
     try {
       await getManager().transaction(
-        'SERIALIZABLE',
+        this.isolation,
         async (transactionalEntityManager) => {
           const newListing = this.listingRepo.create({
             user: user,
@@ -626,7 +706,7 @@ export class DatabaseService {
     var actionLog: ActionLog;
     try {
       await getManager().transaction(
-        'SERIALIZABLE',
+        this.isolation,
         async (transactionalEntityManager) => {
           const newActionLog = this.actionLogRepo.create({
             type: request.type,
@@ -718,5 +798,155 @@ export class DatabaseService {
     });
 
     return actionLogs;
+  }
+
+  async createNewInventory(
+    inventoryRequest: InventoryRequest,
+  ): Promise<Inventory> {
+    var inventory: Inventory;
+    try {
+      await getManager().transaction(
+        this.isolation,
+        async (transactionalEntityManager) => {
+          const newInventory = this.inventoryRepo.create({
+            item_id: inventoryRequest.item_id,
+            vault: inventoryRequest.vault,
+            zone: inventoryRequest.zone,
+            shelf: inventoryRequest.shelf,
+            box: inventoryRequest.box,
+            box_row: inventoryRequest.box_row,
+            gallery_row: inventoryRequest.gallery_row,
+            gallery_position: inventoryRequest.gallery_position,
+            status: InventoryStatus.InStock,
+            updated_at: 0,
+            created_at: Math.round(Date.now() / 1000),
+          });
+          inventory = await this.vaultingRepo.save(newInventory);
+        },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
+    return inventory;
+  }
+
+  async getSubmissionOrder(
+    submission_order_id: number,
+  ): Promise<SubmissionOrder> {
+    const submissionOrder = await this.submissionOrderRepo.findOne({
+      where: { id: submission_order_id },
+    });
+    // throw error if submission order not found
+    if (!submissionOrder) {
+      throw new NotFoundException(
+        `Submission order with id ${submission_order_id} not found`,
+      );
+    }
+    return submissionOrder;
+  }
+
+  async listSubmissionsForOrder(
+    submission_order_id: number,
+  ): Promise<Submission[]> {
+    const submissions = await this.submissionRepo.find({
+      where: { order_id: submission_order_id },
+    });
+    return submissions;
+  }
+
+  async listSubmissionOrders(
+    userUUID: string,
+    status: number,
+    offset: number,
+    limit: number,
+    order: string,
+  ): Promise<SubmissionOrderDetails[]> {
+    var where_filter = {};
+    if (userUUID !== undefined) {
+      // find user by uuid
+      const user = await this.userRepo.findOne({
+        where: { uuid: userUUID },
+      });
+      if (!user) {
+        throw new NotFoundException(`User ${userUUID} not found`);
+      }
+      where_filter = { user: user.id };
+    }
+
+    if (status !== undefined) {
+      where_filter['status'] = status;
+    }
+    if (offset == undefined) {
+      offset = 0;
+    }
+    var filter = {
+      where: where_filter,
+      skip: offset,
+    };
+    if (limit != undefined) {
+      filter['take'] = limit;
+    }
+
+    // order by id
+    if (!!order) {
+      filter['order'] = { id: order };
+    }
+
+    const submissionOrders = await this.submissionOrderRepo.find(filter);
+    // find all submissions for submission orders
+    const submissionOrderIds = submissionOrders.map((submissionOrder) => {
+      return submissionOrder.id;
+    });
+    const submissions = await this.submissionRepo.find({
+      where: { order_id: In(submissionOrderIds) },
+    });
+    // build a map of submission_order_id to a list of submissions
+    const submissionMap = new Map<number, Submission[]>();
+    submissions.forEach((submission) => {
+      const submissionOrderId = submission.order_id;
+      if (!submissionMap.has(submissionOrderId)) {
+        submissionMap.set(submissionOrderId, []);
+      }
+      submissionMap.get(submissionOrderId).push(submission);
+    });
+    // find all items for submissions
+    const itemIds = submissions.map((submission) => {
+      return submission.item_id;
+    });
+    const items = await this.itemRepo.find({
+      where: { id: In(itemIds) },
+    });
+    // build a map of submission id to item
+    const itemMap = new Map<number, Item>();
+    items.forEach((item) => {
+      itemMap.set(item.id, item);
+    });
+    // find all users for submission orders
+    const userIds = submissionOrders.map((submissionOrder) => {
+      return submissionOrder.user;
+    });
+    const users = await this.userRepo.find({
+      where: { id: In(userIds) },
+    });
+    // build a map of user id to user
+    const userMap = new Map<number, User>();
+    users.forEach((user) => {
+      userMap.set(user.id, user);
+    });
+
+    // for each submission order, format the submission order details
+    const submissionOrderDetails = submissionOrders.map((submissionOrder) => {
+      const submissionOrderDetails = newSubmissionOrderDetails(
+        submissionOrder,
+        userMap.get(submissionOrder.user),
+        submissionMap.get(submissionOrder.id),
+        itemMap,
+        userMap,
+      );
+      return submissionOrderDetails;
+    });
+
+    return submissionOrderDetails;
   }
 }
