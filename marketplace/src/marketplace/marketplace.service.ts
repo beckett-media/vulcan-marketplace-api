@@ -84,8 +84,8 @@ export class MarketplaceService {
   async uploadImages(request: SubmissionImage): Promise<[string, string]> {
     var imagePath = '';
     var imagePathRev = '';
-    if (request.image_base64 != '') {
-      if (request.image_format == '') {
+    if (!!request.image_base64) {
+      if (!request.image_format) {
         throw new InternalServerErrorException('Image format not specified');
       }
       const image_buffer = Buffer.from(request.image_base64, 'base64');
@@ -98,8 +98,8 @@ export class MarketplaceService {
       imagePath = request.image_path || '';
     }
 
-    if (request.image_rev_base64 != '') {
-      if (request.image_rev_format == '') {
+    if (!!request.image_rev_base64) {
+      if (!request.image_rev_format) {
         throw new InternalServerErrorException(
           'Back image format not specified',
         );

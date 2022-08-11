@@ -832,41 +832,46 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: "The base64 encoding of item's image ",
-    required: true,
+    required: false,
     example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
   })
   @IsString()
+  @IsOptional()
   image_base64: string;
 
   @ApiProperty({
     description: 'The image format of the item',
-    required: true,
+    required: false,
     example: 'jpg',
   })
   @IsString()
+  @IsOptional()
   image_format: string;
 
   @ApiProperty({
     description: "The base64 encoding of item's back image ",
-    required: true,
+    required: false,
     example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
   })
   @IsString()
+  @IsOptional()
   image_rev_base64: string;
 
   @ApiProperty({
     description: 'The back image format of the item',
-    required: true,
+    required: false,
     example: 'jpg',
   })
   @IsString()
+  @IsOptional()
   image_rev_format: string;
 
   @ApiProperty({
     description: 'The status enum number',
-    required: true,
+    required: false,
     example: 1,
   })
+  @IsOptional()
   @IsNumber()
   status: number;
 
