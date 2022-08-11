@@ -892,7 +892,6 @@ export class DatabaseService {
     if (!!order) {
       filter['order'] = { id: order };
     }
-    console.log('abc');
     const submissionOrders = await this.submissionOrderRepo.find(filter);
     // find all submissions for submission orders
     const submissionOrderIds = submissionOrders.map((submissionOrder) => {
@@ -910,7 +909,6 @@ export class DatabaseService {
       }
       submissionMap.get(submissionOrderId).push(submission);
     });
-    console.log('123');
     // find all items for submissions
     const itemIds = submissions.map((submission) => {
       return submission.item_id;

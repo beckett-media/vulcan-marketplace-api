@@ -168,12 +168,12 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async updateSubmissionOrder(
     @Param('submission_order_id') submission_order_id: number,
-    @Request() request: SubmissionOrderUpdate,
+    @Body() body: SubmissionOrderUpdate,
   ): Promise<SubmissionOrderDetails> {
     const submissionDetails =
       await this.marketplaceService.updateSubmissionOrder(
         submission_order_id,
-        request.status,
+        body.status,
       );
     //assertOwnerOrAdmin(request.user, submissionDetails, this.logger);
     return submissionDetails;
@@ -225,7 +225,6 @@ export class MarketplaceController {
   async updateSubmission(
     @Body() body: SubmissionUpdate,
     @Param('submission_id') submission_id: number,
-    @Request() request: any,
   ): Promise<SubmissionDetails> {
     const submission = await this.marketplaceService.getSubmission(
       submission_id,

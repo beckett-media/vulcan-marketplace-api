@@ -209,8 +209,6 @@ describe('MarketplaceService', () => {
       type: SubmissionUpdateType.Image,
       image_base64: imageBaseball,
       image_format: 'jpg',
-      image_rev_base64: imageBlackBox,
-      image_rev_format: 'jpg',
     });
 
     // update submission image
@@ -219,7 +217,21 @@ describe('MarketplaceService', () => {
       submissionUpdate,
     );
     expect(submissionDetails.image_url).toBe('fake_url');
-    expect(submissionDetails.image_rev_url).toBe('fake_url');
+    expect(submissionDetails.image_rev_url).toBe('');
+
+    const submissionUpdateRev = new SubmissionUpdate({
+      type: SubmissionUpdateType.Image,
+      image_rev_base64: imageBlackBox,
+      image_rev_format: 'jpg',
+    });
+
+    // update submission image
+    const submissionDetailsRev = await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateRev,
+    );
+    expect(submissionDetailsRev.image_url).toBe('fake_url');
+    expect(submissionDetailsRev.image_rev_url).toBe('fake_url');
   });
 
   it('should create new vaulting and update existing ones', async () => {
