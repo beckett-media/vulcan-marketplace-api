@@ -48,14 +48,6 @@ export class SubmissionRequest {
   type: ItemType;
 
   @ApiProperty({
-    description: 'The description of the enum type of the submission',
-    required: true,
-    example: 1,
-  })
-  @IsString()
-  type_desc: string;
-
-  @ApiProperty({
     description: 'The player of the submitted card',
     required: true,
     example: 'Willie Mays',
