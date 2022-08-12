@@ -8,7 +8,7 @@ import {
   Inventory,
   SubmissionOrder,
 } from '../database/database.entity';
-import { Repository, getManager, In } from 'typeorm';
+import { Repository, getManager, In, Not } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -44,9 +44,12 @@ import {
 } from '../util/format';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
-import { InventoryRequest } from '../inventory/dtos/inventory.dto';
+import {
+  InventoryRequest,
+  ListInventoryRequest,
+} from '../inventory/dtos/inventory.dto';
 
-const DEFAULT_USER_SOURCE = 'cognito';
+export const DEFAULT_USER_SOURCE = 'cognito';
 const INIT_COLLECTION = '';
 const INIT_TOKEN_ID = 0;
 
@@ -111,8 +114,37 @@ export class DatabaseService {
     return order;
   }
 
+  async discardSubmissionOrder(order_id: number) {
+    // get submissions by order id
+    const submissions = await this.getSubmissionsByOrder(order_id);
+
+    // discard each submission
+    for (let submission of submissions) {
+      submission.status = SubmissionStatus.Failed;
+      submission.updated_at = Math.round(Date.now() / 1000);
+      await this.submissionRepo.save(submission);
+    }
+
+    // discard order
+    const order = await this.submissionOrderRepo.findOne(order_id);
+    order.status = SubmissionOrderStatus.Discarded;
+    order.updated_at = Math.round(Date.now() / 1000);
+    await this.submissionOrderRepo.save(order);
+  }
+
+  async getSubmissionsByOrder(order_id: number): Promise<Submission[]> {
+    var where_filter = { order_id: order_id };
+    var filter = {
+      where: where_filter,
+    };
+    const submissions = await this.submissionRepo.find(filter);
+    return submissions;
+  }
+
   async createNewSubmission(
     submission: SubmissionRequest,
+    user: User,
+    submissionOrder: SubmissionOrder,
     imagePaths: [string, string],
   ) {
     var submission_id: number;
@@ -124,14 +156,6 @@ export class DatabaseService {
       await getManager().transaction(
         this.isolation,
         async (transactionalEntityManager) => {
-          const user = await this.maybeCreateNewUser(
-            submission.user,
-            DEFAULT_USER_SOURCE,
-          );
-          const submissionOrder = await this.maybeCreateSubmissionOrder(
-            user.id,
-            submission.order_uuid,
-          );
           order_id = submissionOrder.id;
           const newItem = this.itemRepo.create({
             uuid: uuidv4(),
@@ -179,6 +203,7 @@ export class DatabaseService {
     } catch (error) {
       status = SubmissionStatus.Failed;
       this.logger.error(error);
+      throw new InternalServerErrorException(error);
     }
     status = SubmissionStatus.Submitted;
 
@@ -210,6 +235,8 @@ export class DatabaseService {
       where_filter = { user: user.id };
     }
 
+    // by default, set status filter to be <not failed>
+    where_filter['status'] = Not(SubmissionStatus.Failed);
     if (status !== undefined) {
       where_filter['status'] = status;
     }
@@ -874,6 +901,8 @@ export class DatabaseService {
       where_filter = { user: user.id };
     }
 
+    // by default, set status filter to be <not discarded>
+    where_filter['status'] = Not(SubmissionOrderStatus.Discarded);
     if (status !== undefined) {
       where_filter['status'] = status;
     }
@@ -947,5 +976,30 @@ export class DatabaseService {
     });
 
     return submissionOrderDetails;
+  }
+
+  async listInventory(
+    inventoryRequest: ListInventoryRequest,
+  ): Promise<Inventory[]> {
+    var where_filter = {};
+    if (inventoryRequest.item_id !== undefined) {
+      where_filter['item_id'] = inventoryRequest.item_id;
+    }
+    const inventories = await this.inventoryRepo.find({
+      where: where_filter,
+    });
+    return inventories;
+  }
+
+  async getInventory(inventory_id: number) {
+    const inventory = await this.inventoryRepo.findOne({
+      where: { id: inventory_id },
+    });
+    if (!inventory) {
+      throw new NotFoundException(
+        `Inventory with id ${inventory_id} not found`,
+      );
+    }
+    return inventory;
   }
 }

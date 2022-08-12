@@ -39,7 +39,7 @@ import {
   SubmissionOrderUpdate,
   SubmissionUpdate,
 } from './dtos/marketplace.dto';
-import { CacheModule } from '@nestjs/common';
+import { CacheModule, InternalServerErrorException } from '@nestjs/common';
 
 describe('MarketplaceService', () => {
   let service: MarketplaceService;
@@ -111,7 +111,13 @@ describe('MarketplaceService', () => {
   it('should create new submission', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
     const submission = await service.submitItem(submissionRequest);
     expect(submission).toBeDefined();
     expect(submission.user).toBe(userUUID);
@@ -137,7 +143,13 @@ describe('MarketplaceService', () => {
   it('should not approve if submission not received', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
     const submission = await service.submitItem(submissionRequest);
     const submissionUpdateApproved = new SubmissionUpdate({
       type: SubmissionUpdateType.Status,
@@ -177,7 +189,13 @@ describe('MarketplaceService', () => {
   it('should update submission order status', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', false, '');
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      false,
+      '',
+      true,
+    );
     const submission = await service.submitItem(submissionRequest);
 
     // update submission order status
@@ -193,10 +211,194 @@ describe('MarketplaceService', () => {
     expect(submissionOrder.status).toBe(SubmissionOrderStatus.Processed);
   });
 
+  it('should preserve atomicity for submission orders', async () => {
+    // 3 test cases: x - failed, o - success
+    // 1. XOO
+    // 2. OXO
+    // 3. OOX
+
+    // 1. XOO
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    // 1st request
+    var submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      false,
+    );
+    await expect(service.submitItem(submissionRequest)).rejects.toEqual(
+      new InternalServerErrorException('Image format not specified'),
+    );
+    // 2nd request
+    submissionRequest = newSubmissionRequest(userUUID, 'sn2', true, '', true);
+    await expect(service.submitItem(submissionRequest)).rejects.toEqual(
+      new InternalServerErrorException(
+        'Submission order has been discarded due to previous failure',
+      ),
+    );
+
+    // 2. OXO
+    // 1st request
+    var uuid = '00000000-0000-0000-0000-000000000099';
+    var submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn11',
+      true,
+      uuid,
+      true,
+    );
+    var submissionResponse = await service.submitItem(submissionRequest);
+    expect(submissionResponse.order_id).toBeDefined();
+    var submission11 = await service.getSubmission(
+      submissionResponse.submission_id,
+    );
+    expect(submission11).toBeDefined();
+    var submissionOrder = await service.getSubmissionOrder(
+      submissionResponse.order_id,
+    );
+    expect(submissionOrder).toBeDefined();
+    expect(submission11.status == SubmissionStatus.Submitted).toBe(true);
+    expect(submissionOrder.status == SubmissionOrderStatus.Created).toBe(true);
+
+    // 2nd request
+    submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn22',
+      true,
+      uuid,
+      false,
+    );
+    await expect(service.submitItem(submissionRequest)).rejects.toEqual(
+      new InternalServerErrorException('Image format not specified'),
+    );
+    // 3rd request
+    submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn33',
+      true,
+      uuid,
+      true,
+    );
+    await expect(service.submitItem(submissionRequest)).rejects.toEqual(
+      new InternalServerErrorException(
+        'Submission order has been discarded due to previous failure',
+      ),
+    );
+
+    // verify submission order is discarded
+    await expect(
+      service.getSubmissionOrder(submissionOrder.id),
+    ).rejects.toEqual(
+      new InternalServerErrorException(
+        `Submission order ${submissionOrder.id} not found`,
+      ),
+    );
+    // verify submission is marked as failed
+    submission11 = await service.getSubmission(submission11.id);
+    expect(submission11.status == SubmissionStatus.Failed).toBe(true);
+
+    // 3. OOX
+    // 1st request
+    uuid = '00000000-0000-0000-0000-000000000088';
+    submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn111',
+      true,
+      uuid,
+      true,
+    );
+    var submissionResponse = await service.submitItem(submissionRequest);
+    expect(submissionResponse.order_id).toBeDefined();
+    var submission111 = await service.getSubmission(
+      submissionResponse.submission_id,
+    );
+    expect(submission111).toBeDefined();
+    var submissionOrder = await service.getSubmissionOrder(
+      submissionResponse.order_id,
+    );
+    expect(submissionOrder).toBeDefined();
+    expect(submission111.status == SubmissionStatus.Submitted).toBe(true);
+    expect(submissionOrder.status == SubmissionOrderStatus.Created).toBe(true);
+
+    // 2nd request
+    submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn222',
+      true,
+      uuid,
+      true,
+    );
+    submissionResponse = await service.submitItem(submissionRequest);
+    expect(submissionResponse.order_id).toBeDefined();
+    var submission222 = await service.getSubmission(
+      submissionResponse.submission_id,
+    );
+    expect(submission222).toBeDefined();
+    submissionOrder = await service.getSubmissionOrder(
+      submissionResponse.order_id,
+    );
+    expect(submissionOrder).toBeDefined();
+    expect(submission222.status == SubmissionStatus.Submitted).toBe(true);
+    expect(submissionOrder.status == SubmissionOrderStatus.Created).toBe(true);
+
+    // check listSubmissions
+    var submissions = await service.listSubmissions(
+      userUUID,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions.length).toBe(2);
+
+    // 3rd request
+    submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn22',
+      true,
+      uuid,
+      false,
+    );
+    await expect(service.submitItem(submissionRequest)).rejects.toEqual(
+      new InternalServerErrorException('Image format not specified'),
+    );
+
+    // verify submission order is discarded
+    await expect(
+      service.getSubmissionOrder(submissionOrder.id),
+    ).rejects.toEqual(
+      new InternalServerErrorException(
+        `Submission order ${submissionOrder.id} not found`,
+      ),
+    );
+    // veify submissions are marked as failed
+    submission111 = await service.getSubmission(submission111.id);
+    expect(submission111.status == SubmissionStatus.Failed).toBe(true);
+    submission222 = await service.getSubmission(submission222.id);
+    expect(submission222.status == SubmissionStatus.Failed).toBe(true);
+
+    // check listSubmissions
+    var submissions = await service.listSubmissions(
+      userUUID,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions.length).toBe(0);
+  });
+
   it('should update submission image', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', false, '');
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      false,
+      '',
+      true,
+    );
     const submission = await service.submitItem(submissionRequest);
     const submissionDetailsBefore = await service.getSubmission(
       submission.submission_id,
@@ -234,10 +436,59 @@ describe('MarketplaceService', () => {
     expect(submissionDetailsRev.image_rev_url).toBe('fake_url');
   });
 
+  it('should fail if vaulting image format is not just letters', async () => {
+    // create submission
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
+    const submission = await service.submitItem(submissionRequest);
+    const submissionUpdateApproved = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Approved,
+    });
+    const submissionUpdateReceived = new SubmissionUpdate({
+      type: SubmissionUpdateType.Status,
+      status: SubmissionStatus.Received,
+    });
+    await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateReceived,
+    );
+    await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateApproved,
+    );
+    // create vaulting
+    const fake_format = 'fake_format';
+    const vaultingRequest = {
+      item_id: submission.item_id,
+      user: userUUID,
+      submission_id: submission.submission_id,
+      image_base64: 'fake_base64',
+      image_format: fake_format,
+    };
+    await expect(service.newVaulting(vaultingRequest)).rejects.toEqual(
+      new InternalServerErrorException(
+        `Image_format should only contain letters: ${fake_format}`,
+      ),
+    );
+  });
+
   it('should create new vaulting and update existing ones', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
     const submission = await service.submitItem(submissionRequest);
     const submissionUpdateApproved = new SubmissionUpdate({
       type: SubmissionUpdateType.Status,
@@ -280,7 +531,7 @@ describe('MarketplaceService', () => {
       user: userUUID,
       submission_id: submission.submission_id,
       image_base64: 'fake_base64',
-      image_format: 'fake_format',
+      image_format: 'fakeformat',
     };
     const vaulting = await service.newVaulting(vaultingRequest);
     expect(vaulting).toBeDefined();
@@ -352,7 +603,13 @@ describe('MarketplaceService', () => {
   it('should create new listing', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
     const submissionResponse = await service.submitItem(submissionRequest);
     const submission = await service.getSubmission(
       submissionResponse.submission_id,
@@ -374,7 +631,7 @@ describe('MarketplaceService', () => {
       user: userUUID,
       submission_id: submission.id,
       image_base64: 'fake_base64',
-      image_format: 'fake_format',
+      image_format: 'fakeformat',
     };
     const vaulting = await service.newVaulting(vaultingRequest);
     expect(vaulting).toBeDefined();
@@ -425,7 +682,13 @@ describe('MarketplaceService', () => {
   it('should update listing price', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    const submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '');
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
     const submissionResponse = await service.submitItem(submissionRequest);
     const submission = await service.getSubmission(
       submissionResponse.submission_id,
@@ -447,7 +710,7 @@ describe('MarketplaceService', () => {
       user: userUUID,
       submission_id: submission.id,
       image_base64: 'fake_base64',
-      image_format: 'fake_format',
+      image_format: 'fakeformat',
     };
     const vaulting = await service.newVaulting(vaultingRequest);
     expect(vaulting).toBeDefined();

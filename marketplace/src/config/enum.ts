@@ -147,12 +147,18 @@ export enum InventoryStatus {
   InStock = 1,
 }
 
+export const InventoryStatusReadable = {
+  1: 'In Stock',
+};
+
 export enum SubmissionOrderStatus {
+  Discarded = 0,
   Created = 1,
   Processed = 2,
 }
 
 export const SubmissionOrderStatusReadable = {
+  0: 'Discarded',
   1: 'Created',
   2: 'Processed',
 };

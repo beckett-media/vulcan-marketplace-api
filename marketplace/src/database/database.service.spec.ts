@@ -78,6 +78,8 @@ describe('DatabaseService', () => {
   });
 
   it('should create multiple orders', async () => {
+    const user1 = await service.maybeCreateNewUser('user1', 'cognito');
+
     // create array of submissions
     const submissions1 = [
       newSubmissionRequest(
@@ -85,18 +87,21 @@ describe('DatabaseService', () => {
         'sn1',
         true,
         '00000000-0000-0000-0000-000000000001',
+        true,
       ),
       newSubmissionRequest(
         'user1',
         'sn2',
         true,
         '00000000-0000-0000-0000-000000000001',
+        true,
       ),
       newSubmissionRequest(
         'user1',
         'sn3',
         false,
         '00000000-0000-0000-0000-000000000001',
+        true,
       ),
     ];
 
@@ -106,18 +111,21 @@ describe('DatabaseService', () => {
         'sn4',
         true,
         '00000000-0000-0000-0000-000000000002',
+        true,
       ),
       newSubmissionRequest(
         'user1',
         'sn5',
         true,
         '00000000-0000-0000-0000-000000000002',
+        true,
       ),
       newSubmissionRequest(
         'user1',
         'sn6',
         true,
         '00000000-0000-0000-0000-000000000002',
+        true,
       ),
     ];
 
@@ -127,35 +135,65 @@ describe('DatabaseService', () => {
         'sn7',
         true,
         '00000000-0000-0000-0000-000000000003',
+        true,
       ),
       newSubmissionRequest(
         'user1',
         'sn8',
         true,
         '00000000-0000-0000-0000-000000000003',
+        true,
       ),
       newSubmissionRequest(
         'user1',
         'sn9',
         false,
         '00000000-0000-0000-0000-000000000003',
+        true,
       ),
     ];
 
     var order_id: number;
     // loop through submissions and create them
     for (const submission of submissions1) {
-      const result = await service.createNewSubmission(submission, ['', '']);
+      const submissionOrder = await service.maybeCreateSubmissionOrder(
+        user1.id,
+        submission.order_uuid,
+      );
+      const result = await service.createNewSubmission(
+        submission,
+        user1,
+        submissionOrder,
+        ['', ''],
+      );
       order_id = result.order_id;
       expect(result.status).toBe(SubmissionStatus.Submitted);
     }
     for (const submission of submissions2) {
-      const result = await service.createNewSubmission(submission, ['', '']);
+      const submissionOrder = await service.maybeCreateSubmissionOrder(
+        user1.id,
+        submission.order_uuid,
+      );
+      const result = await service.createNewSubmission(
+        submission,
+        user1,
+        submissionOrder,
+        ['', ''],
+      );
       order_id = result.order_id;
       expect(result.status).toBe(SubmissionStatus.Submitted);
     }
     for (const submission of submissions3) {
-      const result = await service.createNewSubmission(submission, ['', '']);
+      const submissionOrder = await service.maybeCreateSubmissionOrder(
+        user1.id,
+        submission.order_uuid,
+      );
+      const result = await service.createNewSubmission(
+        submission,
+        user1,
+        submissionOrder,
+        ['', ''],
+      );
       order_id = result.order_id;
       expect(result.status).toBe(SubmissionStatus.Submitted);
     }
@@ -181,8 +219,18 @@ describe('DatabaseService', () => {
       'sn3',
       false,
       '00000000-0000-0000-0000-000000000001',
+      true,
     );
-    const result = await service.createNewSubmission(submission, ['', '']);
+    const submissionOrder = await service.maybeCreateSubmissionOrder(
+      user1.id,
+      submission.order_uuid,
+    );
+    const result = await service.createNewSubmission(
+      submission,
+      user1,
+      submissionOrder,
+      ['', ''],
+    );
     orders = await service.listSubmissionOrders(
       'user1',
       undefined,
@@ -212,19 +260,26 @@ describe('DatabaseService', () => {
     const s3url = 'fake s3url';
     // create array of submissions
     const submissions = [
-      newSubmissionRequest('user1', 'sn1', true, ''),
-      newSubmissionRequest('user2', 'sn2', true, ''),
-      newSubmissionRequest('user3', 'sn3', false, ''),
-      newSubmissionRequest('user1', 'sn4', false, ''),
+      newSubmissionRequest('user1', 'sn1', true, '', true),
+      newSubmissionRequest('user2', 'sn2', true, '', true),
+      newSubmissionRequest('user3', 'sn3', false, '', true),
+      newSubmissionRequest('user1', 'sn4', false, '', true),
     ];
 
     var order_id: number;
     // loop through submissions and create them
     for (const submission of submissions) {
-      const result = await service.createNewSubmission(submission, [
-        s3url,
-        s3url,
-      ]);
+      const user = await service.maybeCreateNewUser(submission.user, 'cognito');
+      const submissionOrder = await service.maybeCreateSubmissionOrder(
+        user.id,
+        submission.order_uuid,
+      );
+      const result = await service.createNewSubmission(
+        submission,
+        user,
+        submissionOrder,
+        [s3url, s3url],
+      );
       order_id = result.order_id;
       expect(result.status).toBe(SubmissionStatus.Submitted);
     }

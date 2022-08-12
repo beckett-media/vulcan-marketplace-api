@@ -6,6 +6,7 @@ import {
   Listing,
   ActionLog,
   SubmissionOrder,
+  Inventory,
 } from '../database/database.entity';
 import {
   ActionLogEntityTypeReadable,
@@ -17,6 +18,7 @@ import {
   SubmissionOrderStatus,
   SubmissionOrderStatusReadable,
   ItemTypeReadable,
+  InventoryStatusReadable,
 } from '../config/enum';
 import {
   ActionLogDetails,
@@ -25,6 +27,7 @@ import {
   SubmissionOrderDetails,
   VaultingDetails,
 } from '../marketplace/dtos/marketplace.dto';
+import { InventoryDetails } from '../inventory/dtos/inventory.dto';
 
 export function newSubmissionOrderDetails(
   order: SubmissionOrder,
@@ -170,6 +173,32 @@ export function newListingDetails(
     autograph: item.autograph,
     subject: item.subject,
     image_url: vaulting.image,
+  });
+}
+
+export function newInventoryDetails(
+  inventory: Inventory,
+  item: Item,
+  user: User,
+  vaulting: Vaulting,
+): InventoryDetails {
+  return new InventoryDetails({
+    id: inventory.id,
+    user: user.uuid,
+    item_id: item.id,
+    title: item.title,
+    image_url: vaulting.image,
+    vault: inventory.vault,
+    zone: inventory.zone,
+    shelf: inventory.shelf,
+    box: inventory.box,
+    box_row: inventory.box_row,
+    gallery_row: inventory.gallery_row,
+    gallery_position: inventory.gallery_position,
+    status: inventory.status,
+    status_desc: InventoryStatusReadable[inventory.status],
+    created_at: inventory.created_at,
+    updated_at: inventory.updated_at,
   });
 }
 

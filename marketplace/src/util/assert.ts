@@ -26,3 +26,7 @@ export function assertOwnerOrAdmin(user: any, entity: any, logger: any) {
   // anything else is not allowed
   throw new ForbiddenException();
 }
+
+export function onlyLetters(str: string) {
+  return /^[a-zA-Z]+$/.test(str);
+}

@@ -3,11 +3,14 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Post,
+  Get,
   UseInterceptors,
+  Param,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import { DetailedLogger } from '../logger/detailed.logger';
-import { InventoryRequest } from './dtos/inventory.dto';
+import { InventoryRequest, ListInventoryRequest } from './dtos/inventory.dto';
 import { InventoryService } from './inventory.service';
 
 @Controller('inventory')
@@ -19,7 +22,7 @@ export class InventoryController {
 
   constructor(private inventoryService: InventoryService) {}
 
-  @Post('')
+  @Post('/')
   @ApiOperation({
     summary: 'Create new inventory record for submitted item',
   })
@@ -32,6 +35,36 @@ export class InventoryController {
     const inventoryDetails = await this.inventoryService.newInventory(
       inventoryRequest,
     );
+    return inventoryDetails;
+  }
+
+  @Get('/:inventory_id')
+  @ApiOperation({
+    summary: 'Get inventory record by id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return specified inventory record',
+  })
+  @ApiProduces('application/json')
+  async getInventory(@Param('inventory_id') inventory_id: number) {
+    const inventoryDetails = await this.inventoryService.getInventory(
+      inventory_id,
+    );
+    return inventoryDetails;
+  }
+
+  @Get('/')
+  @ApiOperation({
+    summary: 'List inventory records',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return queried inventory records',
+  })
+  @ApiProduces('application/json')
+  async listInventory(@Query() request: ListInventoryRequest) {
+    const inventoryDetails = await this.inventoryService.listInventory(request);
     return inventoryDetails;
   }
 }

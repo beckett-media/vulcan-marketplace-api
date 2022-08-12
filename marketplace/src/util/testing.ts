@@ -23,9 +23,12 @@ export function newSubmissionRequest(
   sn: string,
   haveImage: boolean,
   order_uuid: string,
+  haveImageFormat: boolean,
 ): SubmissionRequest {
   const image_base64 = haveImage ? imageBaseball : '';
   const image_rev_base64 = haveImage ? imageBlackBox : '';
+  const image_format = haveImageFormat ? 'jpg' : '';
+  const image_rev_format = haveImageFormat ? 'jpg' : '';
   return new SubmissionRequest({
     user: user,
     type: ItemType.card,
@@ -45,9 +48,9 @@ export function newSubmissionRequest(
     subject: 'fake subject',
     est_value: 12300,
     image_base64: image_base64,
-    image_format: 'jpg',
+    image_format: image_format,
     image_rev_base64: image_rev_base64,
-    image_rev_format: 'jpg',
+    image_rev_format: image_rev_format,
   });
 }
 

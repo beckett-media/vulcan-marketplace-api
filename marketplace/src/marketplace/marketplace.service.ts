@@ -23,6 +23,7 @@ import {
   VaultingStatusReadable,
   VaultingUpdateType,
   SubmissionUpdateType,
+  SubmissionOrderStatus,
 } from '../config/enum';
 import {
   Item,
@@ -30,7 +31,10 @@ import {
   SubmissionOrder,
   User,
 } from '../database/database.entity';
-import { DatabaseService } from '../database/database.service';
+import {
+  DatabaseService,
+  DEFAULT_USER_SOURCE,
+} from '../database/database.service';
 import { DetailedLogger } from '../logger/detailed.logger';
 import {
   getAttributes,
@@ -60,6 +64,7 @@ import {
   VaultingUpdate,
 } from './dtos/marketplace.dto';
 import { Cache } from 'cache-manager';
+import { onlyLetters } from '../util/assert';
 
 const VAULTING_API_ACTOR = 'Vaulting API';
 
@@ -88,6 +93,11 @@ export class MarketplaceService {
       if (!request.image_format) {
         throw new InternalServerErrorException('Image format not specified');
       }
+      if (!onlyLetters(request.image_format)) {
+        throw new InternalServerErrorException(
+          `Image_format should only contain letters: ${request.image_format}`,
+        );
+      }
       const image_buffer = Buffer.from(request.image_base64, 'base64');
       imagePath = await this.awsService.uploadItemImage(
         image_buffer,
@@ -102,6 +112,11 @@ export class MarketplaceService {
       if (!request.image_rev_format) {
         throw new InternalServerErrorException(
           'Back image format not specified',
+        );
+      }
+      if (!onlyLetters(request.image_format)) {
+        throw new InternalServerErrorException(
+          `Image_rev_format should only contain letters: ${request.image_format}`,
         );
       }
       const image_rev_buffer = Buffer.from(request.image_rev_base64, 'base64');
@@ -119,28 +134,55 @@ export class MarketplaceService {
   }
 
   async submitItem(request: SubmissionRequest): Promise<SubmissionResponse> {
-    const [imagePath, imagePathRev] = await this.uploadImages(request);
-
-    if (!imagePath && !imagePathRev) {
-      this.logger.log('No image specified');
+    // create user if not exist
+    const user = await this.databaseService.maybeCreateNewUser(
+      request.user,
+      DEFAULT_USER_SOURCE,
+    );
+    // create submission order if not exist
+    const submissionOrder =
+      await this.databaseService.maybeCreateSubmissionOrder(
+        user.id,
+        request.order_uuid,
+      );
+    // if submission order is discarded, just return error
+    if (submissionOrder.status === SubmissionOrderStatus.Discarded) {
+      throw new InternalServerErrorException(
+        'Submission order has been discarded due to previous failure',
+      );
     }
-    const result = await this.databaseService.createNewSubmission(request, [
-      imagePath,
-      imagePathRev,
-    ]);
 
-    // record user action
-    const trimmedRequest = trimRequestWithImage(request);
-    const user = await this.databaseService.getUserByUUID(request.user);
-    const actionLogRequest = new ActionLogRequest({
-      actor_type: ActionLogActorType.CognitoUser,
-      actor: user.id.toString(),
-      entity_type: ActionLogEntityType.Submission,
-      entity: result.submission_id.toString(),
-      type: ActionLogType.Submission,
-      extra: JSON.stringify(trimmedRequest),
-    });
-    await this.newActionLog(actionLogRequest);
+    // if any error, discard submission order
+    var result: any;
+    try {
+      const [imagePath, imagePathRev] = await this.uploadImages(request);
+
+      if (!imagePath && !imagePathRev) {
+        this.logger.log('No image specified');
+      }
+      result = await this.databaseService.createNewSubmission(
+        request,
+        user,
+        submissionOrder,
+        [imagePath, imagePathRev],
+      );
+
+      // record user action
+      const trimmedRequest = trimRequestWithImage(request);
+      const actionLogRequest = new ActionLogRequest({
+        actor_type: ActionLogActorType.CognitoUser,
+        actor: user.id.toString(),
+        entity_type: ActionLogEntityType.Submission,
+        entity: result.submission_id.toString(),
+        type: ActionLogType.Submission,
+        extra: JSON.stringify(trimmedRequest),
+      });
+      await this.newActionLog(actionLogRequest);
+    } catch (error) {
+      this.logger.error(error);
+      await this.databaseService.discardSubmissionOrder(submissionOrder.id);
+      throw new InternalServerErrorException(error);
+    }
 
     return new SubmissionResponse({
       user: request.user,
@@ -275,6 +317,13 @@ export class MarketplaceService {
     const submissionOrder = await this.databaseService.getSubmissionOrder(
       submission_order_id,
     );
+    // if submission order is discarded, then return as if it does not exist
+    if (submissionOrder.status == SubmissionOrderStatus.Discarded) {
+      throw new NotFoundException(
+        `Submission order ${submission_order_id} not found`,
+      );
+    }
+
     const submissions = await this.databaseService.listSubmissionsForOrder(
       submission_order_id,
     );
@@ -440,7 +489,20 @@ export class MarketplaceService {
       }
     } catch (e) {}
 
-    // convert request.image_base64 to buffer
+    // sanity check for image fields
+    if (!!!request.image_base64) {
+      throw new InternalServerErrorException('Image not found');
+    }
+    if (!!!request.image_format) {
+      throw new InternalServerErrorException('Image format not found');
+    }
+    if (!onlyLetters(request.image_format)) {
+      throw new InternalServerErrorException(
+        `Image_format should only contain letters: ${request.image_format}`,
+      );
+    }
+
+    // convert image from base64
     const image_buffer = Buffer.from(request.image_base64, 'base64');
     const s3URL = await this.awsService.uploadItemImage(
       image_buffer,
