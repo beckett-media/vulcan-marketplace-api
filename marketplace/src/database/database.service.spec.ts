@@ -398,19 +398,12 @@ describe('DatabaseService', () => {
 
     // update submission
     const submissionID = user1Submissions3[0].id;
-    const submissionBefore = await service.getSubmission(submissionID);
-    await service.updateSubmission(
-      submissionID,
-      SubmissionUpdateType.Status,
-      SubmissionStatus.Received,
-      '',
-      '',
-    );
-    const submissionAfter = await service.getSubmission(submissionID);
+    var submissionBefore = await service.getSubmission(submissionID);
     expect(submissionBefore.status).toBe(SubmissionStatus.Submitted);
+    expect(submissionBefore.received_at).toEqual(0);
+    submissionBefore.status = SubmissionStatus.Received;
+    await service.updateSubmission(submissionBefore, null);
+    const submissionAfter = await service.getSubmission(submissionID);
     expect(submissionAfter.status).toBe(SubmissionStatus.Received);
-    expect(submissionBefore.received_at).not.toEqual(
-      submissionAfter.received_at,
-    );
   });
 });

@@ -19,7 +19,8 @@ function setupApp(app: INestApplication) {
   app.enableCors();
 
   // pipes
-  app.useGlobalPipes(new ValidationPipe());
+  // for validation, don't allow extra fields in request body
+  app.useGlobalPipes(new ValidationPipe({ forbidNonWhitelisted: true }));
 
   // swagger documents
   const docConfig = new DocumentBuilder()

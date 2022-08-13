@@ -67,6 +67,24 @@ import { Cache } from 'cache-manager';
 import { onlyLetters } from '../util/assert';
 
 const VAULTING_API_ACTOR = 'Vaulting API';
+const FORBIDDEN_UPDATE_FIELDS = [
+  'id',
+  'uuid',
+  'user',
+  'order_id',
+  'item_id',
+  'created_at',
+  'received_at',
+  'rejected_at',
+  'approved_at',
+  'updated_at',
+];
+const IMAGE_FIELDS = [
+  'image_base64',
+  'image_rev_base64',
+  'image_path',
+  'image_rev_path',
+];
 
 @Injectable()
 export class MarketplaceService {
@@ -212,7 +230,10 @@ export class MarketplaceService {
     return submissionDetails;
   }
 
-  async actionLogForSubmisson(submission: Submission, newStatus: number) {
+  async actionLogForSubmisson(
+    submission: Submission,
+    submissionUpdate: SubmissionUpdate,
+  ) {
     // record user action
     // TODO: actor should be the admin user id
     const actionLogRequest = new ActionLogRequest({
@@ -221,9 +242,109 @@ export class MarketplaceService {
       entity_type: ActionLogEntityType.Submission,
       entity: submission.id.toString(),
       type: ActionLogType.SubmissionUpdate,
-      extra: JSON.stringify({ status: newStatus }),
+      extra: JSON.stringify(submissionUpdate),
     });
     await this.newActionLog(actionLogRequest);
+  }
+
+  updateSubmissionStatus(
+    submissionUpdate: SubmissionUpdate,
+    submission: Submission,
+  ): Submission {
+    // sanity check for status
+    switch (submissionUpdate.status) {
+      case SubmissionStatus.Submitted:
+        throw new InternalServerErrorException(
+          `Cannot update status to ${
+            SubmissionStatusReadable[submissionUpdate.status]
+          }`,
+        );
+        break;
+      case SubmissionStatus.Received:
+        var fromStatus = [SubmissionStatus.Submitted];
+        if (!fromStatus.includes(submission.status)) {
+          throw new InternalServerErrorException(
+            `Cannot update status from ${
+              SubmissionStatusReadable[submission.status]
+            } to ${SubmissionStatusReadable[submissionUpdate.status]}`,
+          );
+        }
+        submission.status = SubmissionStatus.Received;
+        submission.received_at = Math.round(Date.now() / 1000);
+        break;
+      case SubmissionStatus.Rejected:
+        var fromStatus = [SubmissionStatus.Received];
+        if (!fromStatus.includes(submission.status)) {
+          throw new InternalServerErrorException(
+            `Cannot update status from ${
+              SubmissionStatusReadable[submission.status]
+            } to ${SubmissionStatusReadable[submissionUpdate.status]}`,
+          );
+        }
+        submission.status = SubmissionStatus.Rejected;
+        submission.rejected_at = Math.round(Date.now() / 1000);
+        break;
+      case SubmissionStatus.Approved:
+        fromStatus = [SubmissionStatus.Received];
+        if (!fromStatus.includes(submission.status)) {
+          throw new InternalServerErrorException(
+            `Cannot update status from ${
+              SubmissionStatusReadable[submission.status]
+            } to ${SubmissionStatusReadable[submissionUpdate.status]}`,
+          );
+        }
+        submission.status = SubmissionStatus.Approved;
+        submission.approved_at = Math.round(Date.now() / 1000);
+        break;
+      case SubmissionStatus.Vaulted:
+        fromStatus = [SubmissionStatus.Approved];
+        if (!fromStatus.includes(submission.status)) {
+          throw new InternalServerErrorException(
+            `Cannot update status from ${
+              SubmissionStatusReadable[submission.status]
+            } to ${SubmissionStatusReadable[submissionUpdate.status]}`,
+          );
+        }
+        submission.status = SubmissionStatus.Vaulted;
+        break;
+      default:
+        throw new InternalServerErrorException(
+          `Cannot update status to ${
+            SubmissionStatusReadable[submissionUpdate.status]
+          }`,
+        );
+    }
+
+    return submission;
+  }
+
+  async updateSubmissionImage(
+    submissionUpdate: SubmissionUpdate,
+    submission: Submission,
+  ): Promise<[string, string]> {
+    var imagePath = '';
+    var imagePathRev = '';
+    // special case for image
+    if (
+      !!submissionUpdate.image_base64 ||
+      !!submissionUpdate.image_rev_base64
+    ) {
+      [imagePath, imagePathRev] = await this.uploadImages(
+        submissionUpdate as SubmissionImage,
+      );
+    }
+    if (!!submissionUpdate.image_path || !!submissionUpdate.image_rev_path) {
+      imagePath = submissionUpdate.image_path || '';
+      imagePathRev = submissionUpdate.image_rev_path || '';
+    }
+    if (!!imagePath) {
+      submission.image = imagePath;
+    }
+    if (!!imagePathRev) {
+      submission.image_rev = imagePathRev;
+    }
+
+    return [imagePath, imagePathRev];
   }
 
   async updateSubmission(
@@ -232,64 +353,63 @@ export class MarketplaceService {
   ): Promise<SubmissionDetails> {
     // if submission exists
     var submission = await this.databaseService.getSubmission(submission_id);
+    var item = await this.databaseService.getItem(submission.item_id);
     var imagePath, imagePathRev: string;
     if (!submission) {
       throw new NotFoundException(`Submission ${submission_id} not found`);
     } else {
-      switch (submissionUpdate.type) {
-        case SubmissionUpdateType.Status:
-          // if submission status is already the same as the new status
-          if (submission.status == submissionUpdate.status) {
-            throw new BadRequestException(
-              `Submission ${submission_id} already has status ${
-                SubmissionStatusReadable[submissionUpdate.status]
-              }`,
-            );
-          }
+      var submissionColumns = await this.databaseService.getColumnNames(
+        'Submission',
+      );
+      // remove forbidden fields from submission columns
+      submissionColumns = submissionColumns.filter(
+        (column) => !FORBIDDEN_UPDATE_FIELDS.includes(column),
+      );
+      var itemColumns = await this.databaseService.getColumnNames('Item');
+      // remove forbidden fields from item columns
+      itemColumns = itemColumns.filter(
+        (column) => !FORBIDDEN_UPDATE_FIELDS.includes(column),
+      );
 
-          // if submission's status is not received, then approval should fail
-          if (
-            submissionUpdate.status == SubmissionStatus.Approved &&
-            submission.status !== SubmissionStatus.Received
-          ) {
-            throw new InternalServerErrorException(
-              `Submission ${submission_id} is not received yet. Cannot approve.`,
-            );
+      var imageProcessed = false;
+      // loop through fields in submissionUpdate and update submission or item
+      for (const field in submissionUpdate) {
+        // for submission fields
+        if (submissionColumns.includes(field)) {
+          switch (field) {
+            case 'status':
+              submission = this.updateSubmissionStatus(
+                submissionUpdate,
+                submission,
+              );
+              break;
+            default:
+              submission[field] = submissionUpdate[field];
           }
-
-          // record user action
-          this.actionLogForSubmisson(submission, submissionUpdate.status);
+        } else if (itemColumns.includes(field)) {
+          // for item fields
+          item[field] = submissionUpdate[field];
+        } else if (IMAGE_FIELDS.includes(field)) {
+          if (!imageProcessed) {
+            [imagePath, imagePathRev] = await this.updateSubmissionImage(
+              submissionUpdate,
+              submission,
+            );
+            imageProcessed = true;
+          }
           break;
-        case SubmissionUpdateType.Image:
-          [imagePath, imagePathRev] = await this.uploadImages(
-            submissionUpdate as SubmissionImage,
-          );
-          const trimmedRequest = trimRequestWithImage(submissionUpdate);
-          const user = await this.databaseService.getUser(submission.user);
-          const actionLogRequest = new ActionLogRequest({
-            actor_type: ActionLogActorType.CognitoAdmin,
-            actor: user.id.toString(),
-            entity_type: ActionLogEntityType.Submission,
-            entity: submission.id.toString(),
-            type: ActionLogType.SubmissionUpdate,
-            extra: JSON.stringify(trimmedRequest),
-          });
-          await this.newActionLog(actionLogRequest);
-          break;
-        default:
+        } else {
           throw new InternalServerErrorException(
-            `Submission update type ${submissionUpdate.type} not supported`,
+            `Field ${field} not supported in submissionUpdate`,
           );
+        }
       }
     }
 
-    submission = await this.databaseService.updateSubmission(
-      submission_id,
-      submissionUpdate.type,
-      submissionUpdate.status,
-      imagePath,
-      imagePathRev,
-    );
+    // Save to db and log the action
+    submission = await this.databaseService.updateSubmission(submission, item);
+    const trimmedRequest = trimRequestWithImage(submissionUpdate);
+    await this.actionLogForSubmisson(submission, trimmedRequest);
 
     if (!submission) {
       throw new InternalServerErrorException('Submission update failed');
@@ -462,7 +582,7 @@ export class MarketplaceService {
     // TODO: don't allow multiple vaultings for the same item
 
     // check submission status
-    const submission = await this.databaseService.getSubmission(
+    var submission = await this.databaseService.getSubmission(
       request.submission_id,
     );
     if (!submission) {
@@ -546,13 +666,9 @@ export class MarketplaceService {
     await this.newActionLog(actionLogRequest);
 
     // update submission status
-    await this.databaseService.updateSubmission(
-      request.submission_id,
-      SubmissionUpdateType.Status,
-      SubmissionStatus.Vaulted,
-      '',
-      '',
-    );
+    submission.status = SubmissionStatus.Vaulted;
+    submission.updated_at = Math.round(Date.now() / 1000);
+    await this.databaseService.updateSubmission(submission, null);
 
     // record user action
     actionLogRequest = new ActionLogRequest({

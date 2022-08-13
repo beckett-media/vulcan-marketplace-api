@@ -223,16 +223,12 @@ export class MarketplaceController {
   })
   @ApiProduces('application/json')
   async updateSubmission(
-    @Body() body: SubmissionUpdate,
+    @Body() submissionUpdate: SubmissionUpdate,
     @Param('submission_id') submission_id: number,
   ): Promise<SubmissionDetails> {
-    const submission = await this.marketplaceService.getSubmission(
-      submission_id,
-    );
-
     const submissionDetails = await this.marketplaceService.updateSubmission(
       submission_id,
-      body,
+      submissionUpdate,
     );
     return submissionDetails;
   }

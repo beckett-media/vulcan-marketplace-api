@@ -152,7 +152,6 @@ describe('MarketplaceService', () => {
     );
     const submission = await service.submitItem(submissionRequest);
     const submissionUpdateApproved = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Approved,
     });
 
@@ -162,12 +161,9 @@ describe('MarketplaceService', () => {
         submission.submission_id,
         submissionUpdateApproved,
       ),
-    ).rejects.toThrow(
-      `Submission ${submission.submission_id} is not received yet. Cannot approve.`,
-    );
+    ).rejects.toThrow(`Cannot update status from Submitted to Approved`);
 
     const submissionUpdateReceived = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Received,
     });
     // first update submission to be received
@@ -389,6 +385,76 @@ describe('MarketplaceService', () => {
     expect(submissions.length).toBe(0);
   });
 
+  it('should update various submission fields', async () => {
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
+    const submissionResponse = await service.submitItem(submissionRequest);
+    expect(submissionResponse.order_id).toBeDefined();
+    const submission = await service.getSubmission(
+      submissionResponse.submission_id,
+    );
+    expect(submission).toBeDefined();
+    expect(submission.status == SubmissionStatus.Submitted).toBe(true);
+
+    // update item attributes
+    const submissionUpdate = new SubmissionUpdate({
+      year: 2020,
+      issue: '#2020-12',
+    });
+    const submissionUpdateResponse = await service.updateSubmission(
+      submission.id,
+      submissionUpdate,
+    );
+    expect(submissionUpdateResponse.id).toBe(submission.id);
+    expect(submissionUpdateResponse.year).toBe(2020);
+    expect(submissionUpdateResponse.issue).toBe('#2020-12');
+
+    // update item attributes and status
+    const submissionUpdate2 = new SubmissionUpdate({
+      year: 2022,
+      issue: '#2022-12',
+      status: SubmissionStatus.Received,
+    });
+    const submissionUpdateResponse2 = await service.updateSubmission(
+      submission.id,
+      submissionUpdate2,
+    );
+    expect(submissionUpdateResponse2.id).toBe(submission.id);
+    expect(submissionUpdateResponse2.year).toBe(2022);
+    expect(submissionUpdateResponse2.issue).toBe('#2022-12');
+    expect(submissionUpdateResponse2.status).toBe(SubmissionStatus.Received);
+
+    // update invalid status transfer
+    const submissionUpdate3 = new SubmissionUpdate({
+      status: SubmissionStatus.Received,
+    });
+    await expect(
+      service.updateSubmission(submission.id, submissionUpdate3),
+    ).rejects.toEqual(
+      new InternalServerErrorException(
+        'Cannot update status from Received to Received',
+      ),
+    );
+
+    // update invalid status transfer
+    const submissionUpdate4 = new SubmissionUpdate({
+      status: SubmissionStatus.Vaulted,
+    });
+    await expect(
+      service.updateSubmission(submission.id, submissionUpdate4),
+    ).rejects.toEqual(
+      new InternalServerErrorException(
+        'Cannot update status from Received to Vaulted',
+      ),
+    );
+  });
+
   it('should update submission image', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
@@ -408,7 +474,6 @@ describe('MarketplaceService', () => {
 
     // update submission image
     const submissionUpdate = new SubmissionUpdate({
-      type: SubmissionUpdateType.Image,
       image_base64: imageBaseball,
       image_format: 'jpg',
     });
@@ -422,7 +487,6 @@ describe('MarketplaceService', () => {
     expect(submissionDetails.image_rev_url).toBe('');
 
     const submissionUpdateRev = new SubmissionUpdate({
-      type: SubmissionUpdateType.Image,
       image_rev_base64: imageBlackBox,
       image_rev_format: 'jpg',
     });
@@ -448,11 +512,9 @@ describe('MarketplaceService', () => {
     );
     const submission = await service.submitItem(submissionRequest);
     const submissionUpdateApproved = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Approved,
     });
     const submissionUpdateReceived = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Received,
     });
     await service.updateSubmission(
@@ -479,7 +541,7 @@ describe('MarketplaceService', () => {
     );
   });
 
-  it('should create new vaulting and update existing ones', async () => {
+  it('should create new vaulting and update existing submission', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
     const submissionRequest = newSubmissionRequest(
@@ -491,11 +553,9 @@ describe('MarketplaceService', () => {
     );
     const submission = await service.submitItem(submissionRequest);
     const submissionUpdateApproved = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Approved,
     });
     const submissionUpdateReceived = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Received,
     });
     await expect(
@@ -503,9 +563,7 @@ describe('MarketplaceService', () => {
         submission.submission_id,
         submissionUpdateApproved,
       ),
-    ).rejects.toThrow(
-      `Submission ${submission.submission_id} is not received yet. Cannot approve.`,
-    );
+    ).rejects.toThrow(`Cannot update status from Submitted to Approved`);
     await service.updateSubmission(
       submission.submission_id,
       submissionUpdateReceived,
@@ -514,16 +572,13 @@ describe('MarketplaceService', () => {
       submission.submission_id,
       submissionUpdateApproved,
     );
+    const submission1 = await service.getSubmission(submission.submission_id);
     await expect(
       service.updateSubmission(
         submission.submission_id,
         submissionUpdateApproved,
       ),
-    ).rejects.toThrow(
-      `Submission ${submission.submission_id} already has status ${
-        SubmissionStatusReadable[SubmissionStatus.Approved]
-      }`,
-    );
+    ).rejects.toThrow(`Cannot update status from Approved to Approved`);
 
     // create vaulting
     const vaultingRequest = {
@@ -598,6 +653,11 @@ describe('MarketplaceService', () => {
     expect(vaultingDetails2.status_desc).toBe(
       VaultingStatusReadable[VaultingStatus.Withdrawn],
     );
+
+    const submissionVaulted = await service.getSubmission(
+      submission.submission_id,
+    );
+    expect(submissionVaulted.status).toBe(SubmissionStatus.Vaulted);
   });
 
   it('should create new listing', async () => {
@@ -615,11 +675,9 @@ describe('MarketplaceService', () => {
       submissionResponse.submission_id,
     );
     const submissionUpdateApproved = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Approved,
     });
     const submissionUpdateReceived = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Received,
     });
     await service.updateSubmission(submission.id, submissionUpdateReceived);
@@ -694,11 +752,9 @@ describe('MarketplaceService', () => {
       submissionResponse.submission_id,
     );
     const submissionUpdateApproved = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Approved,
     });
     const submissionUpdateReceived = new SubmissionUpdate({
-      type: SubmissionUpdateType.Status,
       status: SubmissionStatus.Received,
     });
     await service.updateSubmission(submission.id, submissionUpdateReceived);

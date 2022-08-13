@@ -823,12 +823,159 @@ export class SubmissionOrderUpdate {
 
 export class SubmissionUpdate {
   @ApiProperty({
-    description: 'The enum of update type, 1 - status, 2 - image',
+    description: 'The enum type of the item: 1 - card, 2 - comic',
     required: true,
     example: 1,
   })
-  @IsEnum(SubmissionUpdateType)
-  type: SubmissionUpdateType;
+  @IsEnum(ItemType)
+  type: ItemType;
+
+  @ApiProperty({
+    description: 'The player of the submitted card',
+    required: true,
+    example: 'Willie Mays',
+  })
+  @IsString()
+  player: string;
+
+  @ApiProperty({
+    description: 'The sport of the submitted card',
+    required: true,
+    example: 'Baseball',
+  })
+  @IsString()
+  sport: string;
+
+  @ApiProperty({
+    description: 'The name of the card set',
+    required: true,
+    example: 'World Series 2000',
+  })
+  @IsString()
+  set_name: string;
+
+  @ApiProperty({
+    description: 'The number of the submitted card',
+    required: true,
+    example: '#12345',
+  })
+  @IsString()
+  card_number: string;
+
+  @ApiProperty({
+    description: 'The issue number of the submitted comic',
+    required: true,
+    example: '#2022-12',
+  })
+  @IsString()
+  issue: string;
+
+  @ApiProperty({
+    description: 'The publisher of the issue',
+    required: true,
+    example: 'Marvel',
+  })
+  @IsString()
+  publisher: string;
+
+  @ApiProperty({
+    description: 'The grading company of the submitted the item',
+    required: true,
+    example: 'foo company',
+  })
+  @IsString()
+  grading_company: string;
+
+  @ApiProperty({
+    description: 'The serial number of the submitted the item',
+    required: true,
+    example: 'SN12345678',
+  })
+  @IsString()
+  serial_number: string;
+
+  @ApiProperty({
+    description: 'The title of the submitted the item',
+    required: true,
+    example: 'Foo Title',
+  })
+  @IsString()
+  title: string;
+
+  @ApiProperty({
+    description: 'The description of the submitted the item',
+    required: true,
+    example: 'Foo description',
+  })
+  @IsString()
+  description: string;
+
+  @ApiProperty({
+    description: 'The genre of the submitted the item',
+    required: true,
+    example: 'Foo genre',
+  })
+  @IsString()
+  genre: string;
+
+  @ApiProperty({
+    description: 'The manufacturer of the submitted the item',
+    required: true,
+    example: 'Foo manufacturer',
+  })
+  @IsString()
+  @MinLength(0)
+  manufacturer: string;
+
+  @ApiProperty({
+    description: 'The year of the submitted the item',
+    required: true,
+    example: 1999,
+  })
+  @IsNumber()
+  year: number;
+
+  @ApiProperty({
+    description: 'The overall grade of the submitted the item',
+    required: true,
+    example: 'AAA',
+  })
+  @IsString()
+  overall_grade: string;
+
+  @ApiProperty({
+    description: 'The sub grades of the submitted the item',
+    required: true,
+    example: 'BBB',
+  })
+  @IsString()
+  sub_grades: string;
+
+  @ApiProperty({
+    description: 'The autograph of the submitted the item',
+    required: true,
+    example: 'Foo autograph',
+  })
+  @IsString()
+  @IsOptional()
+  @MinLength(0)
+  autograph: string;
+
+  @ApiProperty({
+    description: 'The subject of the submitted item',
+    required: true,
+    example: 'Foo subject',
+  })
+  @IsString()
+  subject: string;
+
+  @ApiProperty({
+    description: 'The estimated value of the submitted item in cents',
+    required: true,
+    example: 10000,
+  })
+  @IsNumber()
+  est_value: number;
 
   @ApiProperty({
     description: "The base64 encoding of item's image ",
@@ -867,15 +1014,6 @@ export class SubmissionUpdate {
   image_rev_format: string;
 
   @ApiProperty({
-    description: 'The status enum number',
-    required: false,
-    example: 1,
-  })
-  @IsOptional()
-  @IsNumber()
-  status: number;
-
-  @ApiProperty({
     description: 'The image path (static asset of the site) of the item',
     required: false,
     example: 'path/to/image.jpg',
@@ -892,6 +1030,15 @@ export class SubmissionUpdate {
   @IsString()
   @IsOptional()
   image_rev_path: string;
+
+  @ApiProperty({
+    description: 'The status enum number of the submission',
+    required: false,
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  status: number;
 
   constructor(partial: Partial<SubmissionUpdate>) {
     Object.assign(this, partial);

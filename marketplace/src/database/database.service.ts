@@ -8,7 +8,7 @@ import {
   Inventory,
   SubmissionOrder,
 } from '../database/database.entity';
-import { Repository, getManager, In, Not } from 'typeorm';
+import { Repository, getManager, In, Not, getConnection } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -76,6 +76,13 @@ export class DatabaseService {
     let env = process.env[RUNTIME_ENV];
     let config = configuration()[env];
     this.isolation = config['db']['isolation'];
+  }
+
+  async getColumnNames(column: string): Promise<string[]> {
+    const columns = await getConnection()
+      .getMetadata(column)
+      .columns.map((column) => column.propertyName);
+    return columns;
   }
 
   async maybeCreateNewUser(user_uuid: string, source: string): Promise<User> {
@@ -300,44 +307,13 @@ export class DatabaseService {
     return submission;
   }
 
-  async updateSubmission(
-    submission_id: number,
-    type: SubmissionUpdateType,
-    status: number,
-    image: string,
-    imageRev: string,
-  ) {
-    const submission = await this.submissionRepo.findOne(submission_id);
-    if (!submission) {
-      throw new NotFoundException(`Submission ${submission_id} not found`);
+  async updateSubmission(submission: Submission, item: Item) {
+    submission.updated_at = Math.round(Date.now() / 1000);
+    const updatedSubmission = await this.submissionRepo.save(submission);
+    if (!!item) {
+      await this.itemRepo.save(item);
     }
-    switch (type) {
-      case SubmissionUpdateType.Status:
-        submission.status = status;
-        switch (status) {
-          case SubmissionStatus.Received:
-            submission.received_at = Math.round(Date.now() / 1000);
-            break;
-          case SubmissionStatus.Approved:
-            submission.approved_at = Math.round(Date.now() / 1000);
-            break;
-          case SubmissionStatus.Rejected:
-            submission.rejected_at = Math.round(Date.now() / 1000);
-            break;
-        }
-      case SubmissionUpdateType.Image:
-        // update only when image is not empty
-        if (image) {
-          submission.image = image;
-        }
-        if (imageRev) {
-          submission.image_rev = imageRev;
-        }
-        submission.updated_at = Math.round(Date.now() / 1000);
-    }
-
-    await this.submissionRepo.save(submission);
-    return submission;
+    return updatedSubmission;
   }
 
   async updateSubmissionOrder(
