@@ -828,6 +828,7 @@ export class SubmissionUpdate {
     example: 1,
   })
   @IsEnum(ItemType)
+  @IsOptional()
   type: ItemType;
 
   @ApiProperty({
@@ -836,6 +837,7 @@ export class SubmissionUpdate {
     example: 'Willie Mays',
   })
   @IsString()
+  @IsOptional()
   player: string;
 
   @ApiProperty({
@@ -844,6 +846,7 @@ export class SubmissionUpdate {
     example: 'Baseball',
   })
   @IsString()
+  @IsOptional()
   sport: string;
 
   @ApiProperty({
@@ -852,6 +855,7 @@ export class SubmissionUpdate {
     example: 'World Series 2000',
   })
   @IsString()
+  @IsOptional()
   set_name: string;
 
   @ApiProperty({
@@ -860,6 +864,7 @@ export class SubmissionUpdate {
     example: '#12345',
   })
   @IsString()
+  @IsOptional()
   card_number: string;
 
   @ApiProperty({
@@ -868,6 +873,7 @@ export class SubmissionUpdate {
     example: '#2022-12',
   })
   @IsString()
+  @IsOptional()
   issue: string;
 
   @ApiProperty({
@@ -876,6 +882,7 @@ export class SubmissionUpdate {
     example: 'Marvel',
   })
   @IsString()
+  @IsOptional()
   publisher: string;
 
   @ApiProperty({
@@ -884,6 +891,7 @@ export class SubmissionUpdate {
     example: 'foo company',
   })
   @IsString()
+  @IsOptional()
   grading_company: string;
 
   @ApiProperty({
@@ -892,6 +900,7 @@ export class SubmissionUpdate {
     example: 'SN12345678',
   })
   @IsString()
+  @IsOptional()
   serial_number: string;
 
   @ApiProperty({
@@ -900,6 +909,7 @@ export class SubmissionUpdate {
     example: 'Foo Title',
   })
   @IsString()
+  @IsOptional()
   title: string;
 
   @ApiProperty({
@@ -908,6 +918,7 @@ export class SubmissionUpdate {
     example: 'Foo description',
   })
   @IsString()
+  @IsOptional()
   description: string;
 
   @ApiProperty({
@@ -916,6 +927,7 @@ export class SubmissionUpdate {
     example: 'Foo genre',
   })
   @IsString()
+  @IsOptional()
   genre: string;
 
   @ApiProperty({
@@ -924,7 +936,7 @@ export class SubmissionUpdate {
     example: 'Foo manufacturer',
   })
   @IsString()
-  @MinLength(0)
+  @IsOptional()
   manufacturer: string;
 
   @ApiProperty({
@@ -933,6 +945,7 @@ export class SubmissionUpdate {
     example: 1999,
   })
   @IsNumber()
+  @IsOptional()
   year: number;
 
   @ApiProperty({
@@ -941,6 +954,7 @@ export class SubmissionUpdate {
     example: 'AAA',
   })
   @IsString()
+  @IsOptional()
   overall_grade: string;
 
   @ApiProperty({
@@ -949,6 +963,7 @@ export class SubmissionUpdate {
     example: 'BBB',
   })
   @IsString()
+  @IsOptional()
   sub_grades: string;
 
   @ApiProperty({
@@ -958,7 +973,6 @@ export class SubmissionUpdate {
   })
   @IsString()
   @IsOptional()
-  @MinLength(0)
   autograph: string;
 
   @ApiProperty({
@@ -967,6 +981,7 @@ export class SubmissionUpdate {
     example: 'Foo subject',
   })
   @IsString()
+  @IsOptional()
   subject: string;
 
   @ApiProperty({
@@ -975,6 +990,7 @@ export class SubmissionUpdate {
     example: 10000,
   })
   @IsNumber()
+  @IsOptional()
   est_value: number;
 
   @ApiProperty({
