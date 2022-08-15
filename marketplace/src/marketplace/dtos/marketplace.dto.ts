@@ -824,7 +824,7 @@ export class SubmissionOrderUpdate {
 export class SubmissionUpdate {
   @ApiProperty({
     description: 'The enum type of the item: 1 - card, 2 - comic',
-    required: true,
+    required: false,
     example: 1,
   })
   @IsEnum(ItemType)
@@ -832,7 +832,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The player of the submitted card',
-    required: true,
+    required: false,
     example: 'Willie Mays',
   })
   @IsString()
@@ -840,7 +840,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The sport of the submitted card',
-    required: true,
+    required: false,
     example: 'Baseball',
   })
   @IsString()
@@ -848,7 +848,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The name of the card set',
-    required: true,
+    required: false,
     example: 'World Series 2000',
   })
   @IsString()
@@ -856,7 +856,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The number of the submitted card',
-    required: true,
+    required: false,
     example: '#12345',
   })
   @IsString()
@@ -864,7 +864,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The issue number of the submitted comic',
-    required: true,
+    required: false,
     example: '#2022-12',
   })
   @IsString()
@@ -872,7 +872,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The publisher of the issue',
-    required: true,
+    required: false,
     example: 'Marvel',
   })
   @IsString()
@@ -880,7 +880,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The grading company of the submitted the item',
-    required: true,
+    required: false,
     example: 'foo company',
   })
   @IsString()
@@ -888,7 +888,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The serial number of the submitted the item',
-    required: true,
+    required: false,
     example: 'SN12345678',
   })
   @IsString()
@@ -896,7 +896,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The title of the submitted the item',
-    required: true,
+    required: false,
     example: 'Foo Title',
   })
   @IsString()
@@ -904,7 +904,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The description of the submitted the item',
-    required: true,
+    required: false,
     example: 'Foo description',
   })
   @IsString()
@@ -912,7 +912,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The genre of the submitted the item',
-    required: true,
+    required: false,
     example: 'Foo genre',
   })
   @IsString()
@@ -920,7 +920,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The manufacturer of the submitted the item',
-    required: true,
+    required: false,
     example: 'Foo manufacturer',
   })
   @IsString()
@@ -929,7 +929,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The year of the submitted the item',
-    required: true,
+    required: false,
     example: 1999,
   })
   @IsNumber()
@@ -937,7 +937,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The overall grade of the submitted the item',
-    required: true,
+    required: false,
     example: 'AAA',
   })
   @IsString()
@@ -945,7 +945,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The sub grades of the submitted the item',
-    required: true,
+    required: false,
     example: 'BBB',
   })
   @IsString()
@@ -953,7 +953,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The autograph of the submitted the item',
-    required: true,
+    required: false,
     example: 'Foo autograph',
   })
   @IsString()
@@ -963,7 +963,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The subject of the submitted item',
-    required: true,
+    required: false,
     example: 'Foo subject',
   })
   @IsString()
@@ -971,7 +971,7 @@ export class SubmissionUpdate {
 
   @ApiProperty({
     description: 'The estimated value of the submitted item in cents',
-    required: true,
+    required: false,
     example: 10000,
   })
   @IsNumber()
