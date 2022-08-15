@@ -15,8 +15,6 @@ import {
   ListingStatusReadable,
   SubmissionOrderStatus,
   SubmissionStatus,
-  SubmissionStatusReadable,
-  SubmissionUpdateType,
   VaultingStatus,
   VaultingStatusReadable,
   VaultingUpdateType,
@@ -36,7 +34,6 @@ import {
 import {
   ListingRequest,
   ListingUpdate,
-  SubmissionOrderUpdate,
   SubmissionUpdate,
 } from './dtos/marketplace.dto';
 import { CacheModule, InternalServerErrorException } from '@nestjs/common';

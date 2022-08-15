@@ -1,11 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DatabaseService } from '../database/database.service';
-import {
-  SubmissionOrderStatus,
-  SubmissionStatus,
-  SubmissionUpdateType,
-} from '../config/enum';
-import { RUNTIME_ENV } from '../config/configuration';
+import { SubmissionOrderStatus, SubmissionStatus } from '../config/enum';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import {
   Item,
@@ -18,7 +13,6 @@ import {
   SubmissionOrder,
 } from '../database/database.entity';
 import { clearDB, newSubmissionRequest } from '../util/testing';
-import { IsVariableWidth } from 'class-validator';
 
 const DBConnection = {
   type: 'sqlite',

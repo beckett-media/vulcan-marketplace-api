@@ -92,8 +92,8 @@ export class MarketplaceController {
   }
 
   @Get('/submission/order/:submission_order_id')
-  //@OnlyAllowGroups(Group.User, Group.Admin)
-  //@UseGuards(JwtAuthGuard, GroupsGuard)
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get submission order by id',
   })
@@ -111,16 +111,15 @@ export class MarketplaceController {
     @Param('submission_order_id') submission_order_id: number,
     @Request() request: any,
   ): Promise<SubmissionOrderDetails> {
-    const submissionDetails = await this.marketplaceService.getSubmissionOrder(
-      submission_order_id,
-    );
-    //assertOwnerOrAdmin(request.user, submissionDetails, this.logger);
-    return submissionDetails;
+    const submissionOrderDetails =
+      await this.marketplaceService.getSubmissionOrder(submission_order_id);
+    assertOwnerOrAdmin(request.user, submissionOrderDetails, this.logger);
+    return submissionOrderDetails;
   }
 
   @Get('/submission/order')
-  //@OnlyAllowGroups(Group.User, Group.Admin)
-  //@UseGuards(JwtAuthGuard, GroupsGuard)
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get a list of submission orders from a user',
   })
@@ -138,7 +137,7 @@ export class MarketplaceController {
     @Query() query: ListSubmissionOrdersQuery,
     @Request() request: any,
   ): Promise<SubmissionOrderDetails[]> {
-    //assertOwnerOrAdmin(request.user, query, this.logger);
+    assertOwnerOrAdmin(request.user, query, this.logger);
     //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissionOrders(
       query.user,
@@ -151,8 +150,8 @@ export class MarketplaceController {
   }
 
   @Put('/submission/order/:submission_order_id')
-  //@OnlyAllowGroups(Group.User, Group.Admin)
-  //@UseGuards(JwtAuthGuard, GroupsGuard)
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Update submission order by id',
   })
@@ -169,19 +168,23 @@ export class MarketplaceController {
   async updateSubmissionOrder(
     @Param('submission_order_id') submission_order_id: number,
     @Body() body: SubmissionOrderUpdate,
+    @Request() request: any,
   ): Promise<SubmissionOrderDetails> {
+    const submissionOrder = await this.marketplaceService.getSubmissionOrder(
+      submission_order_id,
+    );
+    assertOwnerOrAdmin(request.user, submissionOrder, this.logger);
     const submissionDetails =
       await this.marketplaceService.updateSubmissionOrder(
         submission_order_id,
         body.status,
       );
-    //assertOwnerOrAdmin(request.user, submissionDetails, this.logger);
     return submissionDetails;
   }
 
   @Get('/submission/:submission_id')
-  //@OnlyAllowGroups(Group.User, Group.Admin)
-  //@UseGuards(JwtAuthGuard, GroupsGuard)
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get submission by id',
   })
@@ -202,7 +205,7 @@ export class MarketplaceController {
     const submissionDetails = await this.marketplaceService.getSubmission(
       submission_id,
     );
-    //assertOwnerOrAdmin(request.user, submissionDetails, this.logger);
+    assertOwnerOrAdmin(request.user, submissionDetails, this.logger);
     return submissionDetails;
   }
 
@@ -225,7 +228,12 @@ export class MarketplaceController {
   async updateSubmission(
     @Body() submissionUpdate: SubmissionUpdate,
     @Param('submission_id') submission_id: number,
+    @Request() request: any,
   ): Promise<SubmissionDetails> {
+    const submission = await this.marketplaceService.getSubmission(
+      submission_id,
+    );
+    assertOwnerOrAdmin(request.user, submission, this.logger);
     const submissionDetails = await this.marketplaceService.updateSubmission(
       submission_id,
       submissionUpdate,
@@ -253,8 +261,7 @@ export class MarketplaceController {
     @Query() query: ListSubmissionsQuery,
     @Request() request: any,
   ): Promise<SubmissionDetails[]> {
-    //assertOwnerOrAdmin(request.user, query, this.logger);
-
+    assertOwnerOrAdmin(request.user, query, this.logger);
     //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissions(
       query.user,
@@ -267,8 +274,8 @@ export class MarketplaceController {
   }
 
   @Post('/submission')
-  //@OnlyAllowGroups(Group.User, Group.Admin)
-  //@UseGuards(JwtAuthGuard, GroupsGuard)
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Submit new item to marketplace',
   })
@@ -284,7 +291,9 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async submitItem(
     @Body() body: SubmissionRequest,
+    @Request() request: any,
   ): Promise<SubmissionResponse> {
+    assertOwnerOrAdmin(request.user, body, this.logger);
     const submissionResponse = await this.marketplaceService.submitItem(body);
     return submissionResponse;
   }

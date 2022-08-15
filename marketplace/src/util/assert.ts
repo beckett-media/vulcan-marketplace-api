@@ -2,7 +2,11 @@ import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { Group } from '../config/enum';
 
-export function assertOwnerOrAdmin(user: any, entity: any, logger: any) {
+export class UserEntity {
+  user: string;
+}
+
+export function assertOwnerOrAdmin(jwt: any, entity: UserEntity, logger: any) {
   // if auth check is off
   let env = process.env[RUNTIME_ENV];
   let config = configuration()[env];
@@ -10,21 +14,29 @@ export function assertOwnerOrAdmin(user: any, entity: any, logger: any) {
     return;
   }
 
-  // if user is admin, allow access
-  if (!!user.groups && user.groups.includes(Group.Admin)) {
+  if (!!!jwt || !!!jwt.groups || !!!jwt.user) {
+    throw new ForbiddenException('No login admin/user found');
+  }
+
+  // if user is admin, allow all access
+  if (jwt.groups.includes(Group.Admin)) {
     return;
   }
 
-  // if user name match, allow access
-  if (user.user == entity.user) {
-    return;
+  // if regular user, jwt user and entity user should match
+  if (jwt.groups.includes(Group.User)) {
+    if ((jwt.user as string) == entity.user) {
+      return;
+    }
   }
 
   logger.error(
-    `Unauthorized access: request.user: ${user.user}, entity.user: ${entity.user}`,
+    `Unauthorized access: request.user: ${jwt.user}, entity.user: ${entity.user}`,
   );
   // anything else is not allowed
-  throw new ForbiddenException();
+  throw new ForbiddenException(
+    'Only the owner or admin can access this resource',
+  );
 }
 
 export function onlyLetters(str: string) {
