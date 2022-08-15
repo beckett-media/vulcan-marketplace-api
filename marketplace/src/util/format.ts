@@ -19,6 +19,7 @@ import {
   SubmissionOrderStatusReadable,
   ItemTypeReadable,
   InventoryStatusReadable,
+  ItemType,
 } from '../config/enum';
 import {
   ActionLogDetails,
@@ -316,4 +317,36 @@ export function getAttributes(item: Item) {
   }
 
   return attributes;
+}
+
+export function generateNFTDescription(item: Item): string {
+  var description = '';
+  switch (item.type) {
+    case ItemType.card:
+      if (item.year) {
+        description += `${item.year} `;
+      }
+      if (item.set_name) {
+        description += `${item.set_name} `;
+      }
+      if (item.card_number) {
+        description += `${item.card_number} `;
+      }
+      if (item.player) {
+        description += `${item.player}`;
+      }
+      break;
+    case ItemType.comic:
+      if (item.publisher) {
+        description += `${item.publisher} `;
+      }
+      if (item.issue) {
+        description += `${item.issue}`;
+      }
+      break;
+    default:
+      break;
+  }
+
+  return description;
 }

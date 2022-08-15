@@ -53,6 +53,6 @@ describe('Authentication', () => {
 
     expect(() => {
       assertOwnerOrAdmin(jwt, { user: uuid }, console);
-    }).toThrow('Only the owner or admin can access this resource');
+    }).toThrow('Access not allowed.');
   });
 });

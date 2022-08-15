@@ -37,6 +37,7 @@ import {
 } from '../database/database.service';
 import { DetailedLogger } from '../logger/detailed.logger';
 import {
+  generateNFTDescription,
   getAttributes,
   newActionLogDetails,
   newListingDetails,
@@ -636,11 +637,12 @@ export class MarketplaceService {
     const item = await this.databaseService.getItem(request.item_id);
 
     const attributes = getAttributes(item);
+    const description = generateNFTDescription(item);
     const mint_job_id = await this.bravoService.mintNFT(
       request.user,
       item.uuid,
       item.title,
-      item.description,
+      description,
       request.image_format,
       request.image_base64,
       attributes,
