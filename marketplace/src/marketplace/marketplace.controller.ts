@@ -210,8 +210,8 @@ export class MarketplaceController {
   }
 
   @Put('/submission/:submission_id')
-  //@OnlyAllowGroups(Group.Admin)
-  //@UseGuards(JwtAuthGuard, GroupsGuard)
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Update submission status by id (mainly used by admin)',
   })
@@ -242,8 +242,8 @@ export class MarketplaceController {
   }
 
   @Get('/submission')
-  //@OnlyAllowGroups(Group.User, Group.Admin)
-  //@UseGuards(JwtAuthGuard, GroupsGuard)
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get a list of submissions from a user',
   })

@@ -34,9 +34,7 @@ export function assertOwnerOrAdmin(jwt: any, entity: UserEntity, logger: any) {
     `Unauthorized access: request.user: ${jwt.user}, entity.user: ${entity.user}`,
   );
   // anything else is not allowed
-  throw new ForbiddenException(
-    'Only the owner or admin can access this resource',
-  );
+  throw new ForbiddenException('Access not allowed.');
 }
 
 export function onlyLetters(str: string) {
