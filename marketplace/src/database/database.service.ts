@@ -954,7 +954,6 @@ export class DatabaseService {
             const existingInventory = await this.getInventoryForItem(
               inventoryRequest.item_id,
             );
-            console.log(JSON.stringify(existingInventory));
             throw new InternalServerErrorException(
               `Item ${inventoryRequest.item_id} is already in inventory: ${existingInventory.label}`,
             );
@@ -1008,7 +1007,6 @@ export class DatabaseService {
   async listInventory(
     listInventoryRequest: ListInventoryRequest,
   ): Promise<Inventory[]> {
-    console.log(JSON.stringify(listInventoryRequest));
     var where_filter = {};
     if (!!listInventoryRequest.item_ids) {
       where_filter['item_id'] = In(listInventoryRequest.item_ids);
@@ -1048,7 +1046,6 @@ export class DatabaseService {
     if (!!listInventoryRequest.order) {
       filter['order'] = { id: listInventoryRequest.order };
     }
-    console.log(JSON.stringify(filter));
 
     const inventories = await this.inventoryRepo.find(filter);
     return inventories;

@@ -175,6 +175,7 @@ describe('InventoryService', () => {
     expect(inventory1.label).toBe(
       '[vault]:dallas-[zone]:cabinet-[shelf]:*-[row]:1-[box]:2-[slot]:*',
     );
+    expect(inventory1.user).toBe(userUUID);
 
     var inventoryRequest2 = {
       item_id: vaulting2.item_id,
@@ -208,9 +209,17 @@ describe('InventoryService', () => {
 
     var listInventoryRequest = new ListInventoryRequest({
       vault: 'dallas',
+      order: 'ASC',
     });
     var inventories = await service.listInventory(listInventoryRequest);
     expect(inventories.length).toBe(3);
+    expect(inventories[0].item_id).toBe(vaulting1.item_id);
+    expect(inventories[1].item_id).toBe(vaulting2.item_id);
+    expect(inventories[2].item_id).toBe(vaulting3.item_id);
+    expect(inventories[0].user).toBe(userUUID);
+    expect(inventories[1].user).toBe(userUUID);
+    expect(inventories[2].user).toBe(userUUID);
+
     listInventoryRequest = new ListInventoryRequest({
       box: '1',
     });
