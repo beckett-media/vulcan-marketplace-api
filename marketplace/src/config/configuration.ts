@@ -110,10 +110,10 @@ export default () => ({
     cognito: {
       COGNITO_USER_POOL_ID:
         process.env.MARKETPLACE_AWSDEV_COGNITO_USER_POOL_ID ||
-        'us-west-1_rrW6uRNXW',
+        'us-west-1_YLyATgtQd',
       COGNITO_CLIENT_ID:
         process.env.MARKETPLACE_AWSDEV_COGNITO_CLIENT_ID ||
-        '2cq0oolf1nuqjtk0snc29reeh5',
+        '1fkbqcr55bega982jv61rl776o',
       COGNITO_REGION:
         process.env.MARKETPLACE_AWSDEV_COGNITO_REGION || 'us-west-1',
     },
