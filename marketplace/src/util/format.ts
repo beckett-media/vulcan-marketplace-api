@@ -28,7 +28,10 @@ import {
   SubmissionOrderDetails,
   VaultingDetails,
 } from '../marketplace/dtos/marketplace.dto';
-import { InventoryDetails } from '../inventory/dtos/inventory.dto';
+import {
+  InventoryDetails,
+  InventoryLocation,
+} from '../inventory/dtos/inventory.dto';
 
 export function newSubmissionOrderDetails(
   order: SubmissionOrder,
@@ -192,10 +195,11 @@ export function newInventoryDetails(
     vault: inventory.vault,
     zone: inventory.zone,
     shelf: inventory.shelf,
+    row: inventory.row,
     box: inventory.box,
-    box_row: inventory.box_row,
-    gallery_row: inventory.gallery_row,
-    gallery_position: inventory.gallery_position,
+    slot: inventory.slot,
+    label: inventory.label,
+    note: inventory.note,
     status: inventory.status,
     status_desc: InventoryStatusReadable[inventory.status],
     created_at: inventory.created_at,
@@ -349,4 +353,16 @@ export function generateNFTDescription(item: Item): string {
   }
 
   return description;
+}
+
+export function getInventoryLabel(
+  inventoryLocation: InventoryLocation,
+): string {
+  const vault = inventoryLocation.vault;
+  const zone = inventoryLocation.zone;
+  const shelf = inventoryLocation.shelf ? inventoryLocation.shelf : '*';
+  const row = inventoryLocation.row ? inventoryLocation.row : '*';
+  const box = inventoryLocation.box ? inventoryLocation.box : '*';
+  const slot = inventoryLocation.slot ? inventoryLocation.slot : '*';
+  return `${vault}-${zone}-${shelf}-${row}-${box}-${slot}`;
 }

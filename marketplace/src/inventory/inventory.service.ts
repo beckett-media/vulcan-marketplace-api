@@ -1,4 +1,9 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { newInventoryDetails } from '../util/format';
 import { DatabaseService } from '../database/database.service';
@@ -7,6 +12,7 @@ import {
   InventoryDetails,
   InventoryRequest,
   ListInventoryRequest,
+  UpdateInventoryRequest,
 } from './dtos/inventory.dto';
 
 @Injectable()
@@ -23,10 +29,15 @@ export class InventoryService {
   async newInventory(
     inventoryRequest: InventoryRequest,
   ): Promise<InventoryDetails> {
+    const vault = await this.databaseService.getVaultingByItemID(
+      inventoryRequest.item_id,
+    );
     const inventory = await this.databaseService.createNewInventory(
       inventoryRequest,
     );
-    return new InventoryDetails({});
+    const item = await this.databaseService.getItem(inventory.item_id);
+    const user = await this.databaseService.getUser(item.user);
+    return newInventoryDetails(inventory, item, user, vault);
   }
 
   async listInventory(
@@ -47,5 +58,25 @@ export class InventoryService {
     );
 
     return newInventoryDetails(inventory, item, user, vault);
+  }
+
+  async updateInventory(
+    inventory_id: number,
+    updateInventoryRequest: UpdateInventoryRequest,
+  ): Promise<InventoryDetails> {
+    const inventory = await this.databaseService.getInventory(inventory_id);
+    if (inventory.item_id !== updateInventoryRequest.item_id) {
+      throw new InternalServerErrorException('item_id does not match');
+    }
+
+    const newInventory = await this.databaseService.updateInventory(
+      updateInventoryRequest,
+    );
+    const item = await this.databaseService.getItem(newInventory.item_id);
+    const user = await this.databaseService.getUser(item.user);
+    const vault = await this.databaseService.getVaultingByItemID(
+      newInventory.item_id,
+    );
+    return newInventoryDetails(newInventory, item, user, vault);
   }
 }

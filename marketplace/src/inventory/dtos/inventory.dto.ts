@@ -1,5 +1,12 @@
-import { IsString, IsNumber, MinLength, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  MinLength,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { InventoryStatus } from 'src/config/enum';
 
 export class InventoryRequest {
   @ApiProperty({
@@ -28,48 +35,162 @@ export class InventoryRequest {
 
   @ApiProperty({
     description: 'Shelf number',
-    required: true,
+    required: false,
     example: 2,
-    default: 0,
   })
   @IsNumber()
+  @IsOptional()
   shelf: number;
 
   @ApiProperty({
-    description: 'Box number',
-    required: true,
+    description: 'Row number',
+    required: false,
     example: 3,
-    default: 0,
   })
   @IsNumber()
+  @IsOptional()
+  row: number;
+
+  @ApiProperty({
+    description: 'Box number',
+    required: false,
+    example: 4,
+  })
+  @IsNumber()
+  @IsOptional()
   box: number;
 
   @ApiProperty({
-    description: 'Box row number',
-    required: true,
-    example: 4,
-    default: 0,
-  })
-  @IsNumber()
-  box_row: number;
-
-  @ApiProperty({
-    description: 'Gallery row number',
-    required: true,
+    description: 'Slot number',
+    required: false,
     example: 5,
-    default: 0,
   })
   @IsNumber()
-  gallery_row: number;
+  @IsOptional()
+  slot: number;
 
   @ApiProperty({
-    description: 'Gallery position',
+    description: 'Any note for this inventory',
+    required: false,
+    example: 'Item is fragile',
+  })
+  @IsString()
+  @IsOptional()
+  note: string;
+
+  constructor(partial: Partial<InventoryRequest>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class InventoryLocation {
+  @IsString()
+  vault: string;
+
+  @IsString()
+  zone: string;
+
+  @IsNumber()
+  shelf: number;
+
+  @IsNumber()
+  row: number;
+
+  @IsNumber()
+  box: number;
+
+  @IsNumber()
+  slot: number;
+
+  constructor(partial: Partial<InventoryLocation>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class UpdateInventoryRequest {
+  @ApiProperty({
+    description: 'Item ID',
     required: true,
-    example: 6,
-    default: 0,
+    example: 1,
   })
   @IsNumber()
-  gallery_position: number;
+  item_id: number;
+
+  @ApiProperty({
+    description: 'Vault name',
+    required: false,
+    example: 'Dallas',
+  })
+  @IsString()
+  @IsOptional()
+  vault: string;
+
+  @ApiProperty({
+    description: 'Zone name',
+    required: false,
+    example: 'Cabinet',
+  })
+  @IsString()
+  @IsOptional()
+  zone: string;
+
+  @ApiProperty({
+    description: 'Shelf number',
+    required: false,
+    example: 2,
+  })
+  @IsNumber()
+  @IsOptional()
+  shelf: number;
+
+  @ApiProperty({
+    description: 'Row number',
+    required: false,
+    example: 3,
+  })
+  @IsNumber()
+  @IsOptional()
+  row: number;
+
+  @ApiProperty({
+    description: 'Box number',
+    required: false,
+    example: 4,
+  })
+  @IsNumber()
+  @IsOptional()
+  box: number;
+
+  @ApiProperty({
+    description: 'Slot number',
+    required: false,
+    example: 5,
+  })
+  @IsNumber()
+  @IsOptional()
+  slot: number;
+
+  @ApiProperty({
+    description: 'Any note for this inventory',
+    required: false,
+    example: 'Item is fragile',
+  })
+  @IsString()
+  @IsOptional()
+  note: string;
+
+  @ApiProperty({
+    description: 'inventory status',
+    required: false,
+    example: 0,
+  })
+  @IsEnum(InventoryStatus)
+  @IsOptional()
+  status: number;
+
+  constructor(partial: Partial<UpdateInventoryRequest>) {
+    Object.assign(this, partial);
+  }
 }
 
 export class InventoryDetails {
@@ -139,40 +260,49 @@ export class InventoryDetails {
   shelf: number;
 
   @ApiProperty({
-    description: 'Box number',
+    description: 'Row number',
     required: true,
     example: 3,
+    default: 0,
+  })
+  @IsNumber()
+  row: number;
+
+  @ApiProperty({
+    description: 'Box number',
+    required: true,
+    example: 4,
     default: 0,
   })
   @IsNumber()
   box: number;
 
   @ApiProperty({
-    description: 'Box row number',
-    required: true,
-    example: 4,
-    default: 0,
-  })
-  @IsNumber()
-  box_row: number;
-
-  @ApiProperty({
-    description: 'Gallery row number',
+    description: 'Slot number',
     required: true,
     example: 5,
     default: 0,
   })
   @IsNumber()
-  gallery_row: number;
+  slot: number;
 
   @ApiProperty({
-    description: 'Gallery position',
+    description: 'label generated from all location fields',
     required: true,
-    example: 6,
-    default: 0,
+    example: 'Dallas-Cabinet-2-3-4-5-6',
+    default: '',
   })
-  @IsNumber()
-  gallery_position: number;
+  @IsString()
+  label: string;
+
+  @ApiProperty({
+    description: 'Any note for this inventory',
+    required: true,
+    example: 'Item is fragile',
+    default: '',
+  })
+  @IsString()
+  note: string;
 
   @ApiProperty({
     description: 'Enum of the inventory status of the item',

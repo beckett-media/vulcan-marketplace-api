@@ -38,6 +38,7 @@ import {
   VaultingUpdateType,
 } from '../config/enum';
 import {
+  getInventoryLabel,
   newListingDetails,
   newSubmissionDetails,
   newSubmissionOrderDetails,
@@ -45,8 +46,10 @@ import {
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
 import {
+  InventoryLocation,
   InventoryRequest,
   ListInventoryRequest,
+  UpdateInventoryRequest,
 } from '../inventory/dtos/inventory.dto';
 
 export const DEFAULT_USER_SOURCE = 'cognito';
@@ -803,37 +806,6 @@ export class DatabaseService {
     return actionLogs;
   }
 
-  async createNewInventory(
-    inventoryRequest: InventoryRequest,
-  ): Promise<Inventory> {
-    var inventory: Inventory;
-    try {
-      await getManager().transaction(
-        this.isolation,
-        async (transactionalEntityManager) => {
-          const newInventory = this.inventoryRepo.create({
-            item_id: inventoryRequest.item_id,
-            vault: inventoryRequest.vault,
-            zone: inventoryRequest.zone,
-            shelf: inventoryRequest.shelf,
-            box: inventoryRequest.box,
-            box_row: inventoryRequest.box_row,
-            gallery_row: inventoryRequest.gallery_row,
-            gallery_position: inventoryRequest.gallery_position,
-            status: InventoryStatus.InStock,
-            updated_at: 0,
-            created_at: Math.round(Date.now() / 1000),
-          });
-          inventory = await this.vaultingRepo.save(newInventory);
-        },
-      );
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error);
-    }
-    return inventory;
-  }
-
   async getSubmissionOrder(
     submission_order_id: number,
   ): Promise<SubmissionOrder> {
@@ -954,6 +926,41 @@ export class DatabaseService {
     return submissionOrderDetails;
   }
 
+  async createNewInventory(
+    inventoryRequest: InventoryRequest,
+  ): Promise<Inventory> {
+    var inventory: Inventory;
+    try {
+      await getManager().transaction(
+        this.isolation,
+        async (transactionalEntityManager) => {
+          const label = getInventoryLabel(
+            inventoryRequest as InventoryLocation,
+          );
+          const newInventory = this.inventoryRepo.create({
+            item_id: inventoryRequest.item_id,
+            vault: inventoryRequest.vault,
+            zone: inventoryRequest.zone,
+            shelf: inventoryRequest.shelf ? inventoryRequest.shelf : null,
+            row: inventoryRequest.row ? inventoryRequest.row : null,
+            box: inventoryRequest.box ? inventoryRequest.box : null,
+            slot: inventoryRequest.slot ? inventoryRequest.slot : null,
+            label: label,
+            status: InventoryStatus.InStock,
+            note: inventoryRequest.note ? inventoryRequest.note : '',
+            updated_at: 0,
+            created_at: Math.round(Date.now() / 1000),
+          });
+          inventory = await this.inventoryRepo.save(newInventory);
+        },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
+    return inventory;
+  }
+
   async listInventory(
     inventoryRequest: ListInventoryRequest,
   ): Promise<Inventory[]> {
@@ -967,6 +974,13 @@ export class DatabaseService {
     return inventories;
   }
 
+  async getInventoryForItem(item_id: number): Promise<Inventory> {
+    const inventory = await this.inventoryRepo.findOne({
+      where: { item_id: item_id },
+    });
+    return inventory;
+  }
+
   async getInventory(inventory_id: number) {
     const inventory = await this.inventoryRepo.findOne({
       where: { id: inventory_id },
@@ -976,6 +990,42 @@ export class DatabaseService {
         `Inventory with id ${inventory_id} not found`,
       );
     }
+    return inventory;
+  }
+
+  async updateInventory(
+    updateInventoryRequest: UpdateInventoryRequest,
+  ): Promise<Inventory> {
+    const inventory = await this.getInventoryForItem(
+      updateInventoryRequest.item_id,
+    );
+    inventory.vault = updateInventoryRequest.vault
+      ? updateInventoryRequest.vault
+      : inventory.vault;
+    inventory.zone = updateInventoryRequest.zone
+      ? updateInventoryRequest.zone
+      : inventory.zone;
+    inventory.shelf = updateInventoryRequest.shelf
+      ? updateInventoryRequest.shelf
+      : inventory.shelf;
+    inventory.row = updateInventoryRequest.row
+      ? updateInventoryRequest.row
+      : inventory.row;
+    inventory.box = updateInventoryRequest.box
+      ? updateInventoryRequest.box
+      : inventory.box;
+    inventory.slot = updateInventoryRequest.slot
+      ? updateInventoryRequest.slot
+      : inventory.slot;
+    inventory.status = updateInventoryRequest.status
+      ? updateInventoryRequest.status
+      : inventory.status;
+    inventory.note = updateInventoryRequest.note
+      ? updateInventoryRequest.note
+      : inventory.note;
+    inventory.updated_at = Math.round(Date.now() / 1000);
+    inventory.label = getInventoryLabel(inventory as InventoryLocation);
+    await this.inventoryRepo.save(inventory);
     return inventory;
   }
 }

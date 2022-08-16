@@ -7,10 +7,15 @@ import {
   UseInterceptors,
   Param,
   Query,
+  Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import { DetailedLogger } from '../logger/detailed.logger';
-import { InventoryRequest, ListInventoryRequest } from './dtos/inventory.dto';
+import {
+  InventoryRequest,
+  ListInventoryRequest,
+  UpdateInventoryRequest,
+} from './dtos/inventory.dto';
 import { InventoryService } from './inventory.service';
 
 @Controller('inventory')
@@ -65,6 +70,26 @@ export class InventoryController {
   @ApiProduces('application/json')
   async listInventory(@Query() request: ListInventoryRequest) {
     const inventoryDetails = await this.inventoryService.listInventory(request);
+    return inventoryDetails;
+  }
+
+  @Put('/:inventory_id')
+  @ApiOperation({
+    summary: 'Update inventory record by id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return specified inventory record',
+  })
+  @ApiProduces('application/json')
+  async updateInventory(
+    @Param('inventory_id') inventory_id: number,
+    @Body() updateInventoryRequest: UpdateInventoryRequest,
+  ) {
+    const inventoryDetails = await this.inventoryService.updateInventory(
+      inventory_id,
+      updateInventoryRequest,
+    );
     return inventoryDetails;
   }
 }

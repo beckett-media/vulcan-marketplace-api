@@ -250,6 +250,7 @@ export class Listing {
 
 @Entity()
 @Index(['item_id'])
+@Index(['label'], { unique: true })
 @Index(['vault', 'zone', 'shelf'])
 export class Inventory {
   @PrimaryGeneratedColumn()
@@ -258,26 +259,29 @@ export class Inventory {
   @Column()
   item_id: number;
 
-  @Column({ default: '' })
+  @Column()
   vault: string;
 
-  @Column({ default: '' })
+  @Column()
   zone: string;
 
-  @Column({ default: 0 })
+  @Column({ nullable: true })
   shelf: number;
 
-  @Column({ default: 0 })
+  @Column({ nullable: true })
+  row: number;
+
+  @Column({ nullable: true })
   box: number;
 
-  @Column({ default: 0 })
-  box_row: number;
+  @Column({ nullable: true })
+  slot: number;
 
-  @Column({ default: 0 })
-  gallery_row: number;
+  @Column()
+  label: string;
 
-  @Column({ default: 0 })
-  gallery_position: number;
+  @Column({ default: '' })
+  note: string;
 
   @Column()
   status: number;

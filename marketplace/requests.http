@@ -74,17 +74,17 @@ Authorization: Bearer eyJraWQiOiI2XC9VYVFZUjVabVwvVkZkbmo5eGJVNis2Y0VKN3ErWHVMcF
 
 
 ### get all submission from user and limit
-GET  http://127.0.0.1:3300/marketplace/submission?user=bfa700b5-5ac9-4574-b989-b6513d077f35
+GET  http://yifan-hp-z620:3300/marketplace/submission?user=bfa700b5-5ac9-4574-b989-b6513d077f35
 Authorization: Bearer eyJraWQiOiI2XC9VYVFZUjVabVwvVkZkbmo5eGJVNis2Y0VKN3ErWHVMcFRuaytjVTBMRnM9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJiZmE3MDBiNS01YWM5LTQ1NzQtYjk4OS1iNjUxM2QwNzdmMzUiLCJjb2duaXRvOmdyb3VwcyI6WyJ2YXVsdGluZyJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0xLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMV9yclc2dVJOWFciLCJjbGllbnRfaWQiOiIyY3Ewb29sZjFudXFqdGswc25jMjlyZWVoNSIsIm9yaWdpbl9qdGkiOiJhYWFlMWE5MS05ZDNiLTQzOTEtODk5MC00Yjc4MWQzYjRkMzIiLCJldmVudF9pZCI6IjhiMTgzMDJhLWM0N2QtNGU3OS1hODAzLWNlOTRmYzFkNmNiMiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE2NjA1NDc1NjAsImV4cCI6MTY2MDU1MTE2MCwiaWF0IjoxNjYwNTQ3NTYwLCJqdGkiOiJjOWQxZGRjMS1kNjJmLTQ1ZWQtYWE2My05ZWFlY2Q1NmUzYzEiLCJ1c2VybmFtZSI6ImJmYTcwMGI1LTVhYzktNDU3NC1iOTg5LWI2NTEzZDA3N2YzNSJ9.HUgqD_Qgjb_0UIHJ2K7Q2M1JjFA8mM2PcBS37jhBOxVNYk7xrX-RZf6XtJKcQxWfTHc-5jUaSJxy5QyyyAZVvokTRSOsNwP9qoefpv-8L_rhRyAl0i7N_TEVdIpbVGT0ZkQnIL9In-6bz8H9CzWqj4MlwbXylsZebjC6kDqJQmww0UTIzyE6xcojYsQMCRMYxrEhmCSH-qXlkdShxcQWFZ69rr_yKGipSTBd-n00OZUuFS8skosAeBh_XmcELVBgEH63LBBQ4w3wQwIsJ0W9pQ2K487VqQfXjgSTsfpAa1tLJFgHK2zfvdeDxBkWzHTUhsG6cyokB0bGeVfLv9SHXA
 
 
 ### get all submission
-GET  http://127.0.0.1:3300/marketplace/submission?order=DESC
+GET  http://yifan-hp-z620:3300/marketplace/submission?order=DESC
 Authorization: Bearer eyJraWQiOiI2XC9VYVFZUjVabVwvVkZkbmo5eGJVNis2Y0VKN3ErWHVMcFRuaytjVTBMRnM9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIwMjNmMWRlMC03OWNjLTRlZDctOTA0YS1iNTZjNzZmZDZhNWMiLCJjb2duaXRvOmdyb3VwcyI6WyJhZG1pbiJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0xLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMV9yclc2dVJOWFciLCJjbGllbnRfaWQiOiIyY3Ewb29sZjFudXFqdGswc25jMjlyZWVoNSIsIm9yaWdpbl9qdGkiOiI5MjQzYjAzMS0xNzE4LTRkNmItODg2NC1jOWZjODRhMjMwMTEiLCJldmVudF9pZCI6ImUzNGZmOTM4LWQ0NGItNGMxNS1hZmE2LTk2MTdhYjI1YTY4YSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE2NjA1NDgyNDUsImV4cCI6MTY2MDU1MTg0NSwiaWF0IjoxNjYwNTQ4MjQ1LCJqdGkiOiJhYjc2Mjk2NC1iYzgzLTQzZTItODQxZi0yNmE1NWM5OTM3ZTkiLCJ1c2VybmFtZSI6IjAyM2YxZGUwLTc5Y2MtNGVkNy05MDRhLWI1NmM3NmZkNmE1YyJ9.KRVwJ6P9EXIYGdenNaB3yux18k8RFKo5uuLDAg7TH8FRPzdhoxhsAu-JzgdUi_pihVB8iUBz0EgUuFtszS117R3GVWWLzv0Gak0fof1AqFizJyKSSrybuTk42KYP2T8Scy1eGKVcSKMhSTjE67JrCuSaDGpA3RLMhyNYsvRVihK5pn6yoCnq1Wh-ftv-ekRxIoo_4AUBUoWWE3Bja-WUVx0czlBlJE8oMV6wRXj8Oyas7v23wKDZrbEmGjGhEsaDT34nynN-OPsEG5bbtO1PUO7mJkI0hkEV-mkAqAsW3lxNYE6_mB6doMXDBXtexcNckqbyBq1JjlV3VPR8IJxdKg
 
 
 ### update submission
-PUT http://127.0.0.1:3300/marketplace/submission/41
+PUT http://yifan-hp-z620:3300/marketplace/submission/41
 Content-Type: application/json
 
 {
@@ -96,7 +96,7 @@ Content-Type: application/json
 
 ### update submission order
 
-PUT http://127.0.0.1:3300/marketplace/submission/order
+PUT http://yifan-hp-z620:3300/marketplace/submission/order
 Content-Type: application/json
 Authorization: Bearer eyJraWQiOiI2XC9VYVFZUjVabVwvVkZkbmo5eGJVNis2Y0VKN3ErWHVMcFRuaytjVTBMRnM9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJiZmE3MDBiNS01YWM5LTQ1NzQtYjk4OS1iNjUxM2QwNzdmMzUiLCJjb2duaXRvOmdyb3VwcyI6WyJ2YXVsdGluZyJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0xLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMV9yclc2dVJOWFciLCJjbGllbnRfaWQiOiIyY3Ewb29sZjFudXFqdGswc25jMjlyZWVoNSIsIm9yaWdpbl9qdGkiOiI4NjViZjkzOC00ZDAxLTQ1NTktYWY4ZS1mYjdiZjBhMGZhMGUiLCJldmVudF9pZCI6ImQ0YTA1ODYzLWIzYjYtNDU3Yi1iODg0LTQzODY4MmJlNDlmNiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE2NTkwNzMzNTcsImV4cCI6MTY1OTA3Njk1NywiaWF0IjoxNjU5MDczMzU3LCJqdGkiOiIyZDViZWYyZi03NGQ1LTQwMzYtYWQyMi0xYTkzNjcwYzBlNDEiLCJ1c2VybmFtZSI6ImJmYTcwMGI1LTVhYzktNDU3NC1iOTg5LWI2NTEzZDA3N2YzNSJ9.aqzFFyfVg9fXWWyG3esP4_1gFtxIavaScYUlWG11x9wZFh8pYRREYXpeM0PYFsVgu6cn90UrQdK3JTYrDqvd6VGtAOdXhA9PzyUR6DPxAS3DyVhbC20TvDRgtPSdoXGPKMWU7s4lxSIafb1k4rBd2DPixeNMpDWF0K2VORViFT4wZvg2LPVq1Y6JQ9ukR1JuQ0NIoydbMT4euFVy7_yLiU7ETrmnPN3Vpm2dWDuBczImXVKE12OPwezggPfEoh8CIo-Na26X91dG7yQixPQ6lqlrgJQGv6S6JNn2Oo4i-MoKgdlKzkdLLoY0wII7XGXXDVwPsoG_BBwKKMwmmXQ36w
 
@@ -105,7 +105,7 @@ Authorization: Bearer eyJraWQiOiI2XC9VYVFZUjVabVwvVkZkbmo5eGJVNis2Y0VKN3ErWHVMcF
 }
 
 ### vault new item
-POST http://127.0.0.1:3300/marketplace/vaulting
+POST http://yifan-hp-z620:3300/marketplace/vaulting
 Content-Type: application/json
 
 {
@@ -118,7 +118,7 @@ Content-Type: application/json
 
 ### callback for mint
 ### 2 is status minted
-PUT http://127.0.0.1:3300/marketplace/vaulting
+PUT http://yifan-hp-z620:3300/marketplace/vaulting
 Content-Type: application/json
 
 {
@@ -135,20 +135,45 @@ Content-Type: application/json
 
 
 ### Get vaulting by user
-GET http://127.0.0.1:3300/marketplace/vaulting?order=asaa
+GET http://yifan-hp-z620:3300/marketplace/vaulting?order=asaa
 
 
 ### Get vaulting by submission id
-GET http://127.0.0.1:3300/marketplace/vaulting/submission/11
+GET http://yifan-hp-z620:3300/marketplace/vaulting/submission/11
 
 ### Get vaulting by id
-GET http://127.0.0.1:3300/marketplace/vaulting/7
+GET http://yifan-hp-z620:3300/marketplace/vaulting/7
 
 ### withdraw vaulting
-DELETE http://127.0.0.1:3300/marketplace/vaulting/7
+DELETE http://yifan-hp-z620:3300/marketplace/vaulting/7
+
+
+### Create inventory
+POST http://yifan-hp-z620:3300/inventory
+Content-Type: application/json
+
+{
+  "item_id": 38,
+  "vault": "Dallas",
+  "zone": "Cabinet",
+  "shelf": 1,
+  "box": 2
+}
+
+### Create inventory
+Get http://yifan-hp-z620:3300/inventory/2
+
+### Update inventory
+PUT http://yifan-hp-z620:3300/inventory/2
+Content-Type: application/json
+
+{
+  "item_id": 38,
+  "box": 123
+}
 
 ### list the vaulted item
-POST http://127.0.0.1:3300/marketplace/listing
+POST http://yifan-hp-z620:3300/marketplace/listing
 Content-Type: application/json
 
 {
@@ -158,11 +183,11 @@ Content-Type: application/json
 }
 
 ### list the vaulted item
-GET http://127.0.0.1:3300/marketplace/listing/2
+GET http://yifan-hp-z620:3300/marketplace/listing/2
 
 
 ### change the price of the listing
-PUT http://127.0.0.1:3300/marketplace/listing/2
+PUT http://yifan-hp-z620:3300/marketplace/listing/2
 Content-Type: application/json
 
 {
@@ -170,16 +195,16 @@ Content-Type: application/json
 }
 
 ### change the price of the listing
-DELETE http://127.0.0.1:3300/marketplace/listing/2
+DELETE http://yifan-hp-z620:3300/marketplace/listing/2
 Content-Type: application/json
 
 {}
 
 ### Get user actions
-GET http://127.0.0.1:3300/marketplace/action/user/12345678-7e3a-4623-a496-0117f324a521?order=DESC
+GET http://yifan-hp-z620:3300/marketplace/action/user/12345678-7e3a-4623-a496-0117f324a521?order=DESC
 
 ### Get entity actions
-GET http://127.0.0.1:3300/marketplace/action/listing/2
+GET http://yifan-hp-z620:3300/marketplace/action/listing/2
 
 #########################################################################################################################
 #########################################################################################################################
