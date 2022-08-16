@@ -344,7 +344,7 @@ export class DatabaseService {
   async getItem(item_id: number): Promise<Item> {
     const item = await this.itemRepo.findOne(item_id);
     if (!item) {
-      throw new NotFoundException('Item not found');
+      throw new NotFoundException(`Item ${item_id} not found`);
     }
     return item;
   }
@@ -361,7 +361,7 @@ export class DatabaseService {
   async getUser(user_id: number): Promise<User> {
     const user = await this.userRepo.findOne(user_id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(`User ${user_id} not found`);
     }
     return user;
   }
@@ -372,7 +372,7 @@ export class DatabaseService {
       where: { uuid: user_uuid },
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(`User ${user_uuid} not found`);
     }
     return user;
   }
@@ -490,6 +490,14 @@ export class DatabaseService {
       throw new NotFoundException(`Vaulting not found for item ${item_id}`);
     }
     return vaulting;
+  }
+
+  // get vaulting by item id
+  async getVaultingsByItemIDs(item_ids: number[]): Promise<Vaulting[]> {
+    const vaultings = await this.vaultingRepo.find({
+      where: { item_id: In(item_ids) },
+    });
+    return vaultings;
   }
 
   async getVaultingBySubmissionID(submission_id: number): Promise<Vaulting> {
@@ -937,14 +945,28 @@ export class DatabaseService {
           const label = getInventoryLabel(
             inventoryRequest as InventoryLocation,
           );
+          if (!(await this.isInventoryAvailable(label))) {
+            throw new InternalServerErrorException(
+              `Inventory slot ${label} is already occupied`,
+            );
+          }
+          if (await this.isExistingInventory(inventoryRequest.item_id)) {
+            const existingInventory = await this.getInventoryForItem(
+              inventoryRequest.item_id,
+            );
+            console.log(JSON.stringify(existingInventory));
+            throw new InternalServerErrorException(
+              `Item ${inventoryRequest.item_id} is already in inventory: ${existingInventory.label}`,
+            );
+          }
           const newInventory = this.inventoryRepo.create({
             item_id: inventoryRequest.item_id,
             vault: inventoryRequest.vault,
             zone: inventoryRequest.zone,
-            shelf: inventoryRequest.shelf ? inventoryRequest.shelf : null,
-            row: inventoryRequest.row ? inventoryRequest.row : null,
-            box: inventoryRequest.box ? inventoryRequest.box : null,
-            slot: inventoryRequest.slot ? inventoryRequest.slot : null,
+            shelf: inventoryRequest.shelf ? inventoryRequest.shelf : '',
+            row: inventoryRequest.row ? inventoryRequest.row : '',
+            box: inventoryRequest.box ? inventoryRequest.box : '',
+            slot: inventoryRequest.slot ? inventoryRequest.slot : '',
             label: label,
             status: InventoryStatus.InStock,
             note: inventoryRequest.note ? inventoryRequest.note : '',
@@ -961,16 +983,74 @@ export class DatabaseService {
     return inventory;
   }
 
-  async listInventory(
-    inventoryRequest: ListInventoryRequest,
-  ): Promise<Inventory[]> {
-    var where_filter = {};
-    if (inventoryRequest.item_id !== undefined) {
-      where_filter['item_id'] = inventoryRequest.item_id;
-    }
-    const inventories = await this.inventoryRepo.find({
-      where: where_filter,
+  async isInventoryAvailable(label: string): Promise<boolean> {
+    const inventory = await this.inventoryRepo.findOne({
+      where: { label: label },
     });
+    if (!!inventory) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  async isExistingInventory(item_id: number): Promise<boolean> {
+    const inventory = await this.inventoryRepo.findOne({
+      where: { item_id: item_id },
+    });
+    if (!!inventory) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async listInventory(
+    listInventoryRequest: ListInventoryRequest,
+  ): Promise<Inventory[]> {
+    console.log(JSON.stringify(listInventoryRequest));
+    var where_filter = {};
+    if (!!listInventoryRequest.item_ids) {
+      where_filter['item_id'] = In(listInventoryRequest.item_ids);
+    }
+    if (!!listInventoryRequest.vault) {
+      where_filter['vault'] = listInventoryRequest.vault;
+    }
+    if (!!listInventoryRequest.zone) {
+      where_filter['zone'] = listInventoryRequest.zone;
+    }
+    if (!!listInventoryRequest.shelf) {
+      where_filter['shelf'] = listInventoryRequest.shelf;
+    }
+    if (!!listInventoryRequest.row) {
+      where_filter['row'] = listInventoryRequest.row;
+    }
+    if (!!listInventoryRequest.box) {
+      where_filter['box'] = listInventoryRequest.box;
+    }
+    if (!!listInventoryRequest.slot) {
+      where_filter['slot'] = listInventoryRequest.slot;
+    }
+
+    const offset = listInventoryRequest.offset
+      ? listInventoryRequest.offset
+      : 0;
+    var filter = {
+      where: where_filter,
+      skip: offset,
+    };
+
+    if (!!listInventoryRequest.limit) {
+      filter['take'] = listInventoryRequest.limit;
+    }
+
+    // order by id
+    if (!!listInventoryRequest.order) {
+      filter['order'] = { id: listInventoryRequest.order };
+    }
+    console.log(JSON.stringify(filter));
+
+    const inventories = await this.inventoryRepo.find(filter);
     return inventories;
   }
 
@@ -994,11 +1074,10 @@ export class DatabaseService {
   }
 
   async updateInventory(
+    inventory_id: number,
     updateInventoryRequest: UpdateInventoryRequest,
   ): Promise<Inventory> {
-    const inventory = await this.getInventoryForItem(
-      updateInventoryRequest.item_id,
-    );
+    const inventory = await this.getInventory(inventory_id);
     inventory.vault = updateInventoryRequest.vault
       ? updateInventoryRequest.vault
       : inventory.vault;

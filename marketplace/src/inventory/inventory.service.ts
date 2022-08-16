@@ -46,7 +46,37 @@ export class InventoryService {
     const inventories = await this.databaseService.listInventory(
       ListInventoryRequest,
     );
-    return [];
+    // get all the items for the inventories
+    const itemIDs = inventories.map((inventory) => inventory.item_id);
+    const items = await this.databaseService.listItems(itemIDs);
+    // get all the users for the items
+    const userIDs = items.map((item) => item.user);
+    const users = await this.databaseService.listUsers(userIDs);
+    // get all the vaultings for the items
+    const vaultings = await this.databaseService.getVaultingsByItemIDs(itemIDs);
+
+    // build map from item id to item
+    const itemMap = items.reduce((map, item) => {
+      map[item.id] = item;
+      return map;
+    }, {});
+    // build map from user id to user
+    const userMap = users.reduce((map, user) => {
+      map[user.id] = user;
+      return map;
+    }, {});
+    // build map from item id to vaulting
+    const vaultMap = vaultings.reduce((map, vaulting) => {
+      map[vaulting.item_id] = vaulting;
+      return map;
+    }, {});
+
+    return inventories.map((inventory) => {
+      const item = itemMap[inventory.item_id];
+      const user = userMap[item.user];
+      const vault = vaultMap[inventory.item_id];
+      return newInventoryDetails(inventory, item, user, vault);
+    });
   }
 
   async getInventory(inventory_id: number): Promise<InventoryDetails> {
@@ -64,12 +94,8 @@ export class InventoryService {
     inventory_id: number,
     updateInventoryRequest: UpdateInventoryRequest,
   ): Promise<InventoryDetails> {
-    const inventory = await this.databaseService.getInventory(inventory_id);
-    if (inventory.item_id !== updateInventoryRequest.item_id) {
-      throw new InternalServerErrorException('item_id does not match');
-    }
-
     const newInventory = await this.databaseService.updateInventory(
+      inventory_id,
       updateInventoryRequest,
     );
     const item = await this.databaseService.getItem(newInventory.item_id);

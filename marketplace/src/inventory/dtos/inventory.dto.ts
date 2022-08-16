@@ -4,9 +4,10 @@ import {
   MinLength,
   IsEnum,
   IsOptional,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { InventoryStatus } from 'src/config/enum';
+import { InventoryStatus } from '../../config/enum';
 
 export class InventoryRequest {
   @ApiProperty({
@@ -36,38 +37,38 @@ export class InventoryRequest {
   @ApiProperty({
     description: 'Shelf number',
     required: false,
-    example: 2,
+    example: '2',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  shelf: number;
+  shelf: string;
 
   @ApiProperty({
     description: 'Row number',
     required: false,
-    example: 3,
+    example: '3',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  row: number;
+  row: string;
 
   @ApiProperty({
     description: 'Box number',
     required: false,
-    example: 4,
+    example: '4',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  box: number;
+  box: string;
 
   @ApiProperty({
     description: 'Slot number',
     required: false,
-    example: 5,
+    example: '5',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  slot: number;
+  slot: string;
 
   @ApiProperty({
     description: 'Any note for this inventory',
@@ -91,16 +92,16 @@ export class InventoryLocation {
   zone: string;
 
   @IsNumber()
-  shelf: number;
+  shelf: string;
 
   @IsNumber()
-  row: number;
+  row: string;
 
   @IsNumber()
-  box: number;
+  box: string;
 
   @IsNumber()
-  slot: number;
+  slot: string;
 
   constructor(partial: Partial<InventoryLocation>) {
     Object.assign(this, partial);
@@ -108,14 +109,6 @@ export class InventoryLocation {
 }
 
 export class UpdateInventoryRequest {
-  @ApiProperty({
-    description: 'Item ID',
-    required: true,
-    example: 1,
-  })
-  @IsNumber()
-  item_id: number;
-
   @ApiProperty({
     description: 'Vault name',
     required: false,
@@ -137,38 +130,38 @@ export class UpdateInventoryRequest {
   @ApiProperty({
     description: 'Shelf number',
     required: false,
-    example: 2,
+    example: '2',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  shelf: number;
+  shelf: string;
 
   @ApiProperty({
     description: 'Row number',
     required: false,
-    example: 3,
+    example: '3',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  row: number;
+  row: string;
 
   @ApiProperty({
     description: 'Box number',
     required: false,
-    example: 4,
+    example: '4',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  box: number;
+  box: string;
 
   @ApiProperty({
     description: 'Slot number',
     required: false,
-    example: 5,
+    example: '5',
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  slot: number;
+  slot: string;
 
   @ApiProperty({
     description: 'Any note for this inventory',
@@ -253,38 +246,35 @@ export class InventoryDetails {
   @ApiProperty({
     description: 'Shelf number',
     required: true,
-    example: 2,
-    default: 0,
+    example: '2',
   })
-  @IsNumber()
-  shelf: number;
+  @IsString()
+  shelf: string;
 
   @ApiProperty({
     description: 'Row number',
     required: true,
-    example: 3,
-    default: 0,
+    example: '3',
   })
-  @IsNumber()
-  row: number;
+  @IsString()
+  row: string;
 
   @ApiProperty({
     description: 'Box number',
     required: true,
-    example: 4,
-    default: 0,
+    example: '4',
   })
-  @IsNumber()
-  box: number;
+  @IsString()
+  box: string;
 
   @ApiProperty({
     description: 'Slot number',
     required: true,
-    example: 5,
+    example: '5',
     default: 0,
   })
-  @IsNumber()
-  slot: number;
+  @IsString()
+  slot: string;
 
   @ApiProperty({
     description: 'label generated from all location fields',
@@ -347,28 +337,67 @@ export class InventoryDetails {
 
 export class ListInventoryRequest {
   @ApiProperty({
-    description: 'Item ID',
+    description: 'Item IDs',
     required: false,
-    example: 1,
+    example: [1, 2, 3],
   })
-  @IsNumber()
-  item_id?: number;
+  @IsArray()
+  @IsOptional()
+  item_ids: number[];
 
   @ApiProperty({
-    description: 'User UUID',
+    description: 'Vault name',
     required: false,
-    example: '12345678-1234-1234-1234-1234567890ab',
+    example: 'Dallas',
   })
   @IsString()
-  user_uuid?: string;
+  @IsOptional()
+  vault: string;
 
   @ApiProperty({
-    description: 'The status enum of the inventory record',
+    description: 'Zone number',
     required: false,
-    example: 1,
+    example: '1',
   })
-  @IsNumber()
-  status: number;
+  @IsString()
+  @IsOptional()
+  zone: string;
+
+  @ApiProperty({
+    description: 'Shelf number',
+    required: false,
+    example: '2',
+  })
+  @IsString()
+  @IsOptional()
+  shelf: string;
+
+  @ApiProperty({
+    description: 'Row number',
+    required: false,
+    example: '3',
+  })
+  @IsString()
+  @IsOptional()
+  row: string;
+
+  @ApiProperty({
+    description: 'Box number',
+    required: false,
+    example: '4',
+  })
+  @IsString()
+  @IsOptional()
+  box: string;
+
+  @ApiProperty({
+    description: 'Slot number',
+    required: true,
+    example: '5',
+  })
+  @IsString()
+  @IsOptional()
+  slot: string;
 
   @ApiProperty({
     description: 'The offset of the query',
@@ -376,6 +405,7 @@ export class ListInventoryRequest {
     example: 0,
   })
   @IsNumber()
+  @IsOptional()
   offset: number;
 
   @ApiProperty({
@@ -384,13 +414,20 @@ export class ListInventoryRequest {
     example: 10,
   })
   @IsNumber()
+  @IsOptional()
   limit: number;
 
   @ApiProperty({
-    description: 'The order of the query',
+    description: 'The order of the result by inventory id',
     required: false,
     example: 'ASC or DESC',
   })
+  @IsString()
+  @IsOptional()
   @IsEnum(['ASC', 'DESC'])
   order: string;
+
+  constructor(partial: Partial<ListInventoryRequest>) {
+    Object.assign(this, partial);
+  }
 }

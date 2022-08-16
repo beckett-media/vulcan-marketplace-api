@@ -358,11 +358,11 @@ export function generateNFTDescription(item: Item): string {
 export function getInventoryLabel(
   inventoryLocation: InventoryLocation,
 ): string {
-  const vault = inventoryLocation.vault;
-  const zone = inventoryLocation.zone;
+  const vault = inventoryLocation.vault ? inventoryLocation.vault : '*';
+  const zone = inventoryLocation.zone ? inventoryLocation.zone : '*';
   const shelf = inventoryLocation.shelf ? inventoryLocation.shelf : '*';
   const row = inventoryLocation.row ? inventoryLocation.row : '*';
   const box = inventoryLocation.box ? inventoryLocation.box : '*';
   const slot = inventoryLocation.slot ? inventoryLocation.slot : '*';
-  return `${vault}-${zone}-${shelf}-${row}-${box}-${slot}`;
+  return `[vault]:${vault}-[zone]:${zone}-[shelf]:${shelf}-[row]:${row}-[box]:${box}-[slot]:${slot}`;
 }

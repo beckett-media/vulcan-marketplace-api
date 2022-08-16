@@ -156,20 +156,28 @@ Content-Type: application/json
   "item_id": 38,
   "vault": "Dallas",
   "zone": "Cabinet",
-  "shelf": 1,
-  "box": 2
+  "shelf": "1",
+  "box": "2"
 }
 
-### Create inventory
+### Get single inventory
 Get http://yifan-hp-z620:3300/inventory/2
+
+### Query inventory
+Get http://yifan-hp-z620:3300/inventory
+Content-Type: application/json
+
+{
+  "item_ids": [38, 39]
+}
 
 ### Update inventory
 PUT http://yifan-hp-z620:3300/inventory/2
 Content-Type: application/json
 
 {
-  "item_id": 38,
-  "box": 123
+  "box": "123",
+  "note": "test"
 }
 
 ### list the vaulted item

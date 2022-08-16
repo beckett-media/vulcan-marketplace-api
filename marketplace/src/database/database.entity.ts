@@ -249,7 +249,7 @@ export class Listing {
 }
 
 @Entity()
-@Index(['item_id'])
+@Index(['item_id'], { unique: true })
 @Index(['label'], { unique: true })
 @Index(['vault', 'zone', 'shelf'])
 export class Inventory {
@@ -265,17 +265,17 @@ export class Inventory {
   @Column()
   zone: string;
 
-  @Column({ nullable: true })
-  shelf: number;
+  @Column({ default: '' })
+  shelf: string;
 
-  @Column({ nullable: true })
-  row: number;
+  @Column({ default: '' })
+  row: string;
 
-  @Column({ nullable: true })
-  box: number;
+  @Column({ default: '' })
+  box: string;
 
-  @Column({ nullable: true })
-  slot: number;
+  @Column({ default: '' })
+  slot: string;
 
   @Column()
   label: string;
