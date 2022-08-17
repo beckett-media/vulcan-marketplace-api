@@ -12,10 +12,16 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
+import { ActionLogRequest } from 'src/marketplace/dtos/marketplace.dto';
 import { OnlyAllowGroups } from '../auth/groups.decorator';
 import { GroupsGuard } from '../auth/groups.guard';
 import { JwtAuthGuard } from '../auth/jwt.authguard';
-import { Group } from '../config/enum';
+import {
+  ActionLogActorType,
+  ActionLogEntityType,
+  ActionLogType,
+  Group,
+} from '../config/enum';
 import { DetailedLogger } from '../logger/detailed.logger';
 import {
   InventoryRequest,
@@ -44,10 +50,25 @@ export class InventoryController {
     description: 'Return created inventory record',
   })
   @ApiProduces('application/json')
-  async newInventory(@Body() inventoryRequest: InventoryRequest) {
+  async newInventory(
+    @Body() inventoryRequest: InventoryRequest,
+    @Request() request: any,
+  ) {
     const inventoryDetails = await this.inventoryService.newInventory(
       inventoryRequest,
     );
+
+    // record user action
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoAdmin,
+      actor: request.user,
+      entity_type: ActionLogEntityType.Inventory,
+      entity: inventoryDetails.id.toString(),
+      type: ActionLogType.NewInventory,
+      extra: JSON.stringify(inventoryRequest),
+    });
+    await this.inventoryService.newActionLog(actionLogRequest);
+
     return inventoryDetails;
   }
 
@@ -101,11 +122,24 @@ export class InventoryController {
   async updateInventory(
     @Param('inventory_id') inventory_id: number,
     @Body() updateInventoryRequest: UpdateInventoryRequest,
+    @Request() request: any,
   ) {
     const inventoryDetails = await this.inventoryService.updateInventory(
       inventory_id,
       updateInventoryRequest,
     );
+
+    // record user action
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoAdmin,
+      actor: request.user,
+      entity_type: ActionLogEntityType.Inventory,
+      entity: inventoryDetails.id.toString(),
+      type: ActionLogType.NewInventory,
+      extra: JSON.stringify(UpdateInventoryRequest),
+    });
+    await this.inventoryService.newActionLog(actionLogRequest);
+
     return inventoryDetails;
   }
 }

@@ -14,6 +14,19 @@ import {
   ListInventoryRequest,
   UpdateInventoryRequest,
 } from './dtos/inventory.dto';
+import {
+  ActionLogDetails,
+  ActionLogRequest,
+} from 'src/marketplace/dtos/marketplace.dto';
+import {
+  ActionLogActorType,
+  ActionLogActorTypeReadable,
+  ActionLogEntityType,
+  ActionLogEntityTypeReadable,
+  ActionLogType,
+  ActionLogTypeReadable,
+} from 'src/config/enum';
+import { Inventory } from 'src/database/database.entity';
 
 @Injectable()
 export class InventoryService {
@@ -35,6 +48,7 @@ export class InventoryService {
     const inventory = await this.databaseService.createNewInventory(
       inventoryRequest,
     );
+
     const item = await this.databaseService.getItem(inventory.item_id);
     const user = await this.databaseService.getUser(item.user);
     return newInventoryDetails(inventory, item, user, vault);
@@ -104,5 +118,23 @@ export class InventoryService {
       newInventory.item_id,
     );
     return newInventoryDetails(newInventory, item, user, vault);
+  }
+
+  // create new action log
+  async newActionLog(request: ActionLogRequest): Promise<ActionLogDetails> {
+    // create new action log
+    const actionLog = await this.databaseService.createNewActionLog(request);
+    // return new action log details
+    return new ActionLogDetails({
+      id: actionLog.id,
+      type: actionLog.type,
+      type_desc: ActionLogTypeReadable[actionLog.type],
+      actor: actionLog.actor,
+      actor_type_desc: ActionLogActorTypeReadable[actionLog.actor_type],
+      entity: actionLog.entity,
+      entity_type_desc: ActionLogEntityTypeReadable[actionLog.entity_type],
+      created_at: actionLog.created_at,
+      extra: actionLog.extra,
+    });
   }
 }

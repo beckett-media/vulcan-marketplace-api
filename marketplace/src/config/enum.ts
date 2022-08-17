@@ -97,6 +97,8 @@ export enum ActionLogType {
   Withdrawal = 7,
   Pricing = 8,
   Sale = 9,
+  NewInventory = 10,
+  UpdateInventory = 11,
 }
 
 export const ActionLogTypeReadable = {
@@ -109,6 +111,8 @@ export const ActionLogTypeReadable = {
   7: 'Withdrawal Vaulting',
   8: 'Set Price',
   9: 'Listing Sale',
+  10: 'New Inventory',
+  11: 'Update Inventory',
 };
 
 export enum ActionLogActorType {
@@ -127,14 +131,16 @@ export enum ActionLogEntityType {
   Submission = 1,
   Vaulting = 2,
   Listing = 3,
-  Purchase = 4,
+  Sales = 4,
+  Inventory = 5,
 }
 
 export const ActionLogEntityTypeReadable = {
   1: 'Submission',
   2: 'Vaulting',
   3: 'Listing',
-  4: 'Purchase',
+  4: 'Sales',
+  5: 'Inventory',
 };
 
 export enum ListActionLogType {
