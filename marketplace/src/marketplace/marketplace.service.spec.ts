@@ -549,6 +549,9 @@ describe('MarketplaceService', () => {
       true,
     );
     const submission = await service.submitItem(submissionRequest);
+    const submissionDetails = await service.getSubmission(
+      submission.submission_id,
+    );
     const submissionUpdateApproved = new SubmissionUpdate({
       status: SubmissionStatus.Approved,
     });
@@ -627,6 +630,9 @@ describe('MarketplaceService', () => {
     expect(vaultingDetails.status_desc).toBe(
       VaultingStatusReadable[VaultingStatus.Minted],
     );
+    expect(vaultingDetails.image_url).toBe(submissionDetails.image_url);
+    expect(vaultingDetails.image_rev_url).toBe(submissionDetails.image_rev_url);
+    expect(vaultingDetails.nft_image_url).toBeDefined();
 
     //  burn tx hash should still be empty
     expect(vaultingDetails.burn_tx_hash).toBe('');

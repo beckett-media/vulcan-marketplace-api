@@ -100,6 +100,7 @@ export function newSubmissionDetails(
 
 export function newVaultingDetails(
   vaulting: Vaulting,
+  submission: Submission,
   item: Item,
   user: User,
 ): VaultingDetails {
@@ -130,7 +131,9 @@ export function newVaultingDetails(
     autograph: item.autograph,
     subject: item.subject,
     est_value: item.est_value,
-    image_url: vaulting.image,
+    nft_image_url: vaulting.image,
+    image_url: submission.image,
+    image_rev_url: submission.image_rev,
     status: vaulting.status,
     status_desc: VaultingStatusReadable[vaulting.status],
     mint_tx_hash: vaulting.mint_tx_hash,

@@ -305,7 +305,22 @@ export class DatabaseService {
     const submission = await this.submissionRepo.findOne(submission_id);
     // if we can not find submission, throw not found error
     if (!submission) {
-      throw new NotFoundException('Submission not found');
+      throw new NotFoundException(
+        `Submission not found for id: ${submission_id}`,
+      );
+    }
+    return submission;
+  }
+
+  async getSubmissionByItem(item_id: number): Promise<Submission> {
+    const submission = await this.submissionRepo.findOne({
+      where: { item_id: item_id },
+    });
+    // if we can not find submission, throw not found error
+    if (!submission) {
+      throw new NotFoundException(
+        `Submission not found for item id: ${item_id}`,
+      );
     }
     return submission;
   }

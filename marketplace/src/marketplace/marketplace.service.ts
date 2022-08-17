@@ -570,11 +570,17 @@ export class MarketplaceService {
     // get user details from database
     const user_details = await this.databaseService.listUsers(user_ids);
     // create new vaulting details from vaultings and item details
-    const vaultingDetails = vaultings.map((vaulting) => {
-      const item = item_details.find((item) => item.id === vaulting.item_id);
-      const user = user_details.find((user) => user.id === vaulting.user);
-      return newVaultingDetails(vaulting, item, user);
-    });
+    const vaultingDetails = await Promise.all(
+      vaultings.map(async (vaulting): Promise<VaultingDetails> => {
+        const item = item_details.find((item) => item.id === vaulting.item_id);
+        const user = user_details.find((user) => user.id === vaulting.user);
+        const submission = await this.databaseService.getSubmissionByItem(
+          item.id,
+        );
+        return newVaultingDetails(vaulting, submission, item, user);
+      }),
+    );
+
     return vaultingDetails;
   }
 
@@ -736,9 +742,12 @@ export class MarketplaceService {
 
   async getVaulting(vaulting_id: number): Promise<VaultingDetails> {
     const vaulting = await this.databaseService.getVaulting(vaulting_id);
+    const submission = await this.databaseService.getSubmissionByItem(
+      vaulting.item_id,
+    );
     const item = await this.databaseService.getItem(vaulting.item_id);
     const user = await this.databaseService.getUser(vaulting.user);
-    return newVaultingDetails(vaulting, item, user);
+    return newVaultingDetails(vaulting, submission, item, user);
   }
 
   async getVaultingBySubmissionID(
@@ -747,19 +756,23 @@ export class MarketplaceService {
     const vaulting = await this.databaseService.getVaultingBySubmissionID(
       submission_id,
     );
+    const submission = await this.databaseService.getSubmission(submission_id);
     // if no vaulting found, return null
     if (!vaulting) {
       return null;
     }
     const item = await this.databaseService.getItem(vaulting.item_id);
     const user = await this.databaseService.getUser(vaulting.user);
-    return newVaultingDetails(vaulting, item, user);
+    return newVaultingDetails(vaulting, submission, item, user);
   }
 
   async updateVaulting(
     vaultingUpdate: VaultingUpdate,
   ): Promise<VaultingDetails> {
     const vaulting = await this.databaseService.updateVaulting(vaultingUpdate);
+    const submission = await this.databaseService.getSubmissionByItem(
+      vaulting.item_id,
+    );
     const item = await this.databaseService.getItem(vaulting.item_id);
     const user = await this.databaseService.getUser(vaulting.user);
 
@@ -794,7 +807,7 @@ export class MarketplaceService {
     });
     await this.newActionLog(actionLogRequest);
 
-    return newVaultingDetails(vaulting, item, user);
+    return newVaultingDetails(vaulting, submission, item, user);
   }
 
   // create new listing

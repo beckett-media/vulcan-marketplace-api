@@ -1485,13 +1485,31 @@ export class VaultingDetails {
   est_value: number;
 
   @ApiProperty({
-    description: 'The image url of the vaulted item',
+    description: 'The NFT image of the vaulted item',
+    required: true,
+    example: 'https://example.com/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  nft_image_url: string;
+
+  @ApiProperty({
+    description: 'The front image of the vaulted item',
     required: true,
     example: 'https://example.com/image.jpg',
   })
   @IsString()
   @IsOptional()
   image_url: string;
+
+  @ApiProperty({
+    description: 'The back image of the vaulted item',
+    required: true,
+    example: 'https://example.com/image.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  image_rev_url: string;
 
   constructor(partial: Partial<VaultingDetails>) {
     Object.assign(this, partial);
