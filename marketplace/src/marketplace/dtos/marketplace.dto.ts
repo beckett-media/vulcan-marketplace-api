@@ -1498,6 +1498,7 @@ export class VaultingDetails {
   }
 }
 
+// called by API
 export class VaultingUpdate {
   @ApiProperty({
     description: 'The type of the vaulting update',

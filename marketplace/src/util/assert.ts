@@ -14,6 +14,7 @@ export function assertOwnerOrAdmin(jwt: any, entity: UserEntity, logger: any) {
     return;
   }
 
+  // if client is not logged in
   if (!!!jwt || !!!jwt.groups || !!!jwt.user) {
     throw new ForbiddenException('No login admin/user found');
   }

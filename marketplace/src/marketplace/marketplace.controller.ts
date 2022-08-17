@@ -150,7 +150,7 @@ export class MarketplaceController {
   }
 
   @Put('/submission/order/:submission_order_id')
-  @OnlyAllowGroups(Group.User, Group.Admin)
+  @OnlyAllowGroups(Group.Admin)
   @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Update submission order by id',
@@ -299,6 +299,8 @@ export class MarketplaceController {
   }
 
   @Post('/vaulting')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Store new vaulting records',
   })
@@ -312,13 +314,19 @@ export class MarketplaceController {
     description: 'Submission of the item failed',
   })
   @ApiProduces('application/json')
-  async vaultItem(@Body() body: VaultingRequest): Promise<VaultingResponse> {
+  async vaultItem(
+    @Body() body: VaultingRequest,
+    @Request() request: any,
+  ): Promise<VaultingResponse> {
+    assertOwnerOrAdmin(request.user, body, this.logger);
     const submissionResponse = await this.marketplaceService.newVaulting(body);
     return submissionResponse;
   }
 
   // get vaulting by id
   @Get('/vaulting/:vaulting_id')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get vaulting by id',
   })
@@ -334,15 +342,19 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async getVaulting(
     @Param('vaulting_id') vaulting_id: number,
+    @Request() request: any,
   ): Promise<VaultingDetails> {
     const vaultingDetails = await this.marketplaceService.getVaulting(
       vaulting_id,
     );
+    assertOwnerOrAdmin(request.user, vaultingDetails, this.logger);
     return vaultingDetails;
   }
 
-  // get vaulting by id
+  // get vaulting by submission id
   @Get('/vaulting/submission/:submission_id')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get vaulting by submission id',
   })
@@ -358,9 +370,11 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async getVaultingBySubmissionID(
     @Param('submission_id') submission_id: number,
+    @Request() request: any,
   ): Promise<VaultingDetails[]> {
     const vaultingDetails =
       await this.marketplaceService.getVaultingBySubmissionID(submission_id);
+    assertOwnerOrAdmin(request.user, vaultingDetails, this.logger);
     // if no vaulting found, return null
     if (vaultingDetails == null) {
       return [];
@@ -370,6 +384,8 @@ export class MarketplaceController {
 
   // get vaulting by user id
   @Get('/vaulting')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get a list of vaultings from a user',
   })
@@ -385,7 +401,9 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async listVaultings(
     @Query() query: ListVaultingsQuery,
+    @Request() request: any,
   ): Promise<VaultingDetails[]> {
+    assertOwnerOrAdmin(request.user, query, this.logger);
     const vaultingDetails = await this.marketplaceService.listVaultings(
       query.user,
       query.offset,
@@ -397,6 +415,8 @@ export class MarketplaceController {
 
   // withdraw vaulting by id
   @Delete('/vaulting/:vaulting_id')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Withdraw vaulting by id',
   })
@@ -412,7 +432,10 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async withdrawVaultings(
     @Param('vaulting_id') vaulting_id: number,
+    @Request() request: any,
   ): Promise<VaultingDetails> {
+    const vaulting = await this.marketplaceService.getVaulting(vaulting_id);
+    assertOwnerOrAdmin(request.user, vaulting, this.logger);
     const vaultingDetails = await this.marketplaceService.withdrawVaulting(
       vaulting_id,
     );
@@ -420,6 +443,7 @@ export class MarketplaceController {
   }
 
   // update vaulting status id
+  // called by API
   @Put('/vaulting')
   @ApiOperation({
     summary: 'Update vaulting record by id (callback for Bravo API)',
@@ -442,6 +466,8 @@ export class MarketplaceController {
   }
 
   @Get('/listing/:listing_id')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get listing by id',
   })
@@ -463,6 +489,8 @@ export class MarketplaceController {
   }
 
   @Get('/listing')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get all listings for a given user',
   })
@@ -489,6 +517,8 @@ export class MarketplaceController {
   }
 
   @Post('/listing')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Create new listing for vaulted item',
   })
@@ -497,12 +527,20 @@ export class MarketplaceController {
     description: 'Listing created',
   })
   @ApiProduces('application/json')
-  async createListing(@Body() body: ListingRequest): Promise<ListingResponse> {
-    const listingDetails = await this.marketplaceService.newListing(body);
+  async createListing(
+    @Body() listingRequest: ListingRequest,
+    @Request() request: any,
+  ): Promise<ListingResponse> {
+    assertOwnerOrAdmin(request.user, listingRequest, this.logger);
+    const listingDetails = await this.marketplaceService.newListing(
+      listingRequest,
+    );
     return listingDetails;
   }
 
   @Get('/action/user/:uuid')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary:
       "Get a list of user's actions for all entities (submissions, listings, vaultings, etc)",
@@ -516,6 +554,7 @@ export class MarketplaceController {
   async listUserActionLogs(
     @Param('uuid') userUUID: string,
     @Query() query: ListActionLogsQuery,
+    @Request() request: any,
   ): Promise<ActionLogDetails[]> {
     const user = await this.marketplaceService.getUserByUUID(userUUID);
     const actor = user.id.toString();
@@ -534,6 +573,8 @@ export class MarketplaceController {
   }
 
   @Put('/listing/:listing_id')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Update listing for vaulted item',
   })
@@ -544,16 +585,21 @@ export class MarketplaceController {
   @ApiProduces('application/json')
   async updateListing(
     @Param('listing_id') listing_id: number,
-    @Body() body: ListingUpdate,
+    @Body() listingUpdate: ListingUpdate,
+    @Request() request: any,
   ): Promise<ListingDetails> {
+    const listing = await this.marketplaceService.getListing(listing_id);
+    assertOwnerOrAdmin(request.user, listing, this.logger);
     const listingDetails = await this.marketplaceService.updateListing(
       listing_id,
-      body,
+      listingUpdate,
     );
     return listingDetails;
   }
 
   @Get('/action/:entity/:id')
+  @OnlyAllowGroups(Group.User, Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get a list of all user actions associated with an entity',
   })
@@ -568,6 +614,7 @@ export class MarketplaceController {
     @Param('entity') entity: string,
     @Param('id') id: string,
     @Query() query: ListActionLogsQuery,
+    @Request() request: any,
   ): Promise<ActionLogDetails[]> {
     var entityType: number;
     switch (entity) {

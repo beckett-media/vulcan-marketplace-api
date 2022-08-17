@@ -8,8 +8,14 @@ import {
   Param,
   Query,
   Put,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
+import { OnlyAllowGroups } from '../auth/groups.decorator';
+import { GroupsGuard } from '../auth/groups.guard';
+import { JwtAuthGuard } from '../auth/jwt.authguard';
+import { Group } from '../config/enum';
 import { DetailedLogger } from '../logger/detailed.logger';
 import {
   InventoryRequest,
@@ -28,6 +34,8 @@ export class InventoryController {
   constructor(private inventoryService: InventoryService) {}
 
   @Post('/')
+  @OnlyAllowGroups(Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Create new inventory record for submitted item',
   })
@@ -44,6 +52,8 @@ export class InventoryController {
   }
 
   @Get('/:inventory_id')
+  @OnlyAllowGroups(Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Get inventory record by id',
   })
@@ -60,6 +70,8 @@ export class InventoryController {
   }
 
   @Get('/')
+  @OnlyAllowGroups(Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'List inventory records',
   })
@@ -68,12 +80,16 @@ export class InventoryController {
     description: 'Return queried inventory records',
   })
   @ApiProduces('application/json')
-  async listInventory(@Body() request: ListInventoryRequest) {
-    const inventoryDetails = await this.inventoryService.listInventory(request);
+  async listInventory(@Body() listInventoryRequest: ListInventoryRequest) {
+    const inventoryDetails = await this.inventoryService.listInventory(
+      listInventoryRequest,
+    );
     return inventoryDetails;
   }
 
   @Put('/:inventory_id')
+  @OnlyAllowGroups(Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Update inventory record by id',
   })
