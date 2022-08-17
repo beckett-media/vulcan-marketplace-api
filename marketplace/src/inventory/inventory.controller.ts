@@ -12,7 +12,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
-import { ActionLogRequest } from 'src/marketplace/dtos/marketplace.dto';
+import { ActionLogRequest } from '../marketplace/dtos/marketplace.dto';
 import { OnlyAllowGroups } from '../auth/groups.decorator';
 import { GroupsGuard } from '../auth/groups.guard';
 import { JwtAuthGuard } from '../auth/jwt.authguard';

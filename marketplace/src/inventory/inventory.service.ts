@@ -17,7 +17,7 @@ import {
 import {
   ActionLogDetails,
   ActionLogRequest,
-} from 'src/marketplace/dtos/marketplace.dto';
+} from '../marketplace/dtos/marketplace.dto';
 import {
   ActionLogActorType,
   ActionLogActorTypeReadable,
@@ -25,8 +25,8 @@ import {
   ActionLogEntityTypeReadable,
   ActionLogType,
   ActionLogTypeReadable,
-} from 'src/config/enum';
-import { Inventory } from 'src/database/database.entity';
+} from '../config/enum';
+import { Inventory } from '../database/database.entity';
 
 @Injectable()
 export class InventoryService {
