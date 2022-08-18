@@ -185,7 +185,6 @@ export class MarketplaceService {
         submissionOrder,
         [imagePath, imagePathRev],
       );
-
       // record user action
       const trimmedRequest = trimRequestWithImage(request);
       const actionLogRequest = new ActionLogRequest({

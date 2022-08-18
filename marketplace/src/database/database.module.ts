@@ -16,11 +16,10 @@ import { DatabaseService } from './database.service';
 export function GetDBConnection(): TypeOrmModuleOptions {
   let env = process.env[RUNTIME_ENV];
   let config = configuration()[env];
-
   switch (env) {
     case 'test':
       return {
-        type: 'sqlite',
+        type: 'mysql',
         database: config['db']['name'],
         entities: [
           Submission,
@@ -35,10 +34,14 @@ export function GetDBConnection(): TypeOrmModuleOptions {
         ],
         synchronize: config['db']['sync'],
         keepConnectionAlive: true,
+        host: config['db']['host'],
+        port: config['db']['port'],
+        username: config['db']['username'],
+        password: config['db']['password'],
       };
     case 'dev':
       return {
-        type: 'sqlite',
+        type: 'mysql',
         database: config['db']['name'],
         entities: [
           Submission,
@@ -53,6 +56,10 @@ export function GetDBConnection(): TypeOrmModuleOptions {
         ],
         synchronize: config['db']['sync'],
         keepConnectionAlive: true,
+        host: config['db']['host'],
+        port: config['db']['port'],
+        username: config['db']['username'],
+        password: config['db']['password'],
       };
     case 'awsdev':
       return {

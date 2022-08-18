@@ -133,7 +133,7 @@ export class Item {
   @Column()
   title: string;
 
-  @Column({ length: 50000 })
+  @Column({ length: 10000 })
   description: string;
 
   @Column()
@@ -321,6 +321,6 @@ export class ActionLog {
   @Column()
   created_at: number;
 
-  @Column({ length: 50000 })
+  @Column({ length: 10000 })
   extra: string;
 }

@@ -8,7 +8,14 @@ import {
   Inventory,
   SubmissionOrder,
 } from '../database/database.entity';
-import { Repository, getManager, In, Not, getConnection } from 'typeorm';
+import {
+  Repository,
+  getManager,
+  In,
+  Not,
+  getConnection,
+  EntityManager,
+} from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -109,50 +116,55 @@ export class DatabaseService {
     user: number,
     uuid: string,
   ): Promise<SubmissionOrder> {
-    var newOrder: SubmissionOrder;
-    if (true) {
+    const maxTries = 10;
+    var currentTry = 0;
+    var tryTransaction = true;
+
+    var submissionOrder = null;
+    while (tryTransaction) {
+      currentTry++;
       try {
-        await getManager().transaction(
-          'SERIALIZABLE',
-          async (transactionalEntityManager) => {
-            const order = await this.submissionOrderRepo.findOne({
-              where: { uuid: uuid },
-            });
-            newOrder = this.submissionOrderRepo.create({
-              user: user,
-              uuid: uuid,
-              status: SubmissionOrderStatus.Created,
-              created_at: Math.round(Date.now() / 1000),
-            });
-            newOrder = await this.submissionOrderRepo.save(newOrder);
-          },
-        );
-        this.logger.log(`submission order creation done: ${uuid}`);
-        return newOrder;
-      } catch (error) {
-        this.logger.log(`submission order creation failed: ${uuid}`);
-        const retry = 100;
-        const checkInterval = 50;
-        var count = 0;
-        while (count < retry) {
-          sleep(checkInterval);
-          var existingOrder = await this.submissionOrderRepo.findOne({
-            where: { uuid: uuid },
-          });
-          count += 1;
-          if (!!existingOrder) {
-            this.logger.log(
-              `submission order creation coming-back(${count}): ${uuid}`,
-            );
-            return existingOrder;
-          }
-        }
-        throw new InternalServerErrorException(
-          `submission order creation failed, uuid:${uuid}`,
-        );
+        submissionOrder = await this.newSubmissionOrderWithLock(user, uuid);
+      } catch (e) {
+        this.logger.error(`Submission order with lock: ${e}`);
+      }
+      if (null !== submissionOrder) {
+        tryTransaction = false; // transaction succeeded
+      }
+
+      if (currentTry >= maxTries) {
+        throw new Error('Deadlock on maybeCreateSubmissionOrder found.');
       }
     }
-    return newOrder;
+
+    return submissionOrder;
+  }
+
+  async newSubmissionOrderWithLock(
+    user: number,
+    uuid: string,
+  ): Promise<SubmissionOrder> {
+    return getManager().transaction(
+      (entityManager: EntityManager): Promise<SubmissionOrder> => {
+        return entityManager
+          .createQueryBuilder(SubmissionOrder, 'order')
+          .setLock('pessimistic_read')
+          .where({ uuid: uuid })
+          .getOne()
+          .then(async (result) => {
+            var submissionOrder = result;
+            if (undefined === submissionOrder) {
+              submissionOrder = new SubmissionOrder();
+              submissionOrder.user = user;
+              submissionOrder.uuid = uuid;
+              submissionOrder.status = SubmissionOrderStatus.Created;
+              submissionOrder.created_at = Math.round(Date.now() / 1000);
+              return await entityManager.save(submissionOrder);
+            }
+            return submissionOrder;
+          });
+      },
+    );
   }
 
   async discardSubmissionOrder(order_id: number) {
@@ -194,53 +206,48 @@ export class DatabaseService {
     var status: number;
     var order_id: number;
     try {
-      await getManager().transaction(
-        this.isolation,
-        async (transactionalEntityManager) => {
-          order_id = submissionOrder.id;
-          const newItem = this.itemRepo.create({
-            uuid: uuidv4(),
-            user: user.id,
-            type: submission.type,
-            issue: submission.issue,
-            publisher: submission.publisher,
-            player: submission.player,
-            sport: submission.sport,
-            set_name: submission.set_name,
-            card_number: submission.card_number,
-            grading_company: submission.grading_company,
-            serial_number: submission.serial_number,
-            title: submission.title,
-            description: submission.description,
-            genre: submission.genre,
-            manufacturer: submission.manufacturer,
-            year: submission.year,
-            overall_grade: submission.overall_grade,
-            sub_grades: submission.sub_grades,
-            autograph: submission.autograph,
-            subject: submission.subject,
-            est_value: submission.est_value,
-            status: ItemStatus.Submitted,
-          });
-          const itemSaved = await this.itemRepo.save(newItem);
-          item_id = itemSaved.id;
-          uuid = itemSaved.uuid;
-          const newSubmission = this.submissionRepo.create({
-            user: user.id,
-            order_id: submissionOrder.id,
-            item_id: itemSaved.id,
-            status: SubmissionStatus.Submitted,
-            image: imagePaths[0],
-            image_rev: imagePaths[1],
-            created_at: Math.round(Date.now() / 1000),
-            received_at: 0,
-            approved_at: 0,
-            rejected_at: 0,
-          });
-          const submissionSaved = await this.submissionRepo.save(newSubmission);
-          submission_id = submissionSaved.id;
-        },
-      );
+      order_id = submissionOrder.id;
+      const newItem = this.itemRepo.create({
+        uuid: uuidv4(),
+        user: user.id,
+        type: submission.type,
+        issue: submission.issue,
+        publisher: submission.publisher,
+        player: submission.player,
+        sport: submission.sport,
+        set_name: submission.set_name,
+        card_number: submission.card_number,
+        grading_company: submission.grading_company,
+        serial_number: submission.serial_number,
+        title: submission.title,
+        description: submission.description,
+        genre: submission.genre,
+        manufacturer: submission.manufacturer,
+        year: submission.year,
+        overall_grade: submission.overall_grade,
+        sub_grades: submission.sub_grades,
+        autograph: submission.autograph,
+        subject: submission.subject,
+        est_value: submission.est_value,
+        status: ItemStatus.Submitted,
+      });
+      const itemSaved = await this.itemRepo.save(newItem);
+      item_id = itemSaved.id;
+      uuid = itemSaved.uuid;
+      const newSubmission = this.submissionRepo.create({
+        user: user.id,
+        order_id: submissionOrder.id,
+        item_id: itemSaved.id,
+        status: SubmissionStatus.Submitted,
+        image: imagePaths[0],
+        image_rev: imagePaths[1],
+        created_at: Math.round(Date.now() / 1000),
+        received_at: 0,
+        approved_at: 0,
+        rejected_at: 0,
+      });
+      const submissionSaved = await this.submissionRepo.save(newSubmission);
+      submission_id = submissionSaved.id;
     } catch (error) {
       status = SubmissionStatus.Failed;
       this.logger.error(error);
@@ -765,21 +772,16 @@ export class DatabaseService {
   async createNewActionLog(request: ActionLogRequest): Promise<ActionLog> {
     var actionLog: ActionLog;
     try {
-      await getManager().transaction(
-        this.isolation,
-        async (transactionalEntityManager) => {
-          const newActionLog = this.actionLogRepo.create({
-            type: request.type,
-            actor_type: request.actor_type,
-            actor: request.actor,
-            entity_type: request.entity_type,
-            entity: request.entity,
-            created_at: Math.round(Date.now() / 1000),
-            extra: request.extra,
-          });
-          actionLog = await this.actionLogRepo.save(newActionLog);
-        },
-      );
+      const newActionLog = this.actionLogRepo.create({
+        type: request.type,
+        actor_type: request.actor_type,
+        actor: request.actor,
+        entity_type: request.entity_type,
+        entity: request.entity,
+        created_at: Math.round(Date.now() / 1000),
+        extra: request.extra,
+      });
+      actionLog = await this.actionLogRepo.save(newActionLog);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error);

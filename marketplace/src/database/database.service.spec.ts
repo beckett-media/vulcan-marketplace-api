@@ -13,23 +13,7 @@ import {
   SubmissionOrder,
 } from '../database/database.entity';
 import { clearDB, newSubmissionRequest } from '../util/testing';
-
-const DBConnection = {
-  type: 'sqlite',
-  database: 'beckett_marketplace_test.sqlite',
-  entities: [
-    Submission,
-    Item,
-    Vaulting,
-    User,
-    Listing,
-    ActionLog,
-    Inventory,
-    SubmissionOrder,
-  ],
-  synchronize: true,
-  keepConnectionAlive: true,
-} as TypeOrmModuleOptions;
+import { GetDBConnection } from './database.module';
 
 describe('DatabaseService', () => {
   let service: DatabaseService;
@@ -39,7 +23,7 @@ describe('DatabaseService', () => {
       exports: [DatabaseService],
       providers: [DatabaseService],
       imports: [
-        TypeOrmModule.forRoot(DBConnection),
+        TypeOrmModule.forRoot(GetDBConnection()),
         TypeOrmModule.forFeature([
           Submission,
           Item,
