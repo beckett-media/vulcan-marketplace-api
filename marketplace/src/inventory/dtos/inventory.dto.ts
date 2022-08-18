@@ -339,16 +339,15 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'Item IDs',
     required: false,
-    example: [1, 2, 3],
+    example: '1,2,3',
   })
-  @IsArray()
+  @IsString()
   @IsOptional()
-  item_ids: number[];
+  item_ids: string;
 
   @ApiProperty({
     description: 'Vault name',
     required: false,
-    example: 'Dallas',
   })
   @IsString()
   @IsOptional()
@@ -357,7 +356,6 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'Zone number',
     required: false,
-    example: '1',
   })
   @IsString()
   @IsOptional()
@@ -366,7 +364,6 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'Shelf number',
     required: false,
-    example: '2',
   })
   @IsString()
   @IsOptional()
@@ -375,7 +372,6 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'Row number',
     required: false,
-    example: '3',
   })
   @IsString()
   @IsOptional()
@@ -384,7 +380,6 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'Box number',
     required: false,
-    example: '4',
   })
   @IsString()
   @IsOptional()
@@ -392,8 +387,7 @@ export class ListInventoryRequest {
 
   @ApiProperty({
     description: 'Slot number',
-    required: true,
-    example: '5',
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -402,7 +396,6 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'The offset of the query',
     required: false,
-    example: 0,
   })
   @IsNumber()
   @IsOptional()
@@ -411,7 +404,6 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'The limit of the query',
     required: false,
-    example: 10,
   })
   @IsNumber()
   @IsOptional()
@@ -420,7 +412,6 @@ export class ListInventoryRequest {
   @ApiProperty({
     description: 'The order of the result by inventory id',
     required: false,
-    example: 'ASC or DESC',
   })
   @IsString()
   @IsOptional()

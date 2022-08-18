@@ -192,9 +192,19 @@ describe('DatabaseService', () => {
       expect(result.status).toBe(SubmissionStatus.Submitted);
     }
 
+    // list all submissions
+    const submissions = await service.listSubmissions(
+      user1.uuid,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions.length).toBe(9);
+
     // list submission orders
     var orders = await service.listSubmissionOrders(
-      'user1',
+      user1.uuid,
       undefined,
       undefined,
       undefined,

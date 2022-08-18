@@ -51,6 +51,7 @@ import {
   ListInventoryRequest,
   UpdateInventoryRequest,
 } from '../inventory/dtos/inventory.dto';
+import { sleep } from '../util/time';
 
 export const DEFAULT_USER_SOURCE = 'cognito';
 const INIT_COLLECTION = '';
@@ -108,20 +109,50 @@ export class DatabaseService {
     user: number,
     uuid: string,
   ): Promise<SubmissionOrder> {
-    const order = await this.submissionOrderRepo.findOne({
-      where: { uuid: uuid },
-    });
-    if (!order) {
-      const newOrder = this.submissionOrderRepo.create({
-        user: user,
-        uuid: uuid,
-        status: SubmissionOrderStatus.Created,
-        created_at: Math.round(Date.now() / 1000),
-      });
-      await this.submissionOrderRepo.save(newOrder);
-      return newOrder;
+    var newOrder: SubmissionOrder;
+    if (true) {
+      try {
+        await getManager().transaction(
+          'SERIALIZABLE',
+          async (transactionalEntityManager) => {
+            const order = await this.submissionOrderRepo.findOne({
+              where: { uuid: uuid },
+            });
+            newOrder = this.submissionOrderRepo.create({
+              user: user,
+              uuid: uuid,
+              status: SubmissionOrderStatus.Created,
+              created_at: Math.round(Date.now() / 1000),
+            });
+            newOrder = await this.submissionOrderRepo.save(newOrder);
+          },
+        );
+        this.logger.log(`submission order creation done: ${uuid}`);
+        return newOrder;
+      } catch (error) {
+        this.logger.log(`submission order creation failed: ${uuid}`);
+        const retry = 100;
+        const checkInterval = 50;
+        var count = 0;
+        while (count < retry) {
+          sleep(checkInterval);
+          var existingOrder = await this.submissionOrderRepo.findOne({
+            where: { uuid: uuid },
+          });
+          count += 1;
+          if (!!existingOrder) {
+            this.logger.log(
+              `submission order creation coming-back(${count}): ${uuid}`,
+            );
+            return existingOrder;
+          }
+        }
+        throw new InternalServerErrorException(
+          `submission order creation failed, uuid:${uuid}`,
+        );
+      }
     }
-    return order;
+    return newOrder;
   }
 
   async discardSubmissionOrder(order_id: number) {
@@ -975,12 +1006,12 @@ export class DatabaseService {
           }
           const newInventory = this.inventoryRepo.create({
             item_id: inventoryRequest.item_id,
-            vault: inventoryRequest.vault,
-            zone: inventoryRequest.zone,
-            shelf: inventoryRequest.shelf ? inventoryRequest.shelf : '',
-            row: inventoryRequest.row ? inventoryRequest.row : '',
-            box: inventoryRequest.box ? inventoryRequest.box : '',
-            slot: inventoryRequest.slot ? inventoryRequest.slot : '',
+            vault: inventoryRequest.vault.trim(),
+            zone: inventoryRequest.zone.trim(),
+            shelf: inventoryRequest.shelf ? inventoryRequest.shelf.trim() : '',
+            row: inventoryRequest.row ? inventoryRequest.row.trim() : '',
+            box: inventoryRequest.box ? inventoryRequest.box.trim() : '',
+            slot: inventoryRequest.slot ? inventoryRequest.slot.trim() : '',
             label: label,
             status: InventoryStatus.InStock,
             note: inventoryRequest.note ? inventoryRequest.note : '',
@@ -1024,7 +1055,11 @@ export class DatabaseService {
   ): Promise<Inventory[]> {
     var where_filter = {};
     if (!!listInventoryRequest.item_ids) {
-      where_filter['item_id'] = In(listInventoryRequest.item_ids);
+      // convert csv to number array
+      const item_ids = listInventoryRequest.item_ids
+        .split(',')
+        .map((item_id) => parseInt(item_id));
+      where_filter['item_id'] = In(item_ids);
     }
     if (!!listInventoryRequest.vault) {
       where_filter['vault'] = listInventoryRequest.vault;

@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 @Entity()
+@Index(['uuid'], { unique: true })
 @Index(['user', 'status'])
 export class SubmissionOrder {
   @PrimaryGeneratedColumn()

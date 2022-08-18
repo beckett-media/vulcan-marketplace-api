@@ -101,7 +101,7 @@ export class InventoryController {
     description: 'Return queried inventory records',
   })
   @ApiProduces('application/json')
-  async listInventory(@Body() listInventoryRequest: ListInventoryRequest) {
+  async listInventory(@Query() listInventoryRequest: ListInventoryRequest) {
     const inventoryDetails = await this.inventoryService.listInventory(
       listInventoryRequest,
     );

@@ -230,6 +230,14 @@ describe('InventoryService', () => {
     });
     inventories = await service.listInventory(listInventoryRequest);
     expect(inventories.length).toBe(2);
+
+    listInventoryRequest = new ListInventoryRequest({
+      item_ids: vaulting2.item_id + ',' + vaulting3.item_id,
+    });
+    inventories = await service.listInventory(listInventoryRequest);
+    expect(inventories.length).toBe(2);
+    expect(inventories[0].item_id).toBe(vaulting2.item_id);
+    expect(inventories[1].item_id).toBe(vaulting3.item_id);
   });
 
   it('should update inventory', async () => {
