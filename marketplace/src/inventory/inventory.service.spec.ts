@@ -253,31 +253,34 @@ describe('InventoryService', () => {
     var inventoryRequest = {
       item_id: vaulting.item_id,
       vault: 'dallas',
-      zone: 'cabinet',
-      box: '1',
-      row: '2',
-      slot: '3',
+      zone: 'cabinet 1',
+      box: '1 ',
+      row: ' 2',
+      slot: ' 3 ',
+      note: 'this is a note',
     };
     var inventory = await service.newInventory(
       new InventoryRequest(inventoryRequest),
     );
     expect(inventory.label).toBe(
-      '[vault]:dallas-[zone]:cabinet-[shelf]:*-[row]:2-[box]:1-[slot]:3',
+      '[vault]:dallas-[zone]:cabinet 1-[shelf]:*-[row]:2-[box]:1-[slot]:3',
     );
     expect(inventory.updated_at).toBe(0);
+    expect(inventory.note).toBe(inventoryRequest.note);
 
     var updateInventoryRequest = new UpdateInventoryRequest({
-      shelf: '99',
-      slot: '100',
+      shelf: ' 99',
+      slot: '100 ',
     });
     var updatedInventory = await service.updateInventory(
       inventory.id,
       updateInventoryRequest,
     );
     expect(updatedInventory.label).toBe(
-      '[vault]:dallas-[zone]:cabinet-[shelf]:99-[row]:2-[box]:1-[slot]:100',
+      '[vault]:dallas-[zone]:cabinet 1-[shelf]:99-[row]:2-[box]:1-[slot]:100',
     );
     expect(updatedInventory.updated_at).toBeGreaterThan(0);
+    expect(updatedInventory.note).toBe(inventoryRequest.note);
   });
 
   it('should fail inventory creation', async () => {

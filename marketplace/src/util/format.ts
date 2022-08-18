@@ -31,6 +31,7 @@ import {
 import {
   InventoryDetails,
   InventoryLocation,
+  InventoryRequest,
 } from '../inventory/dtos/inventory.dto';
 
 export function newSubmissionOrderDetails(
@@ -368,4 +369,27 @@ export function getInventoryLabel(
   const box = inventoryLocation.box ? inventoryLocation.box : '*';
   const slot = inventoryLocation.slot ? inventoryLocation.slot : '*';
   return `[vault]:${vault}-[zone]:${zone}-[shelf]:${shelf}-[row]:${row}-[box]:${box}-[slot]:${slot}`;
+}
+
+export function trimInventoryLocation(inventoryLocation: InventoryLocation) {
+  inventoryLocation.vault = inventoryLocation.vault
+    ? inventoryLocation.vault.trim()
+    : '';
+  inventoryLocation.zone = inventoryLocation.zone
+    ? inventoryLocation.zone.trim()
+    : '';
+  inventoryLocation.shelf = inventoryLocation.shelf
+    ? inventoryLocation.shelf.trim()
+    : '';
+  inventoryLocation.row = inventoryLocation.row
+    ? inventoryLocation.row.trim()
+    : '';
+  inventoryLocation.box = inventoryLocation.box
+    ? inventoryLocation.box.trim()
+    : '';
+  inventoryLocation.slot = inventoryLocation.slot
+    ? inventoryLocation.slot.trim()
+    : '';
+
+  return inventoryLocation;
 }

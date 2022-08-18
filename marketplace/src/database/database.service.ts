@@ -49,6 +49,7 @@ import {
   newListingDetails,
   newSubmissionDetails,
   newSubmissionOrderDetails,
+  trimInventoryLocation,
 } from '../util/format';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel';
@@ -126,7 +127,7 @@ export class DatabaseService {
       try {
         submissionOrder = await this.newSubmissionOrderWithLock(user, uuid);
       } catch (e) {
-        this.logger.error(`Submission order with lock: ${e}`);
+        this.logger.warn(`Submission order with lock: ${e}`);
       }
       if (null !== submissionOrder) {
         tryTransaction = false; // transaction succeeded
@@ -990,6 +991,10 @@ export class DatabaseService {
       await getManager().transaction(
         this.isolation,
         async (transactionalEntityManager) => {
+          // trim whitespace from inventoryRequest
+          inventoryRequest = trimInventoryLocation(
+            inventoryRequest,
+          ) as InventoryRequest;
           const label = getInventoryLabel(
             inventoryRequest as InventoryLocation,
           );
@@ -1008,12 +1013,12 @@ export class DatabaseService {
           }
           const newInventory = this.inventoryRepo.create({
             item_id: inventoryRequest.item_id,
-            vault: inventoryRequest.vault.trim(),
-            zone: inventoryRequest.zone.trim(),
-            shelf: inventoryRequest.shelf ? inventoryRequest.shelf.trim() : '',
-            row: inventoryRequest.row ? inventoryRequest.row.trim() : '',
-            box: inventoryRequest.box ? inventoryRequest.box.trim() : '',
-            slot: inventoryRequest.slot ? inventoryRequest.slot.trim() : '',
+            vault: inventoryRequest.vault,
+            zone: inventoryRequest.zone,
+            shelf: inventoryRequest.shelf ? inventoryRequest.shelf : '',
+            row: inventoryRequest.row ? inventoryRequest.row : '',
+            box: inventoryRequest.box ? inventoryRequest.box : '',
+            slot: inventoryRequest.slot ? inventoryRequest.slot : '',
             label: label,
             status: InventoryStatus.InStock,
             note: inventoryRequest.note ? inventoryRequest.note : '',
@@ -1127,6 +1132,9 @@ export class DatabaseService {
     updateInventoryRequest: UpdateInventoryRequest,
   ): Promise<Inventory> {
     const inventory = await this.getInventory(inventory_id);
+    updateInventoryRequest = trimInventoryLocation(
+      updateInventoryRequest as InventoryLocation,
+    ) as UpdateInventoryRequest;
     inventory.vault = updateInventoryRequest.vault
       ? updateInventoryRequest.vault
       : inventory.vault;
