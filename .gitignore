@@ -43,3 +43,6 @@ yarn.lock
 .vscode
 *.env
 *package-lock.json
+
+# Misc
+post.*

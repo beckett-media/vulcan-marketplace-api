@@ -23,19 +23,24 @@ function setupApp(app: INestApplication) {
   app.useGlobalPipes(new ValidationPipe({ forbidNonWhitelisted: true }));
 
   // swagger documents
-  const docConfig = new DocumentBuilder()
-    .addSecurity('JWT', {
-      type: 'apiKey',
-      in: 'header',
-      name: 'Authorization',
-    })
-    .addSecurityRequirements('JWT')
-    .setTitle('Marketplace API')
-    .setDescription('The Marketplace API documents')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, docConfig);
-  SwaggerModule.setup('api', app, document);
+  if (
+    process.env[RUNTIME_ENV] === 'dev' ||
+    process.env[RUNTIME_ENV] === 'awsdev'
+  ) {
+    const docConfig = new DocumentBuilder()
+      .addSecurity('JWT', {
+        type: 'apiKey',
+        in: 'header',
+        name: 'Authorization',
+      })
+      .addSecurityRequirements('JWT')
+      .setTitle('Marketplace API')
+      .setDescription('The Marketplace API documents')
+      .setVersion('1.0')
+      .build();
+    const document = SwaggerModule.createDocument(app, docConfig);
+    SwaggerModule.setup('api', app, document);
+  }
 }
 
 async function bootstrap() {
