@@ -251,7 +251,6 @@ export class Listing {
 
 @Entity()
 @Index(['item_id'], { unique: true })
-@Index(['label'], { unique: true })
 @Index(['vault', 'zone', 'shelf'])
 export class Inventory {
   @PrimaryGeneratedColumn()

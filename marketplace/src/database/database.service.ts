@@ -1169,15 +1169,6 @@ export class DatabaseService {
         : inventory.note;
     inventory.updated_at = Math.round(Date.now() / 1000);
     inventory.label = getInventoryLabel(inventory as InventoryLocation);
-    // find existing inventory with same label
-    const existingInventory = await this.inventoryRepo.findOne({
-      where: { label: inventory.label },
-    });
-    if (existingInventory && existingInventory.id !== inventory.id) {
-      throw new InternalServerErrorException(
-        `Inventory ${inventory.label} already exists`,
-      );
-    }
     await this.inventoryRepo.save(inventory);
     return inventory;
   }

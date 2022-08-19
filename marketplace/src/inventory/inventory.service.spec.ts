@@ -282,11 +282,12 @@ describe('InventoryService', () => {
     expect(updatedInventory.updated_at).toBeGreaterThan(0);
     expect(updatedInventory.note).toBe(inventoryRequest.note);
 
-    // second inventory
+    // second inventory, we allow two items with the same label
     submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '', true);
-    vaulting = await mockVaulting(submissionRequest, marketplaceService);
+    const vaulting2 = await mockVaulting(submissionRequest, marketplaceService);
+    expect(vaulting2.item_id).not.toBe(vaulting.item_id);
     inventoryRequest = {
-      item_id: vaulting.item_id,
+      item_id: vaulting2.item_id,
       vault: 'dallas',
       zone: 'cabinet 1',
       box: '1',
@@ -294,7 +295,7 @@ describe('InventoryService', () => {
       slot: '3',
       note: 'this is a note',
     };
-    inventory = await service.newInventory(
+    const inventory2 = await service.newInventory(
       new InventoryRequest(inventoryRequest),
     );
     updateInventoryRequest = new UpdateInventoryRequest({
@@ -302,11 +303,13 @@ describe('InventoryService', () => {
       slot: '100',
     });
     // expect error
-    await expect(
-      service.updateInventory(inventory.id, updateInventoryRequest),
-    ).rejects.toThrow(
-      'Inventory [vault]:dallas-[zone]:cabinet 1-[shelf]:99-[row]:2-[box]:1-[slot]:100 already exists',
+    const updatedInventory2 = await service.updateInventory(
+      inventory2.id,
+      updateInventoryRequest,
     );
+    // same label, different item_id
+    expect(updatedInventory2.label).toBe(updatedInventory.label);
+    expect(updatedInventory2.item_id).not.toEqual(inventory.item_id);
   });
 
   it('should fail inventory creation', async () => {

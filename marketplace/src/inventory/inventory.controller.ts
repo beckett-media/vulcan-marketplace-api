@@ -59,9 +59,10 @@ export class InventoryController {
     );
 
     // record user action
+    const user = request.user.user;
     const actionLogRequest = new ActionLogRequest({
       actor_type: ActionLogActorType.CognitoAdmin,
-      actor: request.user,
+      actor: user,
       entity_type: ActionLogEntityType.Inventory,
       entity: inventoryDetails.id.toString(),
       type: ActionLogType.NewInventory,
@@ -130,9 +131,10 @@ export class InventoryController {
     );
 
     // record user action
+    const user = request.user.user;
     const actionLogRequest = new ActionLogRequest({
       actor_type: ActionLogActorType.CognitoAdmin,
-      actor: request.user,
+      actor: user,
       entity_type: ActionLogEntityType.Inventory,
       entity: inventoryDetails.id.toString(),
       type: ActionLogType.NewInventory,
