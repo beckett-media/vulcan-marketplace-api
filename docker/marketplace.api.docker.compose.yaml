@@ -1,7 +1,7 @@
 version: "3.2"
 services:
   marketplace-api:
-    network_mode: "host"
+    network_mode: host
     container_name: marketplace_api
     image: marketplace-api:1.0.0
     ports:
