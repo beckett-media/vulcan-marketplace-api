@@ -212,6 +212,16 @@ export class MarketplaceService {
     });
   }
 
+  async dbHealthCheck() {
+    await this.databaseService.listSubmissions(
+      undefined,
+      undefined,
+      0,
+      1,
+      undefined,
+    );
+  }
+
   async listSubmissions(
     user: string,
     status: number,

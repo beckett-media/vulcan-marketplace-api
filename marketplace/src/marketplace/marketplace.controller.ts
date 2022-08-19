@@ -89,9 +89,7 @@ export class MarketplaceController {
   })
   async health() {
     // keep the RDS serverless from dropping to 0 capacity
-    await this.marketplaceService.getUserByUUID(
-      '00000000-0000-0000-0000-000000000000',
-    );
+    await this.marketplaceService.dbHealthCheck();
     return { status: 'ok' };
   }
 
