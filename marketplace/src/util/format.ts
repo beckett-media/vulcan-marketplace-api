@@ -188,14 +188,14 @@ export function newInventoryDetails(
   inventory: Inventory,
   item: Item,
   user: User,
-  vaulting: Vaulting,
+  submission: Submission,
 ): InventoryDetails {
   return new InventoryDetails({
     id: inventory.id,
     user: user.uuid,
     item_id: item.id,
     title: item.title,
-    image_url: vaulting.image,
+    image_url: submission.image,
     vault: inventory.vault,
     zone: inventory.zone,
     shelf: inventory.shelf,

@@ -42,7 +42,7 @@ export class InventoryService {
   async newInventory(
     inventoryRequest: InventoryRequest,
   ): Promise<InventoryDetails> {
-    const vault = await this.databaseService.getVaultingByItemID(
+    const submission = await this.databaseService.getSubmissionByItem(
       inventoryRequest.item_id,
     );
     const inventory = await this.databaseService.createNewInventory(
@@ -51,7 +51,7 @@ export class InventoryService {
 
     const item = await this.databaseService.getItem(inventory.item_id);
     const user = await this.databaseService.getUser(item.user);
-    return newInventoryDetails(inventory, item, user, vault);
+    return newInventoryDetails(inventory, item, user, submission);
   }
 
   async listInventory(
@@ -97,11 +97,11 @@ export class InventoryService {
     const inventory = await this.databaseService.getInventory(inventory_id);
     const item = await this.databaseService.getItem(inventory.item_id);
     const user = await this.databaseService.getUser(item.user);
-    const vault = await this.databaseService.getVaultingByItemID(
+    const submission = await this.databaseService.getSubmissionByItem(
       inventory.item_id,
     );
 
-    return newInventoryDetails(inventory, item, user, vault);
+    return newInventoryDetails(inventory, item, user, submission);
   }
 
   async updateInventory(
@@ -114,10 +114,10 @@ export class InventoryService {
     );
     const item = await this.databaseService.getItem(newInventory.item_id);
     const user = await this.databaseService.getUser(item.user);
-    const vault = await this.databaseService.getVaultingByItemID(
+    const submission = await this.databaseService.getSubmissionByItem(
       newInventory.item_id,
     );
-    return newInventoryDetails(newInventory, item, user, vault);
+    return newInventoryDetails(newInventory, item, user, submission);
   }
 
   // create new action log
