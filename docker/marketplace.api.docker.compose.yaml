@@ -7,3 +7,5 @@ services:
     ports:
       - "3300:3300"
     restart: always
+    env_file:
+      /home/ubuntu/prod.env
