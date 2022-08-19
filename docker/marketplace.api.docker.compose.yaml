@@ -1,0 +1,7 @@
+version: "3.2"
+services:
+  blockchain:
+    image: marketplace-api:1.0.0
+    ports:
+      - "3300:3300"
+    restart: always
