@@ -31,6 +31,8 @@ export class SubmissionOrder {
 }
 
 @Entity()
+@Index(['item_id'])
+@Index(['order_id'])
 @Index(['user', 'item_id'], { unique: true })
 export class Submission {
   @PrimaryGeneratedColumn()

@@ -67,7 +67,7 @@ export class InventoryService {
     const userIDs = items.map((item) => item.user);
     const users = await this.databaseService.listUsers(userIDs);
     // get all the vaultings for the items
-    const vaultings = await this.databaseService.getVaultingsByItemIDs(itemIDs);
+    const submissions = await this.databaseService.listSubmissionsByItemIds(itemIDs);
 
     // build map from item id to item
     const itemMap = items.reduce((map, item) => {
@@ -79,17 +79,17 @@ export class InventoryService {
       map[user.id] = user;
       return map;
     }, {});
-    // build map from item id to vaulting
-    const vaultMap = vaultings.reduce((map, vaulting) => {
-      map[vaulting.item_id] = vaulting;
+    // build map from item id to submission
+    const submissionMap = submissions.reduce((map, submission) => {
+      map[submission.item_id] = submission;
       return map;
     }, {});
 
     return inventories.map((inventory) => {
       const item = itemMap[inventory.item_id];
       const user = userMap[item.user];
-      const vault = vaultMap[inventory.item_id];
-      return newInventoryDetails(inventory, item, user, vault);
+      const submission = submissionMap[inventory.item_id];
+      return newInventoryDetails(inventory, item, user, submission);
     });
   }
 

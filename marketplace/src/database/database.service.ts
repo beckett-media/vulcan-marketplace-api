@@ -372,6 +372,14 @@ export class DatabaseService {
     return submissionDetails;
   }
 
+  // list submissions by item ids
+  async listSubmissionsByItemIds(item_ids: number[]): Promise<Submission[]> {
+    const submissions = await this.submissionRepo.find({
+      where: { item_id: In(item_ids) },
+    });
+    return submissions;
+  }
+
   async getSubmission(submission_id: number): Promise<Submission> {
     const submission = await this.submissionRepo.findOne(submission_id);
     // if we can not find submission, throw not found error

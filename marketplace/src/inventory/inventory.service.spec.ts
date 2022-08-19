@@ -20,6 +20,7 @@ import { DatabaseModule, GetDBConnection } from '../database/database.module';
 import { DatabaseService } from '../database/database.service';
 import { InventoryService } from './inventory.service';
 import {
+  SubmissionDetails,
   SubmissionRequest,
   SubmissionUpdate,
   VaultingRequest,
@@ -31,10 +32,10 @@ import {
   UpdateInventoryRequest,
 } from './dtos/inventory.dto';
 
-async function mockVaulting(
+async function mockSubmission(
   submissionRequest: SubmissionRequest,
   marketplaceService: MarketplaceService,
-): Promise<VaultingResponse> {
+): Promise<SubmissionDetails> {
   // create submission
   var submission = await marketplaceService.submitItem(submissionRequest);
   const submissionUpdateApproved = new SubmissionUpdate({
@@ -52,15 +53,9 @@ async function mockVaulting(
     submissionUpdateApproved,
   );
 
-  const vaultingRequest = {
-    item_id: submission.item_id,
-    user: submissionRequest.user,
-    submission_id: submission.submission_id,
-    image_base64: 'fake_base64',
-    image_format: 'fakeformat',
-  };
-  const vaulting = await marketplaceService.newVaulting(vaultingRequest);
-  return vaulting;
+  const submissionDetails = await marketplaceService.getSubmission(submission.submission_id);
+
+  return submissionDetails;
 }
 
 describe('InventoryService', () => {
@@ -142,7 +137,7 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var vaulting1 = await mockVaulting(submissionRequest1, marketplaceService);
+    var submission1 = await mockSubmission(submissionRequest1, marketplaceService);
 
     var submissionRequest2 = newSubmissionRequest(
       userUUID,
@@ -151,7 +146,7 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var vaulting2 = await mockVaulting(submissionRequest2, marketplaceService);
+    var submission2 = await mockSubmission(submissionRequest2, marketplaceService);
 
     var submissionRequest3 = newSubmissionRequest(
       userUUID,
@@ -160,10 +155,10 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var vaulting3 = await mockVaulting(submissionRequest3, marketplaceService);
+    var submission3 = await mockSubmission(submissionRequest3, marketplaceService);
 
     var inventoryRequest1 = {
-      item_id: vaulting1.item_id,
+      item_id: submission1.item_id,
       vault: 'dallas',
       zone: 'cabinet',
       row: '1',
@@ -178,7 +173,7 @@ describe('InventoryService', () => {
     expect(inventory1.user).toBe(userUUID);
 
     var inventoryRequest2 = {
-      item_id: vaulting2.item_id,
+      item_id: submission2.item_id,
       vault: 'dallas',
       zone: 'cabinet',
       shelf: '1',
@@ -193,7 +188,7 @@ describe('InventoryService', () => {
     );
 
     var inventoryRequest3 = {
-      item_id: vaulting3.item_id,
+      item_id: submission3.item_id,
       vault: 'dallas',
       zone: 'cabinet',
       box: '1',
@@ -213,9 +208,9 @@ describe('InventoryService', () => {
     });
     var inventories = await service.listInventory(listInventoryRequest);
     expect(inventories.length).toBe(3);
-    expect(inventories[0].item_id).toBe(vaulting1.item_id);
-    expect(inventories[1].item_id).toBe(vaulting2.item_id);
-    expect(inventories[2].item_id).toBe(vaulting3.item_id);
+    expect(inventories[0].item_id).toBe(submission1.item_id);
+    expect(inventories[1].item_id).toBe(submission2.item_id);
+    expect(inventories[2].item_id).toBe(submission3.item_id);
     expect(inventories[0].user).toBe(userUUID);
     expect(inventories[1].user).toBe(userUUID);
     expect(inventories[2].user).toBe(userUUID);
@@ -232,12 +227,12 @@ describe('InventoryService', () => {
     expect(inventories.length).toBe(2);
 
     listInventoryRequest = new ListInventoryRequest({
-      item_ids: vaulting2.item_id + ',' + vaulting3.item_id,
+      item_ids: submission2.item_id + ',' + submission3.item_id,
     });
     inventories = await service.listInventory(listInventoryRequest);
     expect(inventories.length).toBe(2);
-    expect(inventories[0].item_id).toBe(vaulting2.item_id);
-    expect(inventories[1].item_id).toBe(vaulting3.item_id);
+    expect(inventories[0].item_id).toBe(submission2.item_id);
+    expect(inventories[1].item_id).toBe(submission3.item_id);
   });
 
   it('should update inventory', async () => {
@@ -249,7 +244,7 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var vaulting = await mockVaulting(submissionRequest, marketplaceService);
+    var vaulting = await mockSubmission(submissionRequest, marketplaceService);
     var inventoryRequest = {
       item_id: vaulting.item_id,
       vault: 'dallas',
@@ -284,7 +279,7 @@ describe('InventoryService', () => {
 
     // second inventory, we allow two items with the same label
     submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '', true);
-    const vaulting2 = await mockVaulting(submissionRequest, marketplaceService);
+    const vaulting2 = await mockSubmission(submissionRequest, marketplaceService);
     expect(vaulting2.item_id).not.toBe(vaulting.item_id);
     inventoryRequest = {
       item_id: vaulting2.item_id,
@@ -321,7 +316,7 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var vaulting = await mockVaulting(submissionRequest, marketplaceService);
+    var vaulting = await mockSubmission(submissionRequest, marketplaceService);
     var inventoryRequest = {
       item_id: vaulting.item_id,
       vault: 'dallas',
@@ -351,7 +346,7 @@ describe('InventoryService', () => {
 
     // double occupacy inventory not allowed
     submissionRequest = newSubmissionRequest(userUUID, 'sn2', true, '', true);
-    var vaulting = await mockVaulting(submissionRequest, marketplaceService);
+    var vaulting = await mockSubmission(submissionRequest, marketplaceService);
     var inventoryRequest = {
       item_id: vaulting.item_id,
       vault: 'dallas',
