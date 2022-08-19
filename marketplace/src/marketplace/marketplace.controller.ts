@@ -87,7 +87,11 @@ export class MarketplaceController {
   @ApiOperation({
     summary: 'LB health check',
   })
-  health() {
+  async health() {
+    // keep the RDS serverless from dropping to 0 capacity
+    await this.marketplaceService.getUserByUUID(
+      '00000000-0000-0000-0000-000000000000',
+    );
     return { status: 'ok' };
   }
 

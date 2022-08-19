@@ -281,6 +281,32 @@ describe('InventoryService', () => {
     );
     expect(updatedInventory.updated_at).toBeGreaterThan(0);
     expect(updatedInventory.note).toBe(inventoryRequest.note);
+
+    // second inventory
+    submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '', true);
+    vaulting = await mockVaulting(submissionRequest, marketplaceService);
+    inventoryRequest = {
+      item_id: vaulting.item_id,
+      vault: 'dallas',
+      zone: 'cabinet 1',
+      box: '1',
+      row: '2',
+      slot: '3',
+      note: 'this is a note',
+    };
+    inventory = await service.newInventory(
+      new InventoryRequest(inventoryRequest),
+    );
+    updateInventoryRequest = new UpdateInventoryRequest({
+      shelf: '99',
+      slot: '100',
+    });
+    // expect error
+    await expect(
+      service.updateInventory(inventory.id, updateInventoryRequest),
+    ).rejects.toThrow(
+      'Inventory [vault]:dallas-[zone]:cabinet 1-[shelf]:99-[row]:2-[box]:1-[slot]:100 already exists',
+    );
   });
 
   it('should fail inventory creation', async () => {

@@ -372,24 +372,30 @@ export function getInventoryLabel(
 }
 
 export function trimInventoryLocation(inventoryLocation: InventoryLocation) {
-  inventoryLocation.vault = inventoryLocation.vault
-    ? inventoryLocation.vault.trim()
-    : '';
-  inventoryLocation.zone = inventoryLocation.zone
-    ? inventoryLocation.zone.trim()
-    : '';
-  inventoryLocation.shelf = inventoryLocation.shelf
-    ? inventoryLocation.shelf.trim()
-    : '';
-  inventoryLocation.row = inventoryLocation.row
-    ? inventoryLocation.row.trim()
-    : '';
-  inventoryLocation.box = inventoryLocation.box
-    ? inventoryLocation.box.trim()
-    : '';
-  inventoryLocation.slot = inventoryLocation.slot
-    ? inventoryLocation.slot.trim()
-    : '';
+  inventoryLocation.vault =
+    inventoryLocation.vault != undefined
+      ? inventoryLocation.vault.trim()
+      : inventoryLocation.vault;
+  inventoryLocation.zone =
+    inventoryLocation.zone != undefined
+      ? inventoryLocation.zone.trim()
+      : inventoryLocation.zone;
+  inventoryLocation.shelf =
+    inventoryLocation.shelf != undefined
+      ? inventoryLocation.shelf.trim()
+      : inventoryLocation.shelf;
+  inventoryLocation.row =
+    inventoryLocation.row != undefined
+      ? inventoryLocation.row.trim()
+      : inventoryLocation.row;
+  inventoryLocation.box =
+    inventoryLocation.box != undefined
+      ? inventoryLocation.box.trim()
+      : inventoryLocation.box;
+  inventoryLocation.slot =
+    inventoryLocation.slot != undefined
+      ? inventoryLocation.slot.trim()
+      : inventoryLocation.slot;
 
   return inventoryLocation;
 }

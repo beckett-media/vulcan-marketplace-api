@@ -1135,32 +1135,49 @@ export class DatabaseService {
     updateInventoryRequest = trimInventoryLocation(
       updateInventoryRequest as InventoryLocation,
     ) as UpdateInventoryRequest;
-    inventory.vault = updateInventoryRequest.vault
-      ? updateInventoryRequest.vault
-      : inventory.vault;
-    inventory.zone = updateInventoryRequest.zone
-      ? updateInventoryRequest.zone
-      : inventory.zone;
-    inventory.shelf = updateInventoryRequest.shelf
-      ? updateInventoryRequest.shelf
-      : inventory.shelf;
-    inventory.row = updateInventoryRequest.row
-      ? updateInventoryRequest.row
-      : inventory.row;
-    inventory.box = updateInventoryRequest.box
-      ? updateInventoryRequest.box
-      : inventory.box;
-    inventory.slot = updateInventoryRequest.slot
-      ? updateInventoryRequest.slot
-      : inventory.slot;
-    inventory.status = updateInventoryRequest.status
-      ? updateInventoryRequest.status
-      : inventory.status;
-    inventory.note = updateInventoryRequest.note
-      ? updateInventoryRequest.note
-      : inventory.note;
+    inventory.vault =
+      updateInventoryRequest.vault != undefined
+        ? updateInventoryRequest.vault
+        : inventory.vault;
+    inventory.zone =
+      updateInventoryRequest.zone != undefined
+        ? updateInventoryRequest.zone
+        : inventory.zone;
+    inventory.shelf =
+      updateInventoryRequest.shelf != undefined
+        ? updateInventoryRequest.shelf
+        : inventory.shelf;
+    inventory.row =
+      updateInventoryRequest.row != undefined
+        ? updateInventoryRequest.row
+        : inventory.row;
+    inventory.box =
+      updateInventoryRequest.box != undefined
+        ? updateInventoryRequest.box
+        : inventory.box;
+    inventory.slot =
+      updateInventoryRequest.slot != undefined
+        ? updateInventoryRequest.slot
+        : inventory.slot;
+    inventory.status =
+      updateInventoryRequest.status != undefined
+        ? updateInventoryRequest.status
+        : inventory.status;
+    inventory.note =
+      updateInventoryRequest.note != undefined
+        ? updateInventoryRequest.note
+        : inventory.note;
     inventory.updated_at = Math.round(Date.now() / 1000);
     inventory.label = getInventoryLabel(inventory as InventoryLocation);
+    // find existing inventory with same label
+    const existingInventory = await this.inventoryRepo.findOne({
+      where: { label: inventory.label },
+    });
+    if (existingInventory && existingInventory.id !== inventory.id) {
+      throw new InternalServerErrorException(
+        `Inventory ${inventory.label} already exists`,
+      );
+    }
     await this.inventoryRepo.save(inventory);
     return inventory;
   }
