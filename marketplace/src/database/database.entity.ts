@@ -74,7 +74,7 @@ export class Submission {
 }
 
 @Entity()
-@Index(['uuid'])
+@Index(['uuid'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;

@@ -98,19 +98,51 @@ export class DatabaseService {
   }
 
   async maybeCreateNewUser(user_uuid: string, source: string): Promise<User> {
-    const user = await this.userRepo.findOne({
-      where: { uuid: user_uuid },
-    });
-    if (!user) {
-      const newUser = this.userRepo.create({
-        uuid: user_uuid,
-        created_at: Math.round(Date.now() / 1000),
-        source: source,
-      });
-      await this.userRepo.save(newUser);
-      return newUser;
+    const maxTries = 10;
+    var currentTry = 0;
+    var tryTransaction = true;
+
+    var user = null;
+    while (tryTransaction) {
+      currentTry++;
+      try {
+        user = await this.newUserWithLock(user_uuid, source);
+      } catch (e) {
+        this.logger.warn(`User with lock: ${e}`);
+      }
+      if (null !== user) {
+        tryTransaction = false; // transaction succeeded
+      }
+
+      if (currentTry >= maxTries) {
+        throw new Error('Deadlock on maybeCreateUser found.');
+      }
     }
+
     return user;
+  }
+
+  async newUserWithLock(user_uuid: string, source: string): Promise<User> {
+    return getManager().transaction(
+      (entityManager: EntityManager): Promise<User> => {
+        return entityManager
+          .createQueryBuilder(User, 'user')
+          .setLock('pessimistic_read')
+          .where({ uuid: user_uuid })
+          .getOne()
+          .then(async (result) => {
+            var user = result;
+            if (undefined === user) {
+              user = new User();
+              user.uuid = user_uuid;
+              user.source = source;
+              user.created_at = Math.round(Date.now() / 1000);
+              return await entityManager.save(user);
+            }
+            return user;
+          });
+      },
+    );
   }
 
   async maybeCreateSubmissionOrder(
