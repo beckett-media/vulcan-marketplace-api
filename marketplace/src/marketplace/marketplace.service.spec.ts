@@ -168,6 +168,14 @@ describe('MarketplaceService', () => {
       submission.submission_id,
       submissionUpdateReceived,
     );
+    // then verify that it is received
+    const submissionUpdateVerified = new SubmissionUpdate({
+      status: SubmissionStatus.Verified,
+    });
+    await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateVerified,
+    );
 
     // approve submission should succeed
     const submissionDetails = await service.updateSubmission(
@@ -511,12 +519,19 @@ describe('MarketplaceService', () => {
     const submissionUpdateApproved = new SubmissionUpdate({
       status: SubmissionStatus.Approved,
     });
+    const submissionUpdateVerified = new SubmissionUpdate({
+      status: SubmissionStatus.Verified,
+    });
     const submissionUpdateReceived = new SubmissionUpdate({
       status: SubmissionStatus.Received,
     });
     await service.updateSubmission(
       submission.submission_id,
       submissionUpdateReceived,
+    );
+    await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateVerified,
     );
     await service.updateSubmission(
       submission.submission_id,
@@ -555,6 +570,9 @@ describe('MarketplaceService', () => {
     const submissionUpdateApproved = new SubmissionUpdate({
       status: SubmissionStatus.Approved,
     });
+    const submissionUpdateVerified = new SubmissionUpdate({
+      status: SubmissionStatus.Verified,
+    });
     const submissionUpdateReceived = new SubmissionUpdate({
       status: SubmissionStatus.Received,
     });
@@ -567,6 +585,10 @@ describe('MarketplaceService', () => {
     await service.updateSubmission(
       submission.submission_id,
       submissionUpdateReceived,
+    );
+    await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateVerified,
     );
     await service.updateSubmission(
       submission.submission_id,
@@ -680,10 +702,14 @@ describe('MarketplaceService', () => {
     const submissionUpdateApproved = new SubmissionUpdate({
       status: SubmissionStatus.Approved,
     });
+    const submissionUpdateVerified = new SubmissionUpdate({
+      status: SubmissionStatus.Verified,
+    });
     const submissionUpdateReceived = new SubmissionUpdate({
       status: SubmissionStatus.Received,
     });
     await service.updateSubmission(submission.id, submissionUpdateReceived);
+    await service.updateSubmission(submission.id, submissionUpdateVerified);
     await service.updateSubmission(submission.id, submissionUpdateApproved);
 
     // create vaulting
@@ -757,10 +783,14 @@ describe('MarketplaceService', () => {
     const submissionUpdateApproved = new SubmissionUpdate({
       status: SubmissionStatus.Approved,
     });
+    const submissionUpdateVerified = new SubmissionUpdate({
+      status: SubmissionStatus.Verified,
+    });
     const submissionUpdateReceived = new SubmissionUpdate({
       status: SubmissionStatus.Received,
     });
     await service.updateSubmission(submission.id, submissionUpdateReceived);
+    await service.updateSubmission(submission.id, submissionUpdateVerified);
     await service.updateSubmission(submission.id, submissionUpdateApproved);
 
     // create vaulting

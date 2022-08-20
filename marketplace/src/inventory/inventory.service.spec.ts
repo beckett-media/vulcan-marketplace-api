@@ -41,6 +41,9 @@ async function mockSubmission(
   const submissionUpdateApproved = new SubmissionUpdate({
     status: SubmissionStatus.Approved,
   });
+  const submissionUpdateVerified = new SubmissionUpdate({
+    status: SubmissionStatus.Verified,
+  });
   const submissionUpdateReceived = new SubmissionUpdate({
     status: SubmissionStatus.Received,
   });
@@ -50,10 +53,16 @@ async function mockSubmission(
   );
   await marketplaceService.updateSubmission(
     submission.submission_id,
+    submissionUpdateVerified,
+  );
+  await marketplaceService.updateSubmission(
+    submission.submission_id,
     submissionUpdateApproved,
   );
 
-  const submissionDetails = await marketplaceService.getSubmission(submission.submission_id);
+  const submissionDetails = await marketplaceService.getSubmission(
+    submission.submission_id,
+  );
 
   return submissionDetails;
 }
@@ -137,7 +146,10 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var submission1 = await mockSubmission(submissionRequest1, marketplaceService);
+    var submission1 = await mockSubmission(
+      submissionRequest1,
+      marketplaceService,
+    );
 
     var submissionRequest2 = newSubmissionRequest(
       userUUID,
@@ -146,7 +158,10 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var submission2 = await mockSubmission(submissionRequest2, marketplaceService);
+    var submission2 = await mockSubmission(
+      submissionRequest2,
+      marketplaceService,
+    );
 
     var submissionRequest3 = newSubmissionRequest(
       userUUID,
@@ -155,7 +170,10 @@ describe('InventoryService', () => {
       '',
       true,
     );
-    var submission3 = await mockSubmission(submissionRequest3, marketplaceService);
+    var submission3 = await mockSubmission(
+      submissionRequest3,
+      marketplaceService,
+    );
 
     var inventoryRequest1 = {
       item_id: submission1.item_id,
@@ -279,7 +297,10 @@ describe('InventoryService', () => {
 
     // second inventory, we allow two items with the same label
     submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '', true);
-    const vaulting2 = await mockSubmission(submissionRequest, marketplaceService);
+    const vaulting2 = await mockSubmission(
+      submissionRequest,
+      marketplaceService,
+    );
     expect(vaulting2.item_id).not.toBe(vaulting.item_id);
     inventoryRequest = {
       item_id: vaulting2.item_id,
