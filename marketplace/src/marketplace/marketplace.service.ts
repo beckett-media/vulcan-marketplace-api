@@ -607,8 +607,6 @@ export class MarketplaceService {
 
   // call by admin
   async newVaulting(request: VaultingRequest): Promise<VaultingResponse> {
-    // TODO: don't allow multiple vaultings for the same item
-
     // check submission status
     var submission = await this.databaseService.getSubmission(
       request.submission_id,

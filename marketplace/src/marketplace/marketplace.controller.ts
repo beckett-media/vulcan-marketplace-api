@@ -301,19 +301,19 @@ export class MarketplaceController {
   }
 
   @Post('/vaulting')
-  @OnlyAllowGroups(Group.User, Group.Admin)
+  @OnlyAllowGroups(Group.Admin)
   @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
     summary: 'Store new vaulting records',
   })
   @ApiResponse({
     status: 201,
-    description: 'The item has been successfully submited.',
+    description: 'The item has been successfully vaulted.',
     type: VaultingResponse,
   })
   @ApiResponse({
     status: 500,
-    description: 'Submission of the item failed',
+    description: 'Vaulting of the item failed',
   })
   @ApiProduces('application/json')
   async vaultItem(
