@@ -5,6 +5,7 @@ export enum SubmissionStatus {
   Rejected = 3,
   Approved = 4,
   Vaulted = 5,
+  Verified = 6,
 }
 
 export enum ItemType {
@@ -35,6 +36,7 @@ export const SubmissionStatusReadable = {
   3: 'Rejected',
   4: 'Approved',
   5: 'Vaulted',
+  6: 'Verified',
 };
 
 export const VaultingStatusReadable = {

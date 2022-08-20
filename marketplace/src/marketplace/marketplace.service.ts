@@ -282,6 +282,18 @@ export class MarketplaceService {
         submission.status = SubmissionStatus.Received;
         submission.received_at = Math.round(Date.now() / 1000);
         break;
+      case SubmissionStatus.Verified:
+        var fromStatus = [SubmissionStatus.Received];
+        if (!fromStatus.includes(submission.status)) {
+          throw new InternalServerErrorException(
+            `Cannot update status from ${
+              SubmissionStatusReadable[submission.status]
+            } to ${SubmissionStatusReadable[submissionUpdate.status]}`,
+          );
+        }
+        submission.status = SubmissionStatus.Verified;
+        submission.received_at = Math.round(Date.now() / 1000);
+        break;
       case SubmissionStatus.Rejected:
         var fromStatus = [SubmissionStatus.Received];
         if (!fromStatus.includes(submission.status)) {
@@ -295,7 +307,7 @@ export class MarketplaceService {
         submission.rejected_at = Math.round(Date.now() / 1000);
         break;
       case SubmissionStatus.Approved:
-        fromStatus = [SubmissionStatus.Received];
+        fromStatus = [SubmissionStatus.Verified];
         if (!fromStatus.includes(submission.status)) {
           throw new InternalServerErrorException(
             `Cannot update status from ${
