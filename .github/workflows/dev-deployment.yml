@@ -9,8 +9,10 @@ jobs:
   deploy:
     name: Build & Upload
     
-    uses: beckett-media/vulcan-marketplace-api/.github/workflows/build_upload_ecr.yml@development
+    uses: beckett-media/vulcan-marketplace-api/.github/workflows/cont-deployment-base.yml@development
     with:
+      ECS_CLUSTER: dev-vulcan-marketplace-api-cluster
+      ECS_SERVICE: dev-vulcan-marketplace-api-service
       ECR_REPOSITORY: dev-vulcan-marketplace-api
       IMAGE_TAG: ${{ github.sha }}
     secrets: inherit
