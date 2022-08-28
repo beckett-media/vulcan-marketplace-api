@@ -1038,19 +1038,6 @@ export class DatabaseService {
           const label = getInventoryLabel(
             inventoryRequest as InventoryLocation,
           );
-          if (!(await this.isInventoryAvailable(label))) {
-            throw new InternalServerErrorException(
-              `Inventory slot ${label} is already occupied`,
-            );
-          }
-          if (await this.isExistingInventory(inventoryRequest.item_id)) {
-            const existingInventory = await this.getInventoryForItem(
-              inventoryRequest.item_id,
-            );
-            throw new InternalServerErrorException(
-              `Item ${inventoryRequest.item_id} is already in inventory: ${existingInventory.label}`,
-            );
-          }
           const newInventory = this.inventoryRepo.create({
             item_id: inventoryRequest.item_id,
             vault: inventoryRequest.vault,
@@ -1060,7 +1047,7 @@ export class DatabaseService {
             box: inventoryRequest.box ? inventoryRequest.box : '',
             slot: inventoryRequest.slot ? inventoryRequest.slot : '',
             label: label,
-            status: InventoryStatus.InStock,
+            status: InventoryStatus.NotCurrent,
             note: inventoryRequest.note ? inventoryRequest.note : '',
             updated_at: 0,
             created_at: Math.round(Date.now() / 1000),
@@ -1171,34 +1158,10 @@ export class DatabaseService {
     inventory_id: number,
     updateInventoryRequest: UpdateInventoryRequest,
   ): Promise<Inventory> {
+    // throw error if inventory is not found
     const inventory = await this.getInventory(inventory_id);
-    updateInventoryRequest = trimInventoryLocation(
-      updateInventoryRequest as InventoryLocation,
-    ) as UpdateInventoryRequest;
-    inventory.vault =
-      updateInventoryRequest.vault != undefined
-        ? updateInventoryRequest.vault
-        : inventory.vault;
-    inventory.zone =
-      updateInventoryRequest.zone != undefined
-        ? updateInventoryRequest.zone
-        : inventory.zone;
-    inventory.shelf =
-      updateInventoryRequest.shelf != undefined
-        ? updateInventoryRequest.shelf
-        : inventory.shelf;
-    inventory.row =
-      updateInventoryRequest.row != undefined
-        ? updateInventoryRequest.row
-        : inventory.row;
-    inventory.box =
-      updateInventoryRequest.box != undefined
-        ? updateInventoryRequest.box
-        : inventory.box;
-    inventory.slot =
-      updateInventoryRequest.slot != undefined
-        ? updateInventoryRequest.slot
-        : inventory.slot;
+
+    // update inventory with new values
     inventory.status =
       updateInventoryRequest.status != undefined
         ? updateInventoryRequest.status
@@ -1208,8 +1171,30 @@ export class DatabaseService {
         ? updateInventoryRequest.note
         : inventory.note;
     inventory.updated_at = Math.round(Date.now() / 1000);
-    inventory.label = getInventoryLabel(inventory as InventoryLocation);
-    await this.inventoryRepo.save(inventory);
+
+    // put updates into a single transaction
+    await getManager().transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.save(inventory);
+
+      // find if the item is already in inventory and is current
+      const existingInventory = await this.inventoryRepo.findOne({
+        where: {
+          item_id: inventory.item_id,
+          status: InventoryStatus.IsCurrent,
+        },
+      });
+      // if the update request is to make the inventory current,
+      // we need to set any existing inventory to not current
+      if (
+        !!existingInventory &&
+        existingInventory.id !== inventory.id &&
+        inventory.status === InventoryStatus.IsCurrent
+      ) {
+        existingInventory.status = InventoryStatus.NotCurrent;
+        await transactionalEntityManager.save(existingInventory);
+      }
+    });
+
     return inventory;
   }
 }

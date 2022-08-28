@@ -67,7 +67,9 @@ export class InventoryService {
     const userIDs = items.map((item) => item.user);
     const users = await this.databaseService.listUsers(userIDs);
     // get all the vaultings for the items
-    const submissions = await this.databaseService.listSubmissionsByItemIds(itemIDs);
+    const submissions = await this.databaseService.listSubmissionsByItemIds(
+      itemIDs,
+    );
 
     // build map from item id to item
     const itemMap = items.reduce((map, item) => {

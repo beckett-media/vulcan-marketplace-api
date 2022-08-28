@@ -3,7 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AwsService } from '../aws/aws.service';
 import { BravoService } from '../bravo/bravo.service';
-import { SubmissionStatus } from '../config/enum';
+import {
+  InventoryStatus,
+  InventoryStatusReadable,
+  SubmissionStatus,
+} from '../config/enum';
 import { MarketplaceService } from '../marketplace/marketplace.service';
 import { clearDB, newSubmissionRequest } from '../util/testing';
 import {
@@ -232,6 +236,9 @@ describe('InventoryService', () => {
     expect(inventories[0].user).toBe(userUUID);
     expect(inventories[1].user).toBe(userUUID);
     expect(inventories[2].user).toBe(userUUID);
+    expect(inventories[0].status).toBe(InventoryStatus.NotCurrent);
+    expect(inventories[1].status).toBe(InventoryStatus.NotCurrent);
+    expect(inventories[2].status).toBe(InventoryStatus.NotCurrent);
 
     listInventoryRequest = new ListInventoryRequest({
       box: '1',
@@ -250,7 +257,9 @@ describe('InventoryService', () => {
     inventories = await service.listInventory(listInventoryRequest);
     expect(inventories.length).toBe(2);
     expect(inventories[0].item_id).toBe(submission2.item_id);
+    expect(inventories[0].status).toBe(InventoryStatus.NotCurrent);
     expect(inventories[1].item_id).toBe(submission3.item_id);
+    expect(inventories[1].status).toBe(InventoryStatus.NotCurrent);
   });
 
   it('should update inventory', async () => {
@@ -282,31 +291,26 @@ describe('InventoryService', () => {
     expect(inventory.note).toBe(inventoryRequest.note);
 
     var updateInventoryRequest = new UpdateInventoryRequest({
-      shelf: ' 99',
-      slot: '100 ',
+      status: InventoryStatus.IsCurrent,
     });
     var updatedInventory = await service.updateInventory(
       inventory.id,
       updateInventoryRequest,
     );
+    // label does not change
     expect(updatedInventory.label).toBe(
-      '[vault]:dallas-[zone]:cabinet 1-[shelf]:99-[row]:2-[box]:1-[slot]:100',
+      '[vault]:dallas-[zone]:cabinet 1-[shelf]:*-[row]:2-[box]:1-[slot]:3',
     );
     expect(updatedInventory.updated_at).toBeGreaterThan(0);
     expect(updatedInventory.note).toBe(inventoryRequest.note);
+    expect(updatedInventory.status).toBe(InventoryStatus.IsCurrent);
 
     // second inventory, we allow two items with the same label
-    submissionRequest = newSubmissionRequest(userUUID, 'sn1', true, '', true);
-    const vaulting2 = await mockSubmission(
-      submissionRequest,
-      marketplaceService,
-    );
-    expect(vaulting2.item_id).not.toBe(vaulting.item_id);
     inventoryRequest = {
-      item_id: vaulting2.item_id,
+      item_id: vaulting.item_id,
       vault: 'dallas',
       zone: 'cabinet 1',
-      box: '1',
+      box: '11',
       row: '2',
       slot: '3',
       note: 'this is a note',
@@ -315,20 +319,36 @@ describe('InventoryService', () => {
       new InventoryRequest(inventoryRequest),
     );
     updateInventoryRequest = new UpdateInventoryRequest({
-      shelf: '99',
-      slot: '100',
+      status: InventoryStatus.IsCurrent,
     });
-    // expect error
+
+    // create a second inventory with the location and mark as current
     const updatedInventory2 = await service.updateInventory(
       inventory2.id,
       updateInventoryRequest,
     );
-    // same label, different item_id
-    expect(updatedInventory2.label).toBe(updatedInventory.label);
-    expect(updatedInventory2.item_id).not.toEqual(inventory.item_id);
+    // different label, same item_id
+    expect(updatedInventory2.label).not.toBe(updatedInventory.label);
+    expect(updatedInventory2.item_id).toEqual(inventory.item_id);
+    expect(updatedInventory2.status).toBe(InventoryStatus.IsCurrent);
+
+    // the first inventory is not current anymore
+    inventory = await service.getInventory(inventory.id);
+    expect(inventory.status).toBe(InventoryStatus.NotCurrent);
+    expect(inventory.item_id).toBe(inventory2.item_id);
+
+    // list the inventories for the item
+    const listInventoryRequest = new ListInventoryRequest({
+      item_ids: `${inventory.item_id}`,
+    });
+    const inventories = await service.listInventory(listInventoryRequest);
+    expect(inventories.length).toBe(2);
+    expect(inventories[0].item_id).toBe(inventories[1].item_id);
+    expect(inventories[0].status).toBe(InventoryStatus.NotCurrent);
+    expect(inventories[1].status).toBe(InventoryStatus.IsCurrent);
   });
 
-  it('should fail inventory creation', async () => {
+  it('should allow double occupancy for the same location or item', async () => {
     const userUUID = '00000000-0000-0000-0000-000000000001';
     var submissionRequest = newSubmissionRequest(
       userUUID,
@@ -346,11 +366,11 @@ describe('InventoryService', () => {
       row: '2',
       slot: '3',
     };
-    var inventory = await service.newInventory(
+    var inventory1 = await service.newInventory(
       new InventoryRequest(inventoryRequest),
     );
 
-    // duplicated inventory not allowed
+    // one item can have multiple inventories
     var inventoryRequest = {
       item_id: vaulting.item_id,
       vault: 'dallas',
@@ -359,13 +379,13 @@ describe('InventoryService', () => {
       row: '2',
       slot: '3',
     };
-    await expect(
-      service.newInventory(new InventoryRequest(inventoryRequest)),
-    ).rejects.toThrow(
-      `Item ${vaulting.item_id} is already in inventory: [vault]:dallas-[zone]:cabinet-[shelf]:*-[row]:2-[box]:1-[slot]:3`,
+    var inventory2 = await service.newInventory(
+      new InventoryRequest(inventoryRequest),
     );
+    expect(inventory2.label).not.toBe(inventory1.label);
+    expect(inventory2.item_id).toBe(inventory1.item_id);
 
-    // double occupacy inventory not allowed
+    // one inventory location can have multiple items
     submissionRequest = newSubmissionRequest(userUUID, 'sn2', true, '', true);
     var vaulting = await mockSubmission(submissionRequest, marketplaceService);
     var inventoryRequest = {
@@ -376,10 +396,10 @@ describe('InventoryService', () => {
       row: '2',
       slot: '3',
     };
-    await expect(
-      service.newInventory(new InventoryRequest(inventoryRequest)),
-    ).rejects.toThrow(
-      'Inventory slot [vault]:dallas-[zone]:cabinet-[shelf]:*-[row]:2-[box]:1-[slot]:3 is already occupied',
+    var inventory3 = await service.newInventory(
+      new InventoryRequest(inventoryRequest),
     );
+    expect(inventory3.label).toBe(inventory1.label);
+    expect(inventory3.item_id).not.toBe(inventory1.item_id);
   });
 });

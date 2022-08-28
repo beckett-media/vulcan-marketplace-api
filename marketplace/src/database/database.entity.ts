@@ -252,11 +252,14 @@ export class Listing {
 }
 
 @Entity()
-@Index(['item_id'], { unique: true })
+@Index(['item_id', 'label'], { unique: true })
 @Index(['vault', 'zone', 'shelf'])
 export class Inventory {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ default: true })
+  isCurrent: boolean;
 
   @Column()
   item_id: number;

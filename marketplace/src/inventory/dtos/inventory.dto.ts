@@ -5,9 +5,10 @@ import {
   IsEnum,
   IsOptional,
   IsArray,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { InventoryStatus } from '../../config/enum';
+import { InventoryLocationType, InventoryStatus } from '../../config/enum';
 
 export class InventoryRequest {
   @ApiProperty({
@@ -17,6 +18,24 @@ export class InventoryRequest {
   })
   @IsNumber()
   item_id: number;
+
+  @ApiProperty({
+    description: 'If the location is current',
+    required: true,
+    example: 1,
+    default: false,
+  })
+  @IsBoolean()
+  is_current: boolean;
+
+  @ApiProperty({
+    description: 'Location type',
+    required: false,
+    example: InventoryLocationType.Vault,
+  })
+  @IsEnum(InventoryLocationType)
+  @IsOptional()
+  location_type: number;
 
   @ApiProperty({
     description: 'Vault name',
@@ -109,60 +128,6 @@ export class InventoryLocation {
 }
 
 export class UpdateInventoryRequest {
-  @ApiProperty({
-    description: 'Vault name',
-    required: false,
-    example: 'Dallas',
-  })
-  @IsString()
-  @IsOptional()
-  vault: string;
-
-  @ApiProperty({
-    description: 'Zone name',
-    required: false,
-    example: 'Cabinet',
-  })
-  @IsString()
-  @IsOptional()
-  zone: string;
-
-  @ApiProperty({
-    description: 'Shelf number',
-    required: false,
-    example: '2',
-  })
-  @IsString()
-  @IsOptional()
-  shelf: string;
-
-  @ApiProperty({
-    description: 'Row number',
-    required: false,
-    example: '3',
-  })
-  @IsString()
-  @IsOptional()
-  row: string;
-
-  @ApiProperty({
-    description: 'Box number',
-    required: false,
-    example: '4',
-  })
-  @IsString()
-  @IsOptional()
-  box: string;
-
-  @ApiProperty({
-    description: 'Slot number',
-    required: false,
-    example: '5',
-  })
-  @IsString()
-  @IsOptional()
-  slot: string;
-
   @ApiProperty({
     description: 'Any note for this inventory',
     required: false,

@@ -8,6 +8,26 @@ export enum SubmissionStatus {
   Verified = 6,
 }
 
+export const SubmissionStatusReadable = {
+  0: 'Failed',
+  1: 'Submitted',
+  2: 'Received',
+  3: 'Rejected',
+  4: 'Approved',
+  5: 'Vaulted',
+  6: 'Verified',
+};
+
+export enum InventoryLocationType {
+  Vault = 0,
+  Display = 1,
+}
+
+export const InventoryLocationTypeReadable = {
+  0: 'Vault',
+  1: 'Display',
+};
+
 export enum ItemType {
   card = 1,
   comic = 2,
@@ -28,16 +48,6 @@ export enum SubmissionUpdateType {
   Status = 1,
   Image = 2,
 }
-
-export const SubmissionStatusReadable = {
-  0: 'Failed',
-  1: 'Submitted',
-  2: 'Received',
-  3: 'Rejected',
-  4: 'Approved',
-  5: 'Vaulted',
-  6: 'Verified',
-};
 
 export const VaultingStatusReadable = {
   0: 'NotMinted',
@@ -152,11 +162,15 @@ export enum ListActionLogType {
 }
 
 export enum InventoryStatus {
-  InStock = 1,
+  NotCurrent = 0,
+  IsCurrent = 1,
+  Deprecated = 2,
 }
 
 export const InventoryStatusReadable = {
-  1: 'In Stock',
+  0: 'Not current inventory location',
+  1: 'Current inventory location',
+  2: 'Inventory location deprecated',
 };
 
 export enum SubmissionOrderStatus {
