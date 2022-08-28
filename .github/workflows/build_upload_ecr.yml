@@ -36,5 +36,5 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
-        docker build -t 548281136650.dkr.ecr.us-west-1.amazonaws.com/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }} -f docker/marketplace.api.dockerfile .
-        docker push 548281136650.dkr.ecr.us-west-1.amazonaws.com/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }}
+        docker build -t $ECR_REGISTRY/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }} -f docker/marketplace.api.dockerfile .
+        docker push $ECR_REGISTRY/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }}
