@@ -71,6 +71,12 @@ jobs:
       run: |
         aws ecs describe-task-definition --task-definition ${{ inputs.ECS_TASK }} --query taskDefinition > task-definition.json
     
+    - name: Delete previous env vars
+      uses: sergeysova/jq-action@v2
+      id: version
+      with:
+        cmd: 'jq ".containerDefinitions[0].environment = []" task-definition.json > task-definition.json'
+
     - name: Update Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
