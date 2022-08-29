@@ -7,6 +7,9 @@ on:
       ECS_SERVICE:
         required: true
         type: string
+      ECS_TASK:
+        required: true
+        type: string
       ECS_CLUSTER:
         required: true
         type: string
@@ -23,6 +26,7 @@ jobs:
 
   build:    
     runs-on: ubuntu-latest
+    name: Build, Upload & Deploy
     steps:
     - name: Check out code
       uses: actions/checkout@v2
@@ -60,7 +64,7 @@ jobs:
   
     - name: Download task definition
       run: |
-        aws ecs describe-task-definition --task-definition ${{ inputs.ECS_SERVICE }} --query taskDefinition > task-definition.json
+        aws ecs describe-task-definition --task-definition ${{ inputs.ECS_TASK }} --query taskDefinition > task-definition.json
     
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
