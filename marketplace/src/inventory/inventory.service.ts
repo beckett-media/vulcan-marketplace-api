@@ -27,6 +27,7 @@ import {
   ActionLogTypeReadable,
 } from '../config/enum';
 import { Inventory } from '../database/database.entity';
+import { DeleteQueryBuilder } from 'typeorm';
 
 @Injectable()
 export class InventoryService {
@@ -52,6 +53,10 @@ export class InventoryService {
     const item = await this.databaseService.getItem(inventory.item_id);
     const user = await this.databaseService.getUser(item.user);
     return newInventoryDetails(inventory, item, user, submission);
+  }
+
+  async deleteInventory(inventory_id: number) {
+    await this.databaseService.deleteInventory(inventory_id);
   }
 
   async listInventory(

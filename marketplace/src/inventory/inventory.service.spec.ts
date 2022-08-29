@@ -398,4 +398,79 @@ describe('InventoryService', () => {
     expect(inventory3.label).toBe(inventory1.label);
     expect(inventory3.item_id).not.toBe(inventory1.item_id);
   });
+
+  it('should delete inventory and not shown again', async () => {
+    // create new inventory
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    var submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
+    var vaulting = await mockSubmission(submissionRequest, marketplaceService);
+    var inventoryRequest = {
+      item_id: vaulting.item_id,
+      vault: 'dallas',
+      zone: 'cabinet 1',
+      box: '1',
+      row: '2',
+      slot: '3',
+    };
+    var inventory1 = await service.newInventory(
+      new InventoryRequest(inventoryRequest),
+    );
+    var inventoryRequest2 = {
+      item_id: vaulting.item_id,
+      vault: 'dallas',
+      zone: 'cabinet 2',
+      box: '11',
+      row: '22',
+      slot: '33',
+    };
+    var inventory2 = await service.newInventory(
+      new InventoryRequest(inventoryRequest2),
+    );
+
+    // update inventory 2 to be current
+    var updateInventoryRequest = new UpdateInventoryRequest({
+      status: InventoryStatus.IsCurrent,
+    });
+    var updatedInventory = await service.updateInventory(
+      inventory2.id,
+      updateInventoryRequest,
+    );
+
+    // list the inventories for the item
+    const listInventoryRequest = new ListInventoryRequest({
+      item_ids: `${inventory1.item_id}`,
+    });
+    var inventories = await service.listInventory(listInventoryRequest);
+    expect(inventories.length).toBe(2);
+    expect(inventories[0].item_id).toBe(inventories[1].item_id);
+    expect(inventories[0].status).toBe(InventoryStatus.NotCurrent);
+    expect(inventories[1].status).toBe(InventoryStatus.IsCurrent);
+
+    // delete inventory 1
+    await service.deleteInventory(inventory1.id);
+
+    // list the inventories for the item again
+    var inventories = await service.listInventory(listInventoryRequest);
+    expect(inventories.length).toBe(1);
+    expect(inventories[0].id).toBe(inventory2.id);
+
+    // query inventory 1 should fail
+    await expect(service.getInventory(inventory1.id)).rejects.toThrow(
+      `Inventory with id ${inventory1.id} not found`,
+    );
+
+    // query inventory 2 should succeed
+    inventory2 = await service.getInventory(inventory2.id);
+
+    // delete inventory 2 should fail
+    await expect(service.deleteInventory(inventory2.id)).rejects.toThrow(
+      `Inventory with id ${inventory2.id} is currently in use`,
+    );
+  });
 });

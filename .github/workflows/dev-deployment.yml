@@ -1,0 +1,20 @@
+name: Build & Upload [DEV]
+
+on:
+  push:
+    branches:
+      - development
+    
+jobs:
+  deploy:
+    name: DEV
+    
+    uses: beckett-media/vulcan-marketplace-api/.github/workflows/cont-deployment-base.yml@development
+    with:
+      ECS_CLUSTER: dev-vulcan-marketplace-api-cluster
+      ECS_TASK: dev-vulcan-marketplace-api-task
+      ECS_SERVICE: dev-vulcan-marketplace-api-service
+      ECR_REPOSITORY: dev-vulcan-marketplace-api
+      CONTAINER_NAME: dev-marketplace-api
+      IMAGE_TAG: ${{ github.sha }}
+    secrets: inherit

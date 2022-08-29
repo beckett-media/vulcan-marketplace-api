@@ -39,10 +39,9 @@ lerna-debug.log*
 *dotgit
 yarn.lock
 */package.lock
-*/package-json.lock
 .vscode
 *.env
-*package-lock.json
+# *package-lock.json
 
 # Misc
 post.*

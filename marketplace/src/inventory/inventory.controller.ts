@@ -10,6 +10,7 @@ import {
   Put,
   UseGuards,
   Request,
+  Delete,
 } from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import { ActionLogRequest } from '../marketplace/dtos/marketplace.dto';
@@ -143,5 +144,39 @@ export class InventoryController {
     await this.inventoryService.newActionLog(actionLogRequest);
 
     return inventoryDetails;
+  }
+
+  @Delete('/:inventory_id')
+  @OnlyAllowGroups(Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
+  @ApiOperation({
+    summary: 'Update inventory record by id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return specified inventory record',
+  })
+  @ApiProduces('application/json')
+  async deleteInventory(
+    @Param('inventory_id') inventory_id: number,
+    @Request() request: any,
+  ) {
+    const inventoryDetails = await this.inventoryService.deleteInventory(
+      inventory_id,
+    );
+
+    // record user action
+    const user = request.user.user;
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoAdmin,
+      actor: user,
+      entity_type: ActionLogEntityType.Inventory,
+      entity: inventory_id.toString(),
+      type: ActionLogType.DeleteInventory,
+      extra: JSON.stringify({ inventory_id: inventory_id }),
+    });
+    await this.inventoryService.newActionLog(actionLogRequest);
+
+    return;
   }
 }
