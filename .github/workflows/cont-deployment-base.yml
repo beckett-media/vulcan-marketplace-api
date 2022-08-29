@@ -48,15 +48,15 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }}"
 
     
-    - name: Scan ECR image with Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@c666240787bede835456c7ceb9f75c9225c3c1b4
-      with:
-        image-ref: ${{ steps.build-image.outputs.image }}
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: 'os,library'
-        severity: 'CRITICAL,HIGH'
+    # - name: Scan ECR image with Trivy vulnerability scanner
+    #   uses: aquasecurity/trivy-action@c666240787bede835456c7ceb9f75c9225c3c1b4
+    #   with:
+    #     image-ref: ${{ steps.build-image.outputs.image }}
+    #     format: 'table'
+    #     exit-code: '1'
+    #     ignore-unfixed: true
+    #     vuln-type: 'os,library'
+    #     severity: 'CRITICAL,HIGH'
   
     - name: Download task definition
       run: |
