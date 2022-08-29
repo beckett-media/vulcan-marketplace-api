@@ -19,6 +19,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -1084,10 +1085,29 @@ export class DatabaseService {
     }
   }
 
+  async deleteInventory(inventory_id: number) {
+    const inventory = await this.inventoryRepo.findOne({
+      where: { id: inventory_id },
+    });
+    if (!inventory) {
+      throw new NotFoundException(
+        `Inventory with id ${inventory_id} not found`,
+      );
+    }
+    if (inventory.status == InventoryStatus.IsCurrent) {
+      throw new InternalServerErrorException(
+        `Inventory with id ${inventory_id} is currently in use`,
+      );
+    }
+    inventory.status = InventoryStatus.Deprecated;
+    await this.inventoryRepo.save(inventory);
+  }
+
   async listInventory(
     listInventoryRequest: ListInventoryRequest,
   ): Promise<Inventory[]> {
     var where_filter = {};
+    where_filter['status'] = Not(InventoryStatus.Deprecated);
     if (!!listInventoryRequest.item_ids) {
       // convert csv to number array
       const item_ids = listInventoryRequest.item_ids
@@ -1144,7 +1164,7 @@ export class DatabaseService {
 
   async getInventory(inventory_id: number) {
     const inventory = await this.inventoryRepo.findOne({
-      where: { id: inventory_id },
+      where: { id: inventory_id, status: Not(InventoryStatus.Deprecated) },
     });
     if (!inventory) {
       throw new NotFoundException(
