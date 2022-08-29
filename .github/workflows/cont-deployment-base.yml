@@ -75,7 +75,10 @@ jobs:
       uses: sergeysova/jq-action@v2
       id: version
       with:
-        cmd: 'jq ".containerDefinitions[0].environment = []" task-definition.json > task-definition.json'
+        cmd: 'jq ".containerDefinitions[0].environment = []" task-definition.json > tf.json'
+    
+    - name: Test edited
+      run: cat tf.json
 
     - name: Update Amazon ECS task definition
       id: task-def
