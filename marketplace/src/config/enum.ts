@@ -111,6 +111,7 @@ export enum ActionLogType {
   Sale = 9,
   NewInventory = 10,
   UpdateInventory = 11,
+  UpdateUserProfileImage = 12,
 }
 
 export const ActionLogTypeReadable = {
@@ -125,6 +126,7 @@ export const ActionLogTypeReadable = {
   9: 'Listing Sale',
   10: 'New Inventory',
   11: 'Update Inventory',
+  12: 'Update User Profile Image',
 };
 
 export enum ActionLogActorType {
@@ -145,6 +147,7 @@ export enum ActionLogEntityType {
   Listing = 3,
   Sales = 4,
   Inventory = 5,
+  User = 6,
 }
 
 export const ActionLogEntityTypeReadable = {
@@ -153,6 +156,7 @@ export const ActionLogEntityTypeReadable = {
   3: 'Listing',
   4: 'Sales',
   5: 'Inventory',
+  6: 'User',
 };
 
 export enum ListActionLogType {

@@ -471,6 +471,12 @@ export class DatabaseService {
     return user;
   }
 
+  async updateUserProfileImage(user: User, image: string): Promise<User> {
+    user.image = image;
+    user = await this.userRepo.save(user);
+    return user;
+  }
+
   // create new vaulting item
   async createNewVaulting(
     user: number,

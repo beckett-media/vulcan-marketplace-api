@@ -118,7 +118,7 @@ export class MarketplaceService {
         );
       }
       const image_buffer = Buffer.from(request.image_base64, 'base64');
-      imagePath = await this.awsService.uploadItemImage(
+      imagePath = await this.awsService.uploadImage(
         image_buffer,
         'submission',
         request.image_format,
@@ -139,7 +139,7 @@ export class MarketplaceService {
         );
       }
       const image_rev_buffer = Buffer.from(request.image_rev_base64, 'base64');
-      imagePathRev = await this.awsService.uploadItemImage(
+      imagePathRev = await this.awsService.uploadImage(
         image_rev_buffer,
         'submission',
         request.image_rev_format,
@@ -650,7 +650,7 @@ export class MarketplaceService {
 
     // convert image from base64
     const image_buffer = Buffer.from(request.image_base64, 'base64');
-    const s3URL = await this.awsService.uploadItemImage(
+    const s3URL = await this.awsService.uploadImage(
       image_buffer,
       'vaulting',
       request.image_format,

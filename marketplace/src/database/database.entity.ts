@@ -84,6 +84,9 @@ export class User {
   @Column()
   uuid: string;
 
+  @Column()
+  image: string;
+
   //TODO: hard code cognito first
   @Column()
   source: string;

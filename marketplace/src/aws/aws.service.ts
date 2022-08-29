@@ -7,7 +7,7 @@ import configuration, { RUNTIME_ENV } from '../config/configuration';
 export class AwsService {
   constructor() {}
 
-  async uploadItemImage(
+  async uploadImage(
     dataBuffer: Buffer,
     prefix: string,
     image_format: string,

@@ -76,11 +76,7 @@ describe('InventoryService', () => {
   let marketplaceService: MarketplaceService;
 
   const fakeAwsService: Partial<AwsService> = {
-    uploadItemImage: (
-      dataBuffer: Buffer,
-      prefix: string,
-      image_format: string,
-    ) => {
+    uploadImage: (dataBuffer: Buffer, prefix: string, image_format: string) => {
       return Promise.resolve('fake_url');
     },
   };

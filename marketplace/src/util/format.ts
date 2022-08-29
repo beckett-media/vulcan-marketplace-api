@@ -33,6 +33,7 @@ import {
   InventoryLocation,
   InventoryRequest,
 } from '../inventory/dtos/inventory.dto';
+import { UserDetails } from 'src/user/dtos/user.dto';
 
 export function newSubmissionOrderDetails(
   order: SubmissionOrder,
@@ -398,4 +399,11 @@ export function trimInventoryLocation(inventoryLocation: InventoryLocation) {
       : inventoryLocation.slot;
 
   return inventoryLocation;
+}
+
+export function newUserDetails(user: User) {
+  return new UserDetails({
+    uuid: user.uuid,
+    image: user.image,
+  });
 }
