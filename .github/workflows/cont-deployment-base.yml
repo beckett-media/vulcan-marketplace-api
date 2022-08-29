@@ -77,9 +77,6 @@ jobs:
       with:
         cmd: 'jq ".containerDefinitions[0].environment = []" task-definition.json > tf.json'
     
-    - name: Test edited
-      run: cat tf.json
-
     - name: Update Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
