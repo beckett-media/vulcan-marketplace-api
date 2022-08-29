@@ -111,6 +111,7 @@ export enum ActionLogType {
   Sale = 9,
   NewInventory = 10,
   UpdateInventory = 11,
+  DeleteInventory = 12,
 }
 
 export const ActionLogTypeReadable = {
