@@ -15,5 +15,6 @@ jobs:
       ECS_TASK: dev-vulcan-marketplace-api-task
       ECS_SERVICE: dev-vulcan-marketplace-api-service
       ECR_REPOSITORY: dev-vulcan-marketplace-api
+      CONTAINER_NAME: dev-marketplace-api
       IMAGE_TAG: ${{ github.sha }}
     secrets: inherit
