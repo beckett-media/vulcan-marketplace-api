@@ -17,7 +17,7 @@ export class UserProfileImageRequest {
     example: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/...',
   })
   @IsString()
-  image: string;
+  image_base64: string;
 
   @ApiProperty({
     description: 'Image format, e.g. png',

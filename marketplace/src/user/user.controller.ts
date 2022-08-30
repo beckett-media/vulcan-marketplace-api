@@ -1,17 +1,26 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiResponse } from '@nestjs/swagger';
-import { OnlyAllowGroups } from 'src/auth/groups.decorator';
-import { GroupsGuard } from 'src/auth/groups.guard';
-import { JwtAuthGuard } from 'src/auth/jwt.authguard';
-import { JwtStrategy } from 'src/auth/jwt.strategy';
+import { OnlyAllowGroups } from '../auth/groups.decorator';
+import { GroupsGuard } from '../auth/groups.guard';
+import { JwtAuthGuard } from '../auth/jwt.authguard';
+
 import {
   ActionLogActorType,
   ActionLogEntityType,
   ActionLogType,
   Group,
-} from 'src/config/enum';
-import { DetailedLogger } from 'src/logger/detailed.logger';
-import { ActionLogRequest } from 'src/marketplace/dtos/marketplace.dto';
+} from '../config/enum';
+import { DetailedLogger } from '../logger/detailed.logger';
+import { ActionLogRequest } from '../marketplace/dtos/marketplace.dto';
+import { assertOwnerOrAdmin } from '../util/assert';
+import { trimRequestWithImage } from '../util/format';
 import { UserProfileImageRequest } from './dtos/user.dto';
 import { UserService } from './user.service';
 
@@ -23,7 +32,7 @@ export class UserController {
 
   constructor(private userService: UserService) {}
 
-  @Post('/{uuid}/image')
+  @Post('/:uuid/image')
   @OnlyAllowGroups(Group.Admin, Group.User)
   @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
@@ -36,19 +45,24 @@ export class UserController {
   @ApiProduces('application/json')
   async newInventory(
     @Body() userProfileImageRequest: UserProfileImageRequest,
+    @Param('uuid') userUUID: string,
     @Request() request: any,
   ) {
-    // record user action
-    const user = await this.userService.getUserByUUID(request.user.user);
+    assertOwnerOrAdmin(request.user, { user: userUUID }, this.logger);
+    const userDetails = await this.userService.updateUserProfileImage(
+      userUUID,
+      userProfileImageRequest,
+    );
+    const userEntity = await this.userService.getUserByUUID(userUUID);
 
-    request.user.user;
+    const user = request.user.user;
     const actionLogRequest = new ActionLogRequest({
       actor_type: ActionLogActorType.CognitoUser,
-      actor: user.uuid,
+      actor: user,
       entity_type: ActionLogEntityType.User,
-      entity: user.id.toString(),
+      entity: userEntity.id.toString(),
       type: ActionLogType.UpdateUserProfileImage,
-      extra: JSON.stringify(inventoryRequest),
+      extra: JSON.stringify(trimRequestWithImage(userProfileImageRequest)),
     });
     await this.userService.newActionLog(actionLogRequest);
 

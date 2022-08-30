@@ -10,7 +10,8 @@ import { AwsService } from '../aws/aws.service';
 import { BravoModule } from '../bravo/bravo.module';
 import { BravoService } from '../bravo/bravo.service';
 import { RequestLoggerMiddleware } from '../middleware/logger';
-import { InventoryModule } from 'src/inventory/inventory.module';
+import { InventoryModule } from '../inventory/inventory.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   controllers: [MarketplaceController],
@@ -29,6 +30,7 @@ import { InventoryModule } from 'src/inventory/inventory.module';
     BravoModule,
     AuthModule,
     InventoryModule,
+    UserModule,
     CacheModule.register(),
   ],
 })
