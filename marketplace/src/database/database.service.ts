@@ -109,6 +109,7 @@ export class DatabaseService {
       try {
         user = await this.newUserWithLock(user_uuid, source);
       } catch (e) {
+        console.log(e);
         this.logger.warn(`User with lock: ${e}`);
       }
       if (null !== user) {
@@ -116,7 +117,7 @@ export class DatabaseService {
       }
 
       if (currentTry >= maxTries) {
-        throw new Error('Deadlock on maybeCreateUser found.');
+        throw new Error('Deadlock on maybeCreateNewUser found.');
       }
     }
 
@@ -132,11 +133,15 @@ export class DatabaseService {
           .where({ uuid: user_uuid })
           .getOne()
           .then(async (result) => {
+            const env = process.env[RUNTIME_ENV];
+            const config = configuration()[env];
+            const userPoolId = config['cognito']['COGNITO_USER_POOL_ID'];
             var user = result;
             if (undefined === user) {
               user = new User();
               user.uuid = user_uuid;
               user.source = source;
+              user.source_id = userPoolId;
               user.created_at = Math.round(Date.now() / 1000);
               return await entityManager.save(user);
             }
@@ -473,6 +478,11 @@ export class DatabaseService {
   }
 
   async updateUserProfileImage(user: User, image: string): Promise<User> {
+    // refresh user pool id as well
+    const env = process.env[RUNTIME_ENV];
+    const config = configuration()[env];
+    const userPoolId = config['cognito']['COGNITO_USER_POOL_ID'];
+    user.source_id = userPoolId;
     user.image = image;
     user = await this.userRepo.save(user);
     return user;

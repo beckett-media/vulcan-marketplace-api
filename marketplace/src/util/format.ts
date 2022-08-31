@@ -33,7 +33,7 @@ import {
   InventoryLocation,
   InventoryRequest,
 } from '../inventory/dtos/inventory.dto';
-import { UserDetails } from 'src/user/dtos/user.dto';
+import { UserDetails } from '../user/dtos/user.dto';
 
 export function newSubmissionOrderDetails(
   order: SubmissionOrder,

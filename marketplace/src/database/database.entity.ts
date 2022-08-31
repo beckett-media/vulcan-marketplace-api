@@ -84,12 +84,15 @@ export class User {
   @Column()
   uuid: string;
 
-  @Column()
+  @Column({ default: '' })
   image: string;
 
   //TODO: hard code cognito first
   @Column()
   source: string;
+
+  @Column({ default: '' })
+  source_id: string;
 
   @Column()
   created_at: number;
