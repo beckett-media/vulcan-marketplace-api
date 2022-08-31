@@ -404,6 +404,7 @@ export function trimInventoryLocation(inventoryLocation: InventoryLocation) {
 export function newUserDetails(user: User) {
   return new UserDetails({
     uuid: user.uuid,
-    image: user.image,
+    source: user.source,
+    source_id: user.source_id,
   });
 }

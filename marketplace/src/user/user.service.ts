@@ -29,7 +29,7 @@ export class UserService {
   async updateUserProfileImage(
     userUUID: string,
     userProfileImageRequest: UserProfileImageRequest,
-  ): Promise<UserDetails> {
+  ): Promise<string> {
     var user = await this.databaseService.getUserByUUID(userUUID);
 
     const image_buffer = Buffer.from(
@@ -41,8 +41,8 @@ export class UserService {
       'user/profile_image',
       userProfileImageRequest.image_format,
     );
-    user = await this.databaseService.updateUserProfileImage(user, imagePath);
-    return newUserDetails(user);
+    await this.databaseService.updateUserProfileImage(user, imagePath);
+    return imagePath;
   }
 
   async getUserByUUID(uuid: string): Promise<User> {

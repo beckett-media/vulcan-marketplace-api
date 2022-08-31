@@ -37,14 +37,22 @@ export class UserDetails {
   @IsString()
   uuid: string;
 
-  // image url
   @ApiProperty({
-    description: 'Image url',
+    description: 'Where is the user from',
     required: true,
-    example: 'https://s3.amazonaws.com/some-images/...',
+    example: 'cognito',
   })
   @IsString()
-  image: string;
+  source: string;
+
+  // source id
+  @ApiProperty({
+    description: 'Id from the source',
+    required: true,
+    example: 'us-west1_1y2z3a4b5',
+  })
+  @IsString()
+  source_id: string;
 
   constructor(partial: Partial<UserDetails>) {
     Object.assign(this, partial);

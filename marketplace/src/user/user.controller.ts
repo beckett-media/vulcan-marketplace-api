@@ -36,11 +36,11 @@ export class UserController {
   @OnlyAllowGroups(Group.Admin, Group.User)
   @UseGuards(JwtAuthGuard, GroupsGuard)
   @ApiOperation({
-    summary: 'Create new inventory record for submitted item',
+    summary: 'Upload new user profile image',
   })
   @ApiResponse({
     status: 200,
-    description: 'Return created inventory record',
+    description: 'Return s3 url for the new user profile image',
   })
   @ApiProduces('application/json')
   async newInventory(
@@ -49,12 +49,13 @@ export class UserController {
     @Request() request: any,
   ) {
     assertOwnerOrAdmin(request.user, { user: userUUID }, this.logger);
-    const userDetails = await this.userService.updateUserProfileImage(
+    const imagePath = await this.userService.updateUserProfileImage(
       userUUID,
       userProfileImageRequest,
     );
     const userEntity = await this.userService.getUserByUUID(userUUID);
 
+    // log user action
     const user = request.user.user;
     const actionLogRequest = new ActionLogRequest({
       actor_type: ActionLogActorType.CognitoUser,
@@ -66,6 +67,6 @@ export class UserController {
     });
     await this.userService.newActionLog(actionLogRequest);
 
-    return userDetails;
+    return { image_url: imagePath };
   }
 }
