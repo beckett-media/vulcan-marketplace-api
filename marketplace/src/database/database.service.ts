@@ -1051,6 +1051,21 @@ export class DatabaseService {
           inventoryRequest = trimInventoryLocation(
             inventoryRequest,
           ) as InventoryRequest;
+
+          // find if the item is already in inventory and is current
+          const existingInventory = await this.inventoryRepo.findOne({
+            where: {
+              item_id: inventoryRequest.item_id,
+              status: InventoryStatus.IsCurrent,
+            },
+          });
+          // if there is an existing inventory which is current,
+          // set it to be not current
+          if (!!existingInventory) {
+            existingInventory.status = InventoryStatus.NotCurrent;
+            await this.inventoryRepo.save(existingInventory);
+          }
+
           const label = getInventoryLabel(
             inventoryRequest as InventoryLocation,
           );
@@ -1063,7 +1078,7 @@ export class DatabaseService {
             box: inventoryRequest.box ? inventoryRequest.box : '',
             slot: inventoryRequest.slot ? inventoryRequest.slot : '',
             label: label,
-            status: InventoryStatus.NotCurrent,
+            status: InventoryStatus.IsCurrent,
             note: inventoryRequest.note ? inventoryRequest.note : '',
             updated_at: 0,
             created_at: Math.round(Date.now() / 1000),
@@ -1122,7 +1137,6 @@ export class DatabaseService {
     listInventoryRequest: ListInventoryRequest,
   ): Promise<Inventory[]> {
     var where_filter = {};
-    where_filter['status'] = Not(InventoryStatus.Deprecated);
     if (!!listInventoryRequest.item_ids) {
       // convert csv to number array
       const item_ids = listInventoryRequest.item_ids

@@ -237,9 +237,9 @@ describe('InventoryService', () => {
     expect(inventories[0].user).toBe(userUUID);
     expect(inventories[1].user).toBe(userUUID);
     expect(inventories[2].user).toBe(userUUID);
-    expect(inventories[0].status).toBe(InventoryStatus.NotCurrent);
-    expect(inventories[1].status).toBe(InventoryStatus.NotCurrent);
-    expect(inventories[2].status).toBe(InventoryStatus.NotCurrent);
+    expect(inventories[0].status).toBe(InventoryStatus.IsCurrent);
+    expect(inventories[1].status).toBe(InventoryStatus.IsCurrent);
+    expect(inventories[2].status).toBe(InventoryStatus.IsCurrent);
 
     listInventoryRequest = new ListInventoryRequest({
       box: '1',
@@ -258,9 +258,9 @@ describe('InventoryService', () => {
     inventories = await service.listInventory(listInventoryRequest);
     expect(inventories.length).toBe(2);
     expect(inventories[0].item_id).toBe(submission2.item_id);
-    expect(inventories[0].status).toBe(InventoryStatus.NotCurrent);
+    expect(inventories[0].status).toBe(InventoryStatus.IsCurrent);
     expect(inventories[1].item_id).toBe(submission3.item_id);
-    expect(inventories[1].status).toBe(InventoryStatus.NotCurrent);
+    expect(inventories[1].status).toBe(InventoryStatus.IsCurrent);
   });
 
   it('should update inventory', async () => {
@@ -288,6 +288,7 @@ describe('InventoryService', () => {
     expect(inventory.label).toBe(
       '[vault]:dallas-[zone]:cabinet 1-[shelf]:*-[row]:2-[box]:1-[slot]:3',
     );
+    expect(inventory.status).toBe(InventoryStatus.IsCurrent);
     expect(inventory.updated_at).toBe(0);
     expect(inventory.note).toBe(inventoryRequest.note);
 
@@ -306,7 +307,7 @@ describe('InventoryService', () => {
     expect(updatedInventory.note).toBe(inventoryRequest.note);
     expect(updatedInventory.status).toBe(InventoryStatus.IsCurrent);
 
-    // second inventory, we allow two items with the same label
+    // second inventory
     inventoryRequest = {
       item_id: vaulting.item_id,
       vault: 'dallas',
@@ -319,19 +320,10 @@ describe('InventoryService', () => {
     const inventory2 = await service.newInventory(
       new InventoryRequest(inventoryRequest),
     );
-    updateInventoryRequest = new UpdateInventoryRequest({
-      status: InventoryStatus.IsCurrent,
-    });
-
-    // create a second inventory with the location and mark as current
-    const updatedInventory2 = await service.updateInventory(
-      inventory2.id,
-      updateInventoryRequest,
-    );
     // different label, same item_id
-    expect(updatedInventory2.label).not.toBe(updatedInventory.label);
-    expect(updatedInventory2.item_id).toEqual(inventory.item_id);
-    expect(updatedInventory2.status).toBe(InventoryStatus.IsCurrent);
+    expect(inventory2.label).not.toBe(updatedInventory.label);
+    expect(inventory2.item_id).toEqual(inventory.item_id);
+    expect(inventory2.status).toBe(InventoryStatus.IsCurrent);
 
     // the first inventory is not current anymore
     inventory = await service.getInventory(inventory.id);
@@ -342,11 +334,22 @@ describe('InventoryService', () => {
     const listInventoryRequest = new ListInventoryRequest({
       item_ids: `${inventory.item_id}`,
     });
-    const inventories = await service.listInventory(listInventoryRequest);
+    var inventories = await service.listInventory(listInventoryRequest);
     expect(inventories.length).toBe(2);
     expect(inventories[0].item_id).toBe(inventories[1].item_id);
     expect(inventories[0].status).toBe(InventoryStatus.NotCurrent);
     expect(inventories[1].status).toBe(InventoryStatus.IsCurrent);
+
+    // move the item back to the first inventory
+    updateInventoryRequest = new UpdateInventoryRequest({
+      status: InventoryStatus.IsCurrent,
+    });
+    await service.updateInventory(inventory.id, updateInventoryRequest);
+    inventories = await service.listInventory(listInventoryRequest);
+    expect(inventories.length).toBe(2);
+    expect(inventories[0].item_id).toBe(inventories[1].item_id);
+    expect(inventories[0].status).toBe(InventoryStatus.IsCurrent);
+    expect(inventories[1].status).toBe(InventoryStatus.NotCurrent);
   });
 
   it('should allow double occupancy for the same location or item', async () => {
@@ -462,8 +465,11 @@ describe('InventoryService', () => {
 
     // list the inventories for the item again
     var inventories = await service.listInventory(listInventoryRequest);
-    expect(inventories.length).toBe(1);
-    expect(inventories[0].id).toBe(inventory2.id);
+    expect(inventories.length).toBe(2);
+    expect(inventories[0].id).toBe(inventory1.id);
+    expect(inventories[0].status).toBe(InventoryStatus.Deprecated);
+    expect(inventories[1].id).toBe(inventory2.id);
+    expect(inventories[1].status).toBe(InventoryStatus.IsCurrent);
 
     // query inventory 1 should fail
     await expect(service.getInventory(inventory1.id)).rejects.toThrow(
