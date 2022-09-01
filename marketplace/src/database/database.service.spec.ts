@@ -12,7 +12,7 @@ import {
   Inventory,
   SubmissionOrder,
 } from '../database/database.entity';
-import { clearDB, newSubmissionRequest } from '../util/testing';
+import { clearDB, closeDB, newSubmissionRequest } from '../util/testing';
 import { GetDBConnection } from './database.module';
 
 describe('DatabaseService', () => {
@@ -41,6 +41,11 @@ describe('DatabaseService', () => {
 
     // clear database
     await clearDB();
+  });
+
+  afterEach(async () => {
+    // close database
+    await closeDB();
   });
 
   it('should not create same user twice', async () => {

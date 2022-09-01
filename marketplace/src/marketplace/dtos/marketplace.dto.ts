@@ -1089,24 +1089,6 @@ export class VaultingRequest {
   @IsNumber()
   submission_id: number;
 
-  @ApiProperty({
-    description: 'The base64 encoding of the vaulting image',
-    example: '/9j/4AAQSkZJRgABAQAAAQABAAD/4Q......',
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsString()
-  image_base64: string;
-
-  @ApiProperty({
-    description: 'The format of the vaulting image',
-    example: 'jpg',
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsString()
-  image_format: string;
-
   constructor(partial: Partial<VaultingRequest>) {
     Object.assign(this, partial);
   }

@@ -66,6 +66,8 @@ import {
 } from './dtos/marketplace.dto';
 import { Cache } from 'cache-manager';
 import { onlyLetters } from '../util/assert';
+import got from 'got/dist/source';
+import { buffer } from 'rxjs';
 
 const VAULTING_API_ACTOR = 'Vaulting API';
 const FORBIDDEN_UPDATE_FIELDS = [
@@ -622,6 +624,11 @@ export class MarketplaceService {
         `Mismatched item_id for submission ${request.submission_id}, item: ${request.item_id}`,
       );
     }
+    if (!!!submission.image) {
+      throw new InternalServerErrorException(
+        `Submission ${request.submission_id} has no image`,
+      );
+    }
 
     // check if item is already vaulted
     try {
@@ -635,26 +642,10 @@ export class MarketplaceService {
       }
     } catch (e) {}
 
-    // sanity check for image fields
-    if (!!!request.image_base64) {
-      throw new InternalServerErrorException('Image not found');
-    }
-    if (!!!request.image_format) {
-      throw new InternalServerErrorException('Image format not found');
-    }
-    if (!onlyLetters(request.image_format)) {
-      throw new InternalServerErrorException(
-        `Image_format should only contain letters: ${request.image_format}`,
-      );
-    }
-
-    // convert image from base64
-    const image_buffer = Buffer.from(request.image_base64, 'base64');
-    const s3URL = await this.awsService.uploadImage(
-      image_buffer,
-      'vaulting',
-      request.image_format,
-    );
+    // read s3 image file from submission
+    const imageContent = await this.awsService.readImage(submission.image);
+    const imageBase64 = Buffer.from(imageContent).toString('base64');
+    const imageFormat = submission.image.split('.').pop();
 
     // get user by uuid
     const user = await this.databaseService.getUserByUUID(request.user);
@@ -668,8 +659,8 @@ export class MarketplaceService {
       item.uuid,
       item.title,
       description,
-      request.image_format,
-      request.image_base64,
+      imageFormat,
+      imageBase64,
       attributes,
     );
 
@@ -677,7 +668,7 @@ export class MarketplaceService {
       user.id,
       request.item_id,
       mint_job_id,
-      s3URL,
+      submission.image,
     );
 
     // record user action

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
+import got from 'got/dist/source';
 import { v4 as uuid } from 'uuid';
 import configuration, { RUNTIME_ENV } from '../config/configuration';
 
@@ -30,5 +31,10 @@ export class AwsService {
       })
       .promise();
     return uploadResult.Location;
+  }
+
+  async readImage(s3url: string): Promise<Buffer> {
+    const buffer = await got.get(s3url).buffer();
+    return buffer;
   }
 }

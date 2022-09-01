@@ -9,7 +9,7 @@ import {
   SubmissionStatus,
 } from '../config/enum';
 import { MarketplaceService } from '../marketplace/marketplace.service';
-import { clearDB, newSubmissionRequest } from '../util/testing';
+import { clearDB, closeDB, newSubmissionRequest } from '../util/testing';
 import {
   ActionLog,
   Inventory,
@@ -135,6 +135,11 @@ describe('InventoryService', () => {
 
     // clear database
     await clearDB();
+  });
+
+  afterEach(async () => {
+    // close database
+    await closeDB();
   });
 
   it('should create new inventory', async () => {

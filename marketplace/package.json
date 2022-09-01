@@ -17,7 +17,7 @@
     "start:prod": "export MARKETPLACE_RUNTIME=prod NO_COLOR=logging; nest start --watch",
     "start:debug": "nest start --debug --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "export MARKETPLACE_RUNTIME=test; jest --runInBand --verbose --detectOpenHandles",
+    "test": "export MARKETPLACE_RUNTIME=test; jest --verbose --runInBand",
     "test:watch": "export MARKETPLACE_RUNTIME=dev; jest --watch",
     "test:cov": "export runtime=dev; jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",

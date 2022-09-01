@@ -26,6 +26,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule, GetDBConnection } from '../database/database.module';
 import {
   clearDB,
+  closeDB,
   imageBaseball,
   imageBlackBox,
   newSubmissionRequest,
@@ -44,6 +45,9 @@ describe('MarketplaceService', () => {
   const fakeAwsService: Partial<AwsService> = {
     uploadImage: (dataBuffer: Buffer, prefix: string, image_format: string) => {
       return Promise.resolve('fake_url');
+    },
+    readImage: (s3url: string) => {
+      return Promise.resolve(Buffer.from('fake_image'));
     },
   };
 
@@ -99,6 +103,11 @@ describe('MarketplaceService', () => {
 
     // clear database
     await clearDB();
+  });
+
+  afterEach(async () => {
+    // close database
+    await closeDB();
   });
 
   it('should create new submission', async () => {
@@ -501,13 +510,13 @@ describe('MarketplaceService', () => {
     expect(submissionDetailsRev.image_rev_url).toBe('fake_url');
   });
 
-  it('should fail if vaulting image format is not just letters', async () => {
+  it('should fail if submission image is not set', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
     const submissionRequest = newSubmissionRequest(
       userUUID,
       'sn1',
-      true,
+      false,
       '',
       true,
     );
@@ -544,7 +553,7 @@ describe('MarketplaceService', () => {
     };
     await expect(service.newVaulting(vaultingRequest)).rejects.toEqual(
       new InternalServerErrorException(
-        `Image_format should only contain letters: ${fake_format}`,
+        `Submission ${submission.submission_id} has no image`,
       ),
     );
   });
