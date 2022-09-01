@@ -29,15 +29,6 @@ export class InventoryRequest {
   is_current: boolean;
 
   @ApiProperty({
-    description: 'Location type',
-    required: false,
-    example: InventoryLocationType.Vault,
-  })
-  @IsEnum(InventoryLocationType)
-  @IsOptional()
-  location_type: number;
-
-  @ApiProperty({
     description: 'Vault name',
     required: true,
     example: 'Dallas',
