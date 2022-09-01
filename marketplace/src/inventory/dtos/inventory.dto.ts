@@ -22,7 +22,7 @@ export class InventoryRequest {
   @ApiProperty({
     description: 'If the location is current',
     required: true,
-    example: 1,
+    example: true,
     default: false,
   })
   @IsBoolean()
