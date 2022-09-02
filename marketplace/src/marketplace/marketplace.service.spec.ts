@@ -173,14 +173,6 @@ describe('MarketplaceService', () => {
       submission.submission_id,
       submissionUpdateReceived,
     );
-    // then verify that it is received
-    const submissionUpdateVerified = new SubmissionUpdate({
-      status: SubmissionStatus.Verified,
-    });
-    await service.updateSubmission(
-      submission.submission_id,
-      submissionUpdateVerified,
-    );
 
     // approve submission should succeed
     const submissionDetails = await service.updateSubmission(

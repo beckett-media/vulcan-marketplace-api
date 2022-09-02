@@ -309,7 +309,7 @@ export class MarketplaceService {
         submission.rejected_at = Math.round(Date.now() / 1000);
         break;
       case SubmissionStatus.Approved:
-        fromStatus = [SubmissionStatus.Verified];
+        fromStatus = [SubmissionStatus.Verified, SubmissionStatus.Received];
         if (!fromStatus.includes(submission.status)) {
           throw new InternalServerErrorException(
             `Cannot update status from ${
