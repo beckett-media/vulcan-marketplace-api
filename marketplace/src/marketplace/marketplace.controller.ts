@@ -93,6 +93,12 @@ export class MarketplaceController {
     return { status: 'ok' };
   }
 
+  @Get('/sanitycheck')
+  async sanitycheck() {
+    const result = await this.marketplaceService.sanityCheck();
+    return result;
+  }
+
   @Get('/submission/order/:submission_order_id')
   @OnlyAllowGroups(Group.User, Group.Admin)
   @UseGuards(JwtAuthGuard, GroupsGuard)
@@ -264,9 +270,21 @@ export class MarketplaceController {
     @Request() request: any,
   ): Promise<SubmissionDetails[]> {
     assertOwnerOrAdmin(request.user, query, this.logger);
+    // convert csv to number array
+    const submission_ids =
+      query.submission_ids !== undefined
+        ? query.submission_ids.split(',').map((id) => parseInt(id))
+        : undefined;
+    const submission_order_ids =
+      query.submission_order_ids != undefined
+        ? query.submission_order_ids.split(',').map((id) => parseInt(id))
+        : undefined;
+
     //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissions(
       query.user,
+      submission_ids,
+      submission_order_ids,
       query.status,
       query.offset,
       query.limit,

@@ -305,6 +305,8 @@ export class DatabaseService {
 
   async listSubmissions(
     userUUID: string,
+    ids: number[],
+    order_ids: number[],
     status: number,
     offset: number,
     limit: number,
@@ -320,6 +322,16 @@ export class DatabaseService {
         throw new NotFoundException(`User ${userUUID} not found`);
       }
       where_filter = { user: user.id };
+    }
+
+    // specify ids
+    if (ids !== undefined) {
+      where_filter = { id: In(ids) };
+    }
+
+    // specify order ids
+    if (order_ids !== undefined) {
+      where_filter = { order_id: In(order_ids) };
     }
 
     // by default, set status filter to be <not failed>
@@ -392,6 +404,26 @@ export class DatabaseService {
     if (!submission) {
       throw new NotFoundException(
         `Submission not found for id: ${submission_id}`,
+      );
+    }
+    return submission;
+  }
+
+  async getSubmissionByItemUUID(uuid: string): Promise<Submission> {
+    // find item by uuid
+    const item = await this.itemRepo.findOne({
+      where: { uuid: uuid },
+    });
+    if (!item) {
+      throw new NotFoundException(`Item ${uuid} not found`);
+    }
+    const submission = await this.submissionRepo.findOne({
+      where: { item_id: item.id },
+    });
+    // if we can not find submission, throw not found error
+    if (!submission) {
+      throw new NotFoundException(
+        `Submission not found for item id: ${item.id}`,
       );
     }
     return submission;
@@ -488,7 +520,7 @@ export class DatabaseService {
   }
 
   // create new vaulting item
-  async createNewVaulting(
+  async maybeCreateNewVaulting(
     user: number,
     item_id: number,
     mint_job_id: number,
@@ -499,24 +531,37 @@ export class DatabaseService {
       await getManager().transaction(
         this.isolation,
         async (transactionalEntityManager) => {
-          const newVaulting = this.vaultingRepo.create({
-            user: user,
-            item_id: item_id,
-            mint_job_id: mint_job_id,
-            mint_tx_hash: '',
-            burn_job_id: 0,
-            burn_tx_hash: '',
-            chain_id: 0,
-            collection: INIT_COLLECTION,
-            token_id: INIT_TOKEN_ID,
-            status: VaultingStatus.Minting,
-            image: s3url,
-            minted_at: 0,
-            burned_at: 0,
-            updated_at: Math.round(Date.now() / 1000),
-            created_at: Math.round(Date.now() / 1000),
+          // query vaulting by item id
+          vaulting = await transactionalEntityManager.findOne(Vaulting, {
+            where: { item_id: item_id },
           });
-          vaulting = await this.vaultingRepo.save(newVaulting);
+          // if vaulting does not exist, create a new one
+          if (!vaulting) {
+            const newVaulting = this.vaultingRepo.create({
+              user: user,
+              item_id: item_id,
+              mint_job_id: mint_job_id,
+              mint_tx_hash: '',
+              burn_job_id: 0,
+              burn_tx_hash: '',
+              chain_id: 0,
+              collection: INIT_COLLECTION,
+              token_id: INIT_TOKEN_ID,
+              status: VaultingStatus.Minting,
+              image: s3url,
+              minted_at: 0,
+              burned_at: 0,
+              updated_at: Math.round(Date.now() / 1000),
+              created_at: Math.round(Date.now() / 1000),
+            });
+            vaulting = await this.vaultingRepo.save(newVaulting);
+          } else {
+            // update vaulting status
+            vaulting.mint_job_id = mint_job_id;
+            vaulting.status = VaultingStatus.Minting;
+            vaulting.updated_at = Math.round(Date.now() / 1000);
+            vaulting = await this.vaultingRepo.save(vaulting);
+          }
         },
       );
     } catch (error) {
@@ -623,6 +668,9 @@ export class DatabaseService {
 
   async updateVaulting(vaultingUpdate: VaultingUpdate): Promise<Vaulting> {
     const vaulting = await this.getVaultingByItemUUID(vaultingUpdate.item_uuid);
+    var submission = await this.getSubmissionByItemUUID(
+      vaultingUpdate.item_uuid,
+    );
     if (!vaulting) {
       throw new NotFoundException(
         `Vaulting not found for item ${vaultingUpdate.item_uuid}`,
@@ -649,6 +697,12 @@ export class DatabaseService {
         }
 
         Object.assign(vaulting, newVaulting);
+
+        // update submission status
+        submission.status = SubmissionStatus.Vaulted;
+        submission.updated_at = Math.round(Date.now() / 1000);
+        await this.submissionRepo.save(submission);
+
         break;
       case VaultingUpdateType.Burned:
         newVaulting = {
@@ -669,8 +723,8 @@ export class DatabaseService {
         Object.assign(vaulting, newVaulting);
         break;
     }
-
     await this.vaultingRepo.save(vaulting);
+
     return vaulting;
   }
 
@@ -1245,5 +1299,24 @@ export class DatabaseService {
     });
 
     return inventory;
+  }
+
+  async sanityCheck(): Promise<[boolean, any]> {
+    try {
+      const env = process.env[RUNTIME_ENV];
+      const config = configuration()[env];
+      await this.submissionRepo.find({ take: 1 });
+      return [
+        true,
+        {
+          type: config['db']['type'],
+          host: config['db']['host'],
+          database: config['db']['name'],
+          sync: config['db']['sync'],
+        },
+      ];
+    } catch (e) {
+      return [false, { error: JSON.stringify(e) }];
+    }
   }
 }

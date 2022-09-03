@@ -1,6 +1,14 @@
+uncommitted = $(shell git update-index --refresh)
+beckett_marketplace_head = $(shell git rev-parse HEAD | cut -c 1-8)
+
 docker:
+ifeq ($(uncommitted),)
 	cd marketplace && npm run build
-	docker build -t marketplace-api:1.0.0 -f docker/marketplace.api.dockerfile .
+	docker build -t marketplace-api:1.0.0-$(beckett_marketplace_head) -f docker/marketplace.api.dockerfile .
+else
+	@echo "Uncommitted changes detected: $(uncommitted)"
+	exit 1
+endif
 
 clean:
 	rm -rf marketplace/node_modules
@@ -8,7 +16,7 @@ clean:
 	rm -rf marketplace/dist
 
 install:
-	cd marketplace && npm install;
+	cd marketplace && npm ci;
 
 run:
 	cd marketplace && npm run start;

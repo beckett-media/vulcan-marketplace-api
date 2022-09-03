@@ -408,3 +408,13 @@ export function newUserDetails(user: User) {
     source_id: user.source_id,
   });
 }
+
+export function trimUUID4(uuid: string) {
+  uuid = uuid.trim().toLowerCase();
+  // remove all '-' from uuid
+  uuid = uuid.replace(/-/g, '');
+  if (uuid.length != 32) {
+    throw new Error(`Invalid UUID: ${uuid}`);
+  }
+  return uuid;
+}

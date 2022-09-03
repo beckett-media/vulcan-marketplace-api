@@ -188,6 +188,8 @@ describe('DatabaseService', () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      undefined,
     );
     expect(submissions.length).toBe(9);
 
@@ -289,6 +291,8 @@ describe('DatabaseService', () => {
     // list submissions for user1
     const user1Submissions = await service.listSubmissions(
       'user1',
+      undefined,
+      undefined,
       status,
       offset,
       limit,
@@ -310,6 +314,8 @@ describe('DatabaseService', () => {
     // list submissions for user2
     const user2Submissions = await service.listSubmissions(
       'user2',
+      undefined,
+      undefined,
       status,
       offset,
       limit,
@@ -323,6 +329,8 @@ describe('DatabaseService', () => {
     // list submissions for user3
     const user3Submissions = await service.listSubmissions(
       'user3',
+      undefined,
+      undefined,
       status,
       offset,
       limit,
@@ -339,6 +347,8 @@ describe('DatabaseService', () => {
     // list submissions for user1
     const user1Submissions2 = await service.listSubmissions(
       'user1',
+      undefined,
+      undefined,
       status,
       offset,
       limit,
@@ -356,6 +366,8 @@ describe('DatabaseService', () => {
     // list submissions for user1
     const user1Submissions3 = await service.listSubmissions(
       'user1',
+      undefined,
+      undefined,
       status,
       offset,
       limit,

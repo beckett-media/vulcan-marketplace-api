@@ -91,4 +91,20 @@ export class BravoService {
       throw new InternalServerErrorException(`Burn nft token failed: ${error}`);
     }
   }
+
+  async sanityCheck(): Promise<[boolean, any]> {
+    const env = process.env[RUNTIME_ENV];
+    const config = configuration()[env];
+    const url = config['bravo']['health']['url'];
+    try {
+      const response = await got.get(url, {}).json();
+      this.logger.log(
+        `Bravo API /health response => ${JSON.stringify(response)}`,
+      );
+      return [true, response];
+    } catch (error) {
+      this.logger.error(`Bravo API /health error: ${error}`);
+      return [false, { error: `${error}`, url: url }];
+    }
+  }
 }

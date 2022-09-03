@@ -5,6 +5,7 @@ import {
   IsNumberString,
   IsOptional,
   IsString,
+  IsUUID,
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -322,6 +323,24 @@ export class ListSubmissionsQuery {
   @IsString()
   @IsOptional()
   user: string;
+
+  @ApiProperty({
+    description: 'A list of submission order ids in csv format',
+    required: false,
+    example: '1,2,3',
+  })
+  @IsString()
+  @IsOptional()
+  submission_order_ids: string;
+
+  @ApiProperty({
+    description: 'A list of submission ids in csv format',
+    required: false,
+    example: '1,2,3',
+  })
+  @IsString()
+  @IsOptional()
+  submission_ids: string;
 
   @ApiProperty({
     description: 'The status enum of the submission',
@@ -1077,7 +1096,7 @@ export class VaultingRequest {
     required: true,
   })
   @IsNotEmpty()
-  @IsString()
+  @IsUUID(4)
   user: string;
 
   @ApiProperty({

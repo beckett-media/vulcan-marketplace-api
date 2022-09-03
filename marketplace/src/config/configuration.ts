@@ -20,6 +20,9 @@ export default () => ({
         url: process.env.MARKETPLACE_PROD_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
+      health: {
+        url: process.env.MARKETPLACE_PROD_BRAVO_HEALTH_URL,
+      },
     },
     cognito: {
       COGNITO_USER_POOL_ID: process.env.MARKETPLACE_PROD_COGNITO_USER_POOL_ID,
@@ -57,6 +60,9 @@ export default () => ({
         collection: process.env.MARKETPLACE_STAGE_BRAVO_BURN_COLLECTION,
         url: process.env.MARKETPLACE_STAGE_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
+      },
+      health: {
+        url: process.env.MARKETPLACE_STAGE_BRAVO_HEALTH_URL,
       },
     },
     cognito: {
@@ -106,6 +112,11 @@ export default () => ({
           'https://dev.beckett.com:3000/vaulting/burn',
         headers: { 'Content-Type': 'application/json' },
       },
+      health: {
+        url:
+          process.env.MARKETPLACE_AWSDEV_BRAVO_HEALTH_URL ||
+          'https://dev.beckett.com:3000/vaulting/sanitycheck',
+      },
     },
     cognito: {
       COGNITO_USER_POOL_ID:
@@ -150,6 +161,9 @@ export default () => ({
         collection: process.env.MARKETPLACE_DEV_BRAVO_BURN_COLLECTION,
         url: process.env.MARKETPLACE_DEV_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
+      },
+      health: {
+        url: process.env.MARKETPLACE_DEV_BRAVO_HEALTH_URL,
       },
     },
     cognito: {

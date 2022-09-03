@@ -45,6 +45,7 @@ import {
   newSubmissionOrderDetails,
   newVaultingDetails,
   trimRequestWithImage,
+  trimUUID4,
 } from '../util/format';
 import {
   ActionLogDetails,
@@ -66,8 +67,6 @@ import {
 } from './dtos/marketplace.dto';
 import { Cache } from 'cache-manager';
 import { onlyLetters } from '../util/assert';
-import got from 'got/dist/source';
-import { buffer } from 'rxjs';
 
 const VAULTING_API_ACTOR = 'Vaulting API';
 const FORBIDDEN_UPDATE_FIELDS = [
@@ -101,6 +100,28 @@ export class MarketplaceService {
     private bravoService: BravoService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  async sanityCheck(): Promise<any> {
+    // check db connection
+    const [dbCheck, dbReason] = await this.databaseService.sanityCheck();
+
+    // check bravo service
+    const [bravoCheck, bravoReason] = await this.bravoService.sanityCheck();
+
+    // check aws service
+    const [awsCheck, awsReason] = await this.awsService.sanityCheck();
+
+    return {
+      db: dbCheck ? 'ok' : `failed`,
+      bravoCheck: bravoCheck ? 'ok' : `failed`,
+      awsCheck: awsCheck ? 'ok' : `failed`,
+      details: {
+        db: dbReason,
+        bravoCheck: bravoReason,
+        awsCheck: awsReason,
+      },
+    };
+  }
 
   async getUserByUUID(userUUID: string): Promise<User> {
     const user = await this.databaseService.getUserByUUID(userUUID);
@@ -218,6 +239,8 @@ export class MarketplaceService {
     await this.databaseService.listSubmissions(
       undefined,
       undefined,
+      undefined,
+      undefined,
       0,
       1,
       undefined,
@@ -226,6 +249,8 @@ export class MarketplaceService {
 
   async listSubmissions(
     user: string,
+    ids: number[],
+    order_ids: number[],
     status: number,
     offset: number,
     limit: number,
@@ -233,6 +258,8 @@ export class MarketplaceService {
   ): Promise<SubmissionDetails[]> {
     const submissionDetails = await this.databaseService.listSubmissions(
       user,
+      ids,
+      order_ids,
       status,
       offset,
       limit,
@@ -608,36 +635,42 @@ export class MarketplaceService {
   }
 
   // call by admin
-  async newVaulting(request: VaultingRequest): Promise<VaultingResponse> {
+  async newVaulting(newVaulting: VaultingRequest): Promise<VaultingResponse> {
     // check submission status
     var submission = await this.databaseService.getSubmission(
-      request.submission_id,
+      newVaulting.submission_id,
     );
     if (!submission) {
       throw new NotFoundException('Submission not found');
     }
-    if (submission.status !== SubmissionStatus.Approved) {
+    if (submission.status == SubmissionStatus.Vaulted) {
+      throw new BadRequestException('Submission already vaulted');
+    }
+    if (submission.status != SubmissionStatus.Approved) {
       throw new InternalServerErrorException('Submission not approved');
     }
-    if (submission.item_id != request.item_id) {
+    if (submission.item_id != newVaulting.item_id) {
       throw new InternalServerErrorException(
-        `Mismatched item_id for submission ${request.submission_id}, item: ${request.item_id}`,
+        `Mismatched item_id for submission ${newVaulting.submission_id}, item: ${newVaulting.item_id}`,
       );
     }
     if (!!!submission.image) {
       throw new InternalServerErrorException(
-        `Submission ${request.submission_id} has no image`,
+        `Submission ${newVaulting.submission_id} has no image`,
       );
     }
 
-    // check if item is already vaulted
+    // check if item'nft is already minted
     try {
       const existingVaulting = await this.databaseService.getVaultingByItemID(
-        request.item_id,
+        newVaulting.item_id,
       );
-      if (!!existingVaulting) {
+      if (
+        !!existingVaulting &&
+        existingVaulting.status == VaultingStatus.Minted
+      ) {
         throw new InternalServerErrorException(
-          `Vaulting ${existingVaulting.id} already exists for item ${request.item_id}`,
+          `Vaulting ${existingVaulting.id} already exists for item ${newVaulting.item_id}`,
         );
       }
     } catch (e) {}
@@ -646,16 +679,21 @@ export class MarketplaceService {
     const imageContent = await this.awsService.readImage(submission.image);
     const imageBase64 = Buffer.from(imageContent).toString('base64');
     const imageFormat = submission.image.split('.').pop();
+    if (!!!imageFormat) {
+      throw new InternalServerErrorException(
+        `Invalid image format for submission ${newVaulting.submission_id}: ${submission.image}`,
+      );
+    }
 
-    // get user by uuid
-    const user = await this.databaseService.getUserByUUID(request.user);
     // get item by id
-    const item = await this.databaseService.getItem(request.item_id);
+    const item = await this.databaseService.getItem(newVaulting.item_id);
 
     const attributes = getAttributes(item);
     const description = generateNFTDescription(item);
+    // make sure owner is 32 bytes
+    const owner = trimUUID4(newVaulting.user);
     const mint_job_id = await this.bravoService.mintNFT(
-      request.user,
+      owner,
       item.uuid,
       item.title,
       description,
@@ -664,15 +702,19 @@ export class MarketplaceService {
       attributes,
     );
 
-    const vaulting = await this.databaseService.createNewVaulting(
+    // if vaulting record already exists, update it
+    // otherwise, create a new vaulting record
+    // get user by uuid
+    const user = await this.databaseService.getUserByUUID(newVaulting.user);
+    const vaulting = await this.databaseService.maybeCreateNewVaulting(
       user.id,
-      request.item_id,
+      newVaulting.item_id,
       mint_job_id,
       submission.image,
     );
 
     // record user action
-    const trimmedRequest = trimRequestWithImage(request);
+    const trimmedRequest = trimRequestWithImage(newVaulting);
     var actionLogRequest = new ActionLogRequest({
       actor_type: ActionLogActorType.CognitoUser,
       actor: user.id.toString(),
@@ -683,17 +725,12 @@ export class MarketplaceService {
     });
     await this.newActionLog(actionLogRequest);
 
-    // update submission status
-    submission.status = SubmissionStatus.Vaulted;
-    submission.updated_at = Math.round(Date.now() / 1000);
-    await this.databaseService.updateSubmission(submission, null);
-
     // record user action
     actionLogRequest = new ActionLogRequest({
       actor_type: ActionLogActorType.CognitoUser,
       actor: user.id.toString(),
       entity_type: ActionLogEntityType.Submission,
-      entity: request.submission_id.toString(),
+      entity: newVaulting.submission_id.toString(),
       type: ActionLogType.SubmissionUpdate,
       extra: JSON.stringify({ status: SubmissionStatus.Vaulted }),
     });

@@ -129,6 +129,8 @@ describe('MarketplaceService', () => {
     var status, limit, offset, order;
     const submissions = await service.listSubmissions(
       userUUID,
+      undefined,
+      undefined,
       status,
       offset,
       limit,
@@ -140,6 +142,85 @@ describe('MarketplaceService', () => {
     expect(submissions[0].user).toBe(userUUID);
     expect(submissions[0].grading_company).toBe('fake grading_company');
     expect(submissions[0].image_url).toBe('fake_url');
+  });
+
+  it('should list multiple submissions', async () => {
+    // create submission 1
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const orderUUID1 = '00000000-0000-0000-0000-000000000001';
+    const submissionRequest1 = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      orderUUID1,
+      true,
+    );
+    const submission1 = await service.submitItem(submissionRequest1);
+
+    // create submission 2
+    const submissionRequest2 = newSubmissionRequest(
+      userUUID,
+      'sn2',
+      true,
+      orderUUID1,
+      true,
+    );
+    const submission2 = await service.submitItem(submissionRequest2);
+
+    // create submission 3
+    const orderUUID2 = '00000000-0000-0000-0000-000000000002';
+    const submissionRequest3 = newSubmissionRequest(
+      userUUID,
+      'sn3',
+      true,
+      orderUUID2,
+      true,
+    );
+    const submission3 = await service.submitItem(submissionRequest3);
+
+    // list submissions by all order ids
+    const submissions = await service.listSubmissions(
+      undefined,
+      undefined,
+      [submission1.order_id, submission3.order_id],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions.length).toBe(3);
+    expect(submissions[0].id).toBe(submission1.submission_id);
+    expect(submissions[1].id).toBe(submission2.submission_id);
+    expect(submissions[2].id).toBe(submission3.submission_id);
+
+    // list submissions by first order id
+    const submissions2 = await service.listSubmissions(
+      undefined,
+      undefined,
+      [submission1.order_id],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions2.length).toBe(2);
+    expect(submissions2[0].id).toBe(submission1.submission_id);
+    expect(submissions2[1].id).toBe(submission2.submission_id);
+
+    // list submissions by user id
+    const submissions3 = await service.listSubmissions(
+      userUUID,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions3.length).toBe(3);
+    expect(submissions3[0].user).toBe(userUUID);
+    expect(submissions3[1].user).toBe(userUUID);
+    expect(submissions3[2].user).toBe(userUUID);
   });
 
   it('should not approve if submission not received', async () => {
@@ -347,6 +428,8 @@ describe('MarketplaceService', () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      undefined,
     );
     expect(submissions.length).toBe(2);
 
@@ -379,6 +462,8 @@ describe('MarketplaceService', () => {
     // check listSubmissions
     var submissions = await service.listSubmissions(
       userUUID,
+      undefined,
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -614,6 +699,12 @@ describe('MarketplaceService', () => {
     expect(vaulting.status).toBe(1);
     expect(vaulting.status_desc).toBe('Minting');
 
+    // submission stay approved, not vaulted
+    var submissionVaulted = await service.getSubmission(
+      submission.submission_id,
+    );
+    expect(submissionVaulted.status).toBe(SubmissionStatus.Approved);
+
     // list vaultings
     var status, limit, offset, order;
     const vaultings = await service.listVaultings(
@@ -676,9 +767,8 @@ describe('MarketplaceService', () => {
       VaultingStatusReadable[VaultingStatus.Withdrawn],
     );
 
-    const submissionVaulted = await service.getSubmission(
-      submission.submission_id,
-    );
+    // submission should be vaulted
+    submissionVaulted = await service.getSubmission(submission.submission_id);
     expect(submissionVaulted.status).toBe(SubmissionStatus.Vaulted);
   });
 
