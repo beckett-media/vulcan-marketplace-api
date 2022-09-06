@@ -1,10 +1,11 @@
 uncommitted = $(shell git update-index --refresh)
 beckett_marketplace_head = $(shell git rev-parse HEAD | cut -c 1-8)
+beckett_marketplace_branch = $(shell git rev-parse --abbrev-ref HEAD)
 
 docker:
 ifeq ($(uncommitted),)
 	cd marketplace && npm run build
-	docker build -t marketplace-api:1.0.0-$(beckett_marketplace_head) -f docker/marketplace.api.dockerfile .
+	docker build -t marketplace-api:$(beckett_marketplace_branch)-$(beckett_marketplace_head) -f docker/marketplace.api.dockerfile .
 else
 	@echo "Uncommitted changes detected: $(uncommitted)"
 	exit 1
