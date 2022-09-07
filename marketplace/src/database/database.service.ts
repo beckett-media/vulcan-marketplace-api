@@ -35,6 +35,9 @@ import {
   VaultingUpdate,
 } from '../marketplace/dtos/marketplace.dto';
 import {
+  ActionLogActorType,
+  ActionLogEntityType,
+  ActionLogType,
   InventoryStatus,
   ItemStatus,
   ListActionLogType,
@@ -702,17 +705,23 @@ export class DatabaseService {
           status: VaultingStatus.Minted,
           updated_at: Math.round(Date.now() / 1000),
         };
-
-        if (vaultingUpdate.status == VaultingStatus.Withdrawn) {
-          newVaulting['burned_at'] = Math.round(Date.now() / 1000);
-        }
-
         Object.assign(vaulting, newVaulting);
 
         // update submission status
         submission.status = SubmissionStatus.Vaulted;
         submission.updated_at = Math.round(Date.now() / 1000);
         await this.submissionRepo.save(submission);
+
+        // record user action
+        var actionLogRequest = new ActionLogRequest({
+          actor_type: ActionLogActorType.CognitoUser,
+          actor: submission.user.toString(),
+          entity_type: ActionLogEntityType.Submission,
+          entity: submission.id.toString(),
+          type: ActionLogType.SubmissionUpdate,
+          extra: JSON.stringify({ status: SubmissionStatus.Vaulted }),
+        });
+        await this.createNewActionLog(actionLogRequest);
 
         break;
       case VaultingUpdateType.Burned:

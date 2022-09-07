@@ -728,17 +728,6 @@ export class MarketplaceService {
     });
     await this.newActionLog(actionLogRequest);
 
-    // record user action
-    actionLogRequest = new ActionLogRequest({
-      actor_type: ActionLogActorType.CognitoUser,
-      actor: user.id.toString(),
-      entity_type: ActionLogEntityType.Submission,
-      entity: newVaulting.submission_id.toString(),
-      type: ActionLogType.SubmissionUpdate,
-      extra: JSON.stringify({ status: SubmissionStatus.Vaulted }),
-    });
-    await this.newActionLog(actionLogRequest);
-
     return new VaultingResponse({
       id: vaulting.id,
       user: user.uuid,
