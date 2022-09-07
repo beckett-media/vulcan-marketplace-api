@@ -57,6 +57,7 @@ import {
 } from './dtos/marketplace.dto';
 import { MarketplaceService } from './marketplace.service';
 import { assert } from 'console';
+import { isUUID } from 'class-validator';
 
 function InProd() {
   return 'prod' == process.env[RUNTIME_ENV];
@@ -279,10 +280,22 @@ export class MarketplaceController {
       query.submission_order_ids != undefined
         ? query.submission_order_ids.split(',').map((id) => parseInt(id))
         : undefined;
+    const user_uuids =
+      query.user_uuids != undefined ? query.user_uuids.split(',') : undefined;
+
+    // check if user uuids are valid uuids
+    if (user_uuids !== undefined) {
+      for (const user_uuid of user_uuids) {
+        if (!isUUID(user_uuid)) {
+          throw new BadRequestException(`Invalid user uuid: ${user_uuid}`);
+        }
+      }
+    }
 
     //TODO: if user is not provided, return all submissions, but check if caller is admin
     const result = await this.marketplaceService.listSubmissions(
       query.user,
+      user_uuids,
       submission_ids,
       submission_order_ids,
       query.status,

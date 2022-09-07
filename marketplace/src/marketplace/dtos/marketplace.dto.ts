@@ -325,6 +325,16 @@ export class ListSubmissionsQuery {
   user: string;
 
   @ApiProperty({
+    description: 'A list of user uuids in csv format',
+    required: false,
+    example:
+      '12345678-0000-0000-0000-000000000000,12345678-0000-0000-0000-000000000001',
+  })
+  @IsString()
+  @IsOptional()
+  user_uuids: string;
+
+  @ApiProperty({
     description: 'A list of submission order ids in csv format',
     required: false,
     example: '1,2,3',

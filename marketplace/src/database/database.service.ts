@@ -109,7 +109,6 @@ export class DatabaseService {
       try {
         user = await this.newUserWithLock(user_uuid, source);
       } catch (e) {
-        console.log(e);
         this.logger.warn(`User with lock: ${e}`);
       }
       if (null !== user) {
@@ -305,6 +304,7 @@ export class DatabaseService {
 
   async listSubmissions(
     userUUID: string,
+    userUUIDs: string[],
     ids: number[],
     order_ids: number[],
     status: number,
@@ -321,17 +321,28 @@ export class DatabaseService {
       if (!user) {
         throw new NotFoundException(`User ${userUUID} not found`);
       }
-      where_filter = { user: user.id };
+      where_filter['user'] = user.id;
+    }
+
+    if (userUUIDs !== undefined) {
+      // find users by uuids
+      const users = await this.userRepo.find({
+        where: { uuid: In(userUUIDs) },
+      });
+      if (!users) {
+        throw new NotFoundException(`Users ${userUUIDs} not found`);
+      }
+      where_filter['user'] = In(users.map((user) => user.id));
     }
 
     // specify ids
     if (ids !== undefined) {
-      where_filter = { id: In(ids) };
+      where_filter['id'] = In(ids);
     }
 
     // specify order ids
     if (order_ids !== undefined) {
-      where_filter = { order_id: In(order_ids) };
+      where_filter['order_id'] = In(order_ids);
     }
 
     // by default, set status filter to be <not failed>
@@ -368,8 +379,8 @@ export class DatabaseService {
       itemMap.set(item.id, item);
     });
 
-    // get all user ids from items
-    const user_ids = items.map((item) => item.user);
+    // get all user ids from submissions
+    const user_ids = submissions.map((submission) => submission.user);
     // get all users from user_ids
     const users = await this.userRepo.find({
       where: { id: In(user_ids) },
@@ -587,7 +598,7 @@ export class DatabaseService {
       if (!user) {
         throw new NotFoundException(`User ${userUUID} not found`);
       }
-      where_filter = { user: user.id };
+      where_filter['user'] = user.id;
     }
 
     if (offset == undefined) {
@@ -811,7 +822,7 @@ export class DatabaseService {
       if (!user) {
         throw new NotFoundException(`User ${userUUID} not found`);
       }
-      where_filter = { user: user.id };
+      where_filter['user'] = user.id;
     }
 
     if (offset == undefined) {
@@ -1013,7 +1024,7 @@ export class DatabaseService {
       if (!user) {
         throw new NotFoundException(`User ${userUUID} not found`);
       }
-      where_filter = { user: user.id };
+      where_filter['user'] = user.id;
     }
 
     // by default, set status filter to be <not discarded>

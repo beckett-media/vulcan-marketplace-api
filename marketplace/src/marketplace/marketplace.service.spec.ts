@@ -131,6 +131,7 @@ describe('MarketplaceService', () => {
       userUUID,
       undefined,
       undefined,
+      undefined,
       status,
       offset,
       limit,
@@ -146,10 +147,10 @@ describe('MarketplaceService', () => {
 
   it('should list multiple submissions', async () => {
     // create submission 1
-    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const userUUID1 = '00000000-0000-0000-0000-000000000001';
     const orderUUID1 = '00000000-0000-0000-0000-000000000001';
     const submissionRequest1 = newSubmissionRequest(
-      userUUID,
+      userUUID1,
       'sn1',
       true,
       orderUUID1,
@@ -159,7 +160,7 @@ describe('MarketplaceService', () => {
 
     // create submission 2
     const submissionRequest2 = newSubmissionRequest(
-      userUUID,
+      userUUID1,
       'sn2',
       true,
       orderUUID1,
@@ -168,9 +169,10 @@ describe('MarketplaceService', () => {
     const submission2 = await service.submitItem(submissionRequest2);
 
     // create submission 3
+    const userUUID2 = '00000000-0000-0000-0000-000000000002';
     const orderUUID2 = '00000000-0000-0000-0000-000000000002';
     const submissionRequest3 = newSubmissionRequest(
-      userUUID,
+      userUUID2,
       'sn3',
       true,
       orderUUID2,
@@ -180,6 +182,7 @@ describe('MarketplaceService', () => {
 
     // list submissions by all order ids
     const submissions = await service.listSubmissions(
+      undefined,
       undefined,
       undefined,
       [submission1.order_id, submission3.order_id],
@@ -197,6 +200,7 @@ describe('MarketplaceService', () => {
     const submissions2 = await service.listSubmissions(
       undefined,
       undefined,
+      undefined,
       [submission1.order_id],
       undefined,
       undefined,
@@ -207,9 +211,10 @@ describe('MarketplaceService', () => {
     expect(submissions2[0].id).toBe(submission1.submission_id);
     expect(submissions2[1].id).toBe(submission2.submission_id);
 
-    // list submissions by user id
+    // list submissions by user id 1
     const submissions3 = await service.listSubmissions(
-      userUUID,
+      userUUID1,
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -217,10 +222,99 @@ describe('MarketplaceService', () => {
       undefined,
       undefined,
     );
-    expect(submissions3.length).toBe(3);
-    expect(submissions3[0].user).toBe(userUUID);
-    expect(submissions3[1].user).toBe(userUUID);
-    expect(submissions3[2].user).toBe(userUUID);
+    expect(submissions3.length).toBe(2);
+    expect(submissions3[0].user).toBe(userUUID1);
+    expect(submissions3[1].user).toBe(userUUID1);
+    const submissions3s = await service.listSubmissions(
+      undefined,
+      [userUUID1],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions3s.length).toBe(2);
+    expect(submissions3s[0].user).toBe(userUUID1);
+    expect(submissions3s[1].user).toBe(userUUID1);
+    // list submissions by user id 2
+    const submissions4 = await service.listSubmissions(
+      userUUID2,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions4.length).toBe(1);
+    expect(submissions4[0].user).toBe(userUUID2);
+    const submissions4s = await service.listSubmissions(
+      undefined,
+      [userUUID2],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions4s.length).toBe(1);
+    expect(submissions4s[0].user).toBe(userUUID2);
+    // list submissions by both user id 1 & 2
+    const submissions5 = await service.listSubmissions(
+      undefined,
+      [userUUID1, userUUID2],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions5.length).toBe(3);
+    expect(submissions5[0].user).toBe(userUUID1);
+    expect(submissions5[1].user).toBe(userUUID1);
+    expect(submissions5[2].user).toBe(userUUID2);
+
+    // combine user id 1 & 2 with order id 1
+    const submissions6 = await service.listSubmissions(
+      undefined,
+      [userUUID1, userUUID2],
+      undefined,
+      [submission1.order_id],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions6.length).toBe(2);
+    const submissions7 = await service.listSubmissions(
+      undefined,
+      [userUUID1, userUUID2],
+      undefined,
+      [submission3.order_id],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(submissions7.length).toBe(1);
+    // mismatch user id and order id, should return empty
+    const submissions8 = await service.listSubmissions(
+      undefined,
+      [userUUID1],
+      undefined,
+      [submission3.order_id],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    var user = await service.getUserByUUID(userUUID1);
+    expect(submissions8.length).toBe(0);
   });
 
   it('should not approve if submission not received', async () => {
@@ -430,6 +524,7 @@ describe('MarketplaceService', () => {
       undefined,
       undefined,
       undefined,
+      undefined,
     );
     expect(submissions.length).toBe(2);
 
@@ -462,6 +557,7 @@ describe('MarketplaceService', () => {
     // check listSubmissions
     var submissions = await service.listSubmissions(
       userUUID,
+      undefined,
       undefined,
       undefined,
       undefined,

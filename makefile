@@ -14,7 +14,6 @@ endif
 
 clean:
 	rm -rf marketplace/node_modules
-	rm -rf marketplace/package-lock.json
 	rm -rf marketplace/dist
 
 install:

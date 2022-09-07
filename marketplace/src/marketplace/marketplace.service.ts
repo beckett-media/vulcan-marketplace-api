@@ -241,6 +241,7 @@ export class MarketplaceService {
       undefined,
       undefined,
       undefined,
+      undefined,
       0,
       1,
       undefined,
@@ -249,8 +250,9 @@ export class MarketplaceService {
 
   async listSubmissions(
     user: string,
+    userUUIDs: string[],
     ids: number[],
-    order_ids: number[],
+    orderIDs: number[],
     status: number,
     offset: number,
     limit: number,
@@ -258,8 +260,9 @@ export class MarketplaceService {
   ): Promise<SubmissionDetails[]> {
     const submissionDetails = await this.databaseService.listSubmissions(
       user,
+      userUUIDs,
       ids,
-      order_ids,
+      orderIDs,
       status,
       offset,
       limit,
