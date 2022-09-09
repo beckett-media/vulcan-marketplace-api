@@ -55,6 +55,7 @@ export class UserController {
     @Request() request: any,
   ) {
     assertOwnerOrAdmin(request.user, { user: userUUID }, this.logger);
+
     const imagePath = await this.userService.updateUserProfileImage(
       userUUID,
       userProfileImageRequest,

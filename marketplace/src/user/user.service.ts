@@ -11,7 +11,10 @@ import {
 } from '../marketplace/dtos/marketplace.dto';
 import { AwsService } from '../aws/aws.service';
 import { User } from '../database/database.entity';
-import { DatabaseService } from '../database/database.service';
+import {
+  DatabaseService,
+  DEFAULT_USER_SOURCE,
+} from '../database/database.service';
 import { DetailedLogger } from '../logger/detailed.logger';
 import { getUserAttribute, newUserDetails } from '../util/format';
 import {
@@ -34,6 +37,12 @@ export class UserService {
     userUUID: string,
     userProfileImageRequest: UserProfileImageRequest,
   ): Promise<string> {
+    // create user if not exist
+    await this.databaseService.maybeCreateNewUser(
+      userUUID,
+      DEFAULT_USER_SOURCE,
+    );
+
     const image_buffer = Buffer.from(
       userProfileImageRequest.image_base64,
       'base64',
