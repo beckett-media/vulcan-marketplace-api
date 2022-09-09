@@ -34,8 +34,6 @@ export class UserService {
     userUUID: string,
     userProfileImageRequest: UserProfileImageRequest,
   ): Promise<string> {
-    var user = await this.databaseService.getUserByUUID(userUUID);
-
     const image_buffer = Buffer.from(
       userProfileImageRequest.image_base64,
       'base64',
@@ -45,7 +43,7 @@ export class UserService {
       'user/profile_image',
       userProfileImageRequest.image_format,
     );
-    await this.databaseService.updateUserProfileImage(user, imagePath);
+
     return imagePath;
   }
 

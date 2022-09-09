@@ -531,16 +531,6 @@ export class DatabaseService {
     return user;
   }
 
-  async updateUserProfileImage(user: User, image: string) {
-    // TODO: remove this user update logic
-    // refresh user pool id
-    const env = process.env[RUNTIME_ENV];
-    const config = configuration()[env];
-    const userPoolId = config['cognito']['COGNITO_USER_POOL_ID'];
-    user.source_id = userPoolId;
-    await this.userRepo.save(user);
-  }
-
   // create new vaulting item
   async maybeCreateNewVaulting(
     user: number,
