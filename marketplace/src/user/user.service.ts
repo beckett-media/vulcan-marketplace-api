@@ -13,8 +13,12 @@ import { AwsService } from '../aws/aws.service';
 import { User } from '../database/database.entity';
 import { DatabaseService } from '../database/database.service';
 import { DetailedLogger } from '../logger/detailed.logger';
-import { newUserDetails } from '../util/format';
-import { UserDetails, UserProfileImageRequest } from './dtos/user.dto';
+import { getUserAttribute, newUserDetails } from '../util/format';
+import {
+  ListUsersRequest,
+  UserDetails,
+  UserProfileImageRequest,
+} from './dtos/user.dto';
 
 @Injectable()
 export class UserService {
@@ -65,5 +69,27 @@ export class UserService {
       created_at: actionLog.created_at,
       extra: actionLog.extra,
     });
+  }
+
+  async listUsers(request: ListUsersRequest): Promise<UserDetails[]> {
+    const cognitoUsers = await this.awsService.listUsers(
+      request.user_name,
+      request.email,
+      request.first_name,
+      request.last_name,
+      request.match,
+    );
+    // build map from user sub to cognito users
+    const cognitoUsersMap = new Map();
+    for (const cognitoUser of cognitoUsers) {
+      const sub = getUserAttribute(cognitoUser, 'sub');
+      cognitoUsersMap.set(sub, cognitoUser);
+    }
+
+    const userUUIDs = cognitoUsers.map((user) => getUserAttribute(user, 'sub'));
+    const users = await this.databaseService.listUsersByUUID(userUUIDs);
+    return users.map((user) =>
+      newUserDetails(user, cognitoUsersMap.get(user.uuid)),
+    );
   }
 }

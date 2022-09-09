@@ -8,7 +8,12 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { InventoryLocationType, InventoryStatus } from '../../config/enum';
+import {
+  InventoryLocationType,
+  InventoryStatus,
+  ListUsersMatch,
+} from '../../config/enum';
+import { Type } from 'class-transformer';
 
 export class UserProfileImageRequest {
   @ApiProperty({
@@ -26,6 +31,48 @@ export class UserProfileImageRequest {
   })
   @IsString()
   image_format: string;
+}
+
+export class ListUsersRequest {
+  @ApiProperty({
+    description: "User's username",
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  user_name: string;
+
+  @ApiProperty({
+    description: "User's first name",
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  first_name: string;
+
+  @ApiProperty({
+    description: "User's last name",
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  last_name: string;
+
+  @ApiProperty({
+    description: "User's email",
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  email: string;
+
+  @ApiProperty({
+    description: 'Match type: exact match=1, prefix=2',
+  })
+  @Type(() => Number)
+  @IsOptional()
+  @IsEnum(ListUsersMatch)
+  match: number;
 }
 
 export class UserDetails {
@@ -53,6 +100,30 @@ export class UserDetails {
   })
   @IsString()
   source_id: string;
+
+  @ApiProperty({
+    description: "User's username",
+    required: false,
+    example: 'username2000',
+  })
+  @IsString()
+  user_name: string;
+
+  @ApiProperty({
+    description: "User's full name",
+    required: false,
+    example: 'John Doe',
+  })
+  @IsString()
+  name: string;
+
+  @ApiProperty({
+    description: "User's email",
+    required: false,
+    example: 'abc@gmail.com',
+  })
+  @IsString()
+  email: string;
 
   constructor(partial: Partial<UserDetails>) {
     Object.assign(this, partial);

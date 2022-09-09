@@ -34,6 +34,7 @@ import {
   InventoryRequest,
 } from '../inventory/dtos/inventory.dto';
 import { UserDetails } from '../user/dtos/user.dto';
+import { InternalServerErrorException } from '@nestjs/common';
 
 export function newSubmissionOrderDetails(
   order: SubmissionOrder,
@@ -401,12 +402,23 @@ export function trimInventoryLocation(inventoryLocation: InventoryLocation) {
   return inventoryLocation;
 }
 
-export function newUserDetails(user: User) {
-  return new UserDetails({
+export function newUserDetails(user: User, cognitoUser: any): UserDetails {
+  var userDetails = new UserDetails({
     uuid: user.uuid,
     source: user.source,
     source_id: user.source_id,
   });
+
+  if (!!cognitoUser) {
+    userDetails.email = getUserAttribute(cognitoUser, 'email');
+    userDetails.user_name = cognitoUser.Username;
+    userDetails.name = `${getUserAttribute(
+      cognitoUser,
+      'given_name',
+    )} ${getUserAttribute(cognitoUser, 'family_name')}`;
+  }
+
+  return userDetails;
 }
 
 export function trimUUID4(uuid: string) {
@@ -417,4 +429,18 @@ export function trimUUID4(uuid: string) {
     throw new Error(`Invalid UUID: ${uuid}`);
   }
   return uuid;
+}
+
+export function getUserAttribute(user: any, attributeName: string): string {
+  const attributes = user['Attributes'] as any[];
+  // loop through attributes and find sub
+  for (const attribute of attributes) {
+    if (attribute['Name'] == attributeName) {
+      return attribute['Value'];
+    }
+  }
+
+  throw new InternalServerErrorException(
+    `No ${attributeName} found for user: ` + JSON.stringify(user),
+  );
 }

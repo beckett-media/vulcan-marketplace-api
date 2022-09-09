@@ -503,6 +503,14 @@ export class DatabaseService {
     return users;
   }
 
+  // list users by user uuids
+  async listUsersByUUID(user_uuids: string[]): Promise<User[]> {
+    const users = await this.userRepo.find({
+      where: { uuid: In(user_uuids) },
+    });
+    return users;
+  }
+
   // get user by id
   async getUser(user_id: number): Promise<User> {
     const user = await this.userRepo.findOne(user_id);

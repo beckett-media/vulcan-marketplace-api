@@ -190,3 +190,8 @@ export const SubmissionOrderStatusReadable = {
   1: 'Created',
   2: 'Processed',
 };
+
+export enum ListUsersMatch {
+  ExactMatch = 1,
+  Prefix = 2,
+}

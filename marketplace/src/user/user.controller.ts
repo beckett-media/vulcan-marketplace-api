@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -21,7 +23,11 @@ import { DetailedLogger } from '../logger/detailed.logger';
 import { ActionLogRequest } from '../marketplace/dtos/marketplace.dto';
 import { assertOwnerOrAdmin } from '../util/assert';
 import { trimRequestWithImage } from '../util/format';
-import { UserProfileImageRequest } from './dtos/user.dto';
+import {
+  ListUsersRequest,
+  UserDetails,
+  UserProfileImageRequest,
+} from './dtos/user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -43,7 +49,7 @@ export class UserController {
     description: 'Return s3 url for the new user profile image',
   })
   @ApiProduces('application/json')
-  async newInventory(
+  async newUserProfileImage(
     @Body() userProfileImageRequest: UserProfileImageRequest,
     @Param('uuid') userUUID: string,
     @Request() request: any,
@@ -68,5 +74,23 @@ export class UserController {
     await this.userService.newActionLog(actionLogRequest);
 
     return { image_url: imagePath };
+  }
+
+  @Get('/list')
+  @OnlyAllowGroups(Group.Admin)
+  @UseGuards(JwtAuthGuard, GroupsGuard)
+  @ApiOperation({
+    summary: 'List users by filters',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return a list of users by filters',
+  })
+  @ApiProduces('application/json')
+  async newUser(
+    @Query() listUsersRequest: ListUsersRequest,
+  ): Promise<UserDetails[]> {
+    const users = await this.userService.listUsers(listUsersRequest);
+    return users;
   }
 }
