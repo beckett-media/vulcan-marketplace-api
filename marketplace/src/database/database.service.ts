@@ -1123,39 +1123,59 @@ export class DatabaseService {
           inventoryRequest = trimInventoryLocation(
             inventoryRequest,
           ) as InventoryRequest;
-
-          // find if the item is already in inventory and is current
-          const existingInventory = await this.inventoryRepo.findOne({
-            where: {
-              item_id: inventoryRequest.item_id,
-              status: InventoryStatus.IsCurrent,
-            },
-          });
-          // if there is an existing inventory which is current,
-          // set it to be not current
-          if (!!existingInventory) {
-            existingInventory.status = InventoryStatus.NotCurrent;
-            await this.inventoryRepo.save(existingInventory);
-          }
-
+          // generate the unique location label
           const label = getInventoryLabel(
             inventoryRequest as InventoryLocation,
           );
-          const newInventory = this.inventoryRepo.create({
-            item_id: inventoryRequest.item_id,
-            vault: inventoryRequest.vault,
-            zone: inventoryRequest.zone,
-            shelf: inventoryRequest.shelf ? inventoryRequest.shelf : '',
-            row: inventoryRequest.row ? inventoryRequest.row : '',
-            box: inventoryRequest.box ? inventoryRequest.box : '',
-            slot: inventoryRequest.slot ? inventoryRequest.slot : '',
-            label: label,
-            status: InventoryStatus.IsCurrent,
-            note: inventoryRequest.note ? inventoryRequest.note : '',
-            updated_at: 0,
-            created_at: Math.round(Date.now() / 1000),
+
+          // find if the item is already in inventory & has the same location & is not current
+          const sameInventoryNotCurrent = await this.inventoryRepo.findOne({
+            where: {
+              item_id: inventoryRequest.item_id,
+              label: label,
+              status: Not(InventoryStatus.IsCurrent),
+            },
           });
-          inventory = await this.inventoryRepo.save(newInventory);
+
+          // if there is an existing inventory which is same location & not current
+          // set it to be current
+          if (!!sameInventoryNotCurrent) {
+            sameInventoryNotCurrent.status = InventoryStatus.IsCurrent;
+            sameInventoryNotCurrent.updated_at = Math.round(Date.now() / 1000);
+            inventory = await this.inventoryRepo.save(sameInventoryNotCurrent);
+          } else {
+            // otherwise, create a new inventory and update any existing
+            // inventory for the item to be not current
+
+            // update any existing inventory for the item to be not current
+            const existingInventory = await this.inventoryRepo.findOne({
+              where: {
+                item_id: inventoryRequest.item_id,
+                status: InventoryStatus.IsCurrent,
+              },
+            });
+            if (!!existingInventory) {
+              existingInventory.status = InventoryStatus.NotCurrent;
+              await this.inventoryRepo.save(existingInventory);
+            }
+
+            // create new inventory
+            const newInventory = this.inventoryRepo.create({
+              item_id: inventoryRequest.item_id,
+              vault: inventoryRequest.vault,
+              zone: inventoryRequest.zone,
+              shelf: inventoryRequest.shelf ? inventoryRequest.shelf : '',
+              row: inventoryRequest.row ? inventoryRequest.row : '',
+              box: inventoryRequest.box ? inventoryRequest.box : '',
+              slot: inventoryRequest.slot ? inventoryRequest.slot : '',
+              label: label,
+              status: InventoryStatus.IsCurrent,
+              note: inventoryRequest.note ? inventoryRequest.note : '',
+              updated_at: 0,
+              created_at: Math.round(Date.now() / 1000),
+            });
+            inventory = await this.inventoryRepo.save(newInventory);
+          }
         },
       );
     } catch (error) {
@@ -1234,6 +1254,9 @@ export class DatabaseService {
     if (!!listInventoryRequest.slot) {
       where_filter['slot'] = listInventoryRequest.slot;
     }
+
+    //exclude deprecated inventory
+    where_filter['status'] = Not(InventoryStatus.Deprecated);
 
     const offset = listInventoryRequest.offset
       ? listInventoryRequest.offset
