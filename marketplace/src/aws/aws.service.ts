@@ -117,21 +117,19 @@ export class AwsService {
     };
     const s3 = new S3(s3Config);
     // check s3 connection
+    const settings = {
+      region: config['aws']['AWS_DEFAULT_REGION'],
+      bucket: config['aws']['AWS_PUBLIC_BUCKET_NAME'],
+      access_key:
+        config['aws']['AWS_ACCESS_KEY_ID'].substr(0, 6) + '**************',
+      cognito:
+        config['cognito']['COGNITO_USER_POOL_ID'].substr(0, 16) + '******',
+    };
     try {
       await s3.listBuckets().promise();
-      return [
-        true,
-        {
-          region: config['aws']['AWS_DEFAULT_REGION'],
-          bucket: config['aws']['AWS_PUBLIC_BUCKET_NAME'],
-          access_key:
-            config['aws']['AWS_ACCESS_KEY_ID'].substr(0, 6) + '**************',
-          cognito:
-            config['cognito']['COGNITO_USER_POOL_ID'].substr(0, 16) + '******',
-        },
-      ];
+      return [true, settings];
     } catch (error) {
-      return [false, error];
+      return [false, { error: error, settings: settings }];
     }
   }
 }
