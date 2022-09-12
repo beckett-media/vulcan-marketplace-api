@@ -126,7 +126,9 @@ export class AwsService {
         config['cognito']['COGNITO_USER_POOL_ID'].substr(0, 16) + '******',
     };
     try {
-      await s3.listBuckets().promise();
+      await s3
+        .listObjects({ Bucket: settings['bucket'], MaxKeys: 1 })
+        .promise();
       return [true, settings];
     } catch (error) {
       return [false, { error: error, settings: settings }];
