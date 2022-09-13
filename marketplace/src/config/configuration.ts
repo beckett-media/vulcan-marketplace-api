@@ -1,6 +1,6 @@
 export default () => ({
   prod: {
-    api_port: process.env.MARKETPLACE_PROD_API_PORT || 5300,
+    api_port: process.env.MARKETPLACE_PROD_API_PORT,
     auth_enabled: true,
     aws: {
       AWS_PUBLIC_BUCKET_NAME:
@@ -20,8 +20,8 @@ export default () => ({
         url: process.env.MARKETPLACE_PROD_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
-      health: {
-        url: process.env.MARKETPLACE_PROD_BRAVO_HEALTH_URL,
+      sanitycheck: {
+        url: process.env.MARKETPLACE_PROD_BRAVO_SANITYCHECK_URL,
       },
     },
     cognito: {
@@ -40,7 +40,7 @@ export default () => ({
     },
   },
   stage: {
-    api_port: process.env.MARKETPLACE_STAGE_API_PORT || 4300,
+    api_port: process.env.MARKETPLACE_STAGE_API_PORT,
     auth_enabled: true,
     aws: {
       AWS_PUBLIC_BUCKET_NAME:
@@ -61,8 +61,8 @@ export default () => ({
         url: process.env.MARKETPLACE_STAGE_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
-      health: {
-        url: process.env.MARKETPLACE_STAGE_BRAVO_HEALTH_URL,
+      sanitycheck: {
+        url: process.env.MARKETPLACE_STAGE_BRAVO_SANITYCHECK_URL,
       },
     },
     cognito: {
@@ -81,68 +81,48 @@ export default () => ({
     },
   },
   awsdev: {
-    api_port: process.env.MARKETPLACE_AWSDEV_API_PORT || 3300,
+    api_port: process.env.MARKETPLACE_AWSDEV_API_PORT,
     auth_enabled: true,
     aws: {
       AWS_PUBLIC_BUCKET_NAME:
-        process.env.MARKETPLACE_AWSDEV_AWS_PUBLIC_BUCKET_NAME ||
-        'beckett-marketplace-dev',
+        process.env.MARKETPLACE_AWSDEV_AWS_PUBLIC_BUCKET_NAME,
       AWS_ACCESS_KEY_ID: process.env.MARKETPLACE_AWSDEV_AWS_ACCESS_KEY_ID,
       AWS_SECRET_ACCESS_KEY:
         process.env.MARKETPLACE_AWSDEV_AWS_SECRET_ACCESS_KEY,
-      AWS_DEFAULT_REGION:
-        process.env.MARKETPLACE_AWSDEV_AWS_DEFAULT_REGION || 'us-west-1',
+      AWS_DEFAULT_REGION: process.env.MARKETPLACE_AWSDEV_AWS_DEFAULT_REGION,
     },
     bravo: {
       mint: {
-        collection:
-          process.env.MARKETPLACE_AWSDEV_BRAVO_MINT_COLLECTION ||
-          '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url:
-          process.env.MARKETPLACE_AWSDEV_BRAVO_MINT_URL ||
-          'https://dev.beckett.com:3000/vaulting/mint',
+        collection: process.env.MARKETPLACE_AWSDEV_BRAVO_MINT_COLLECTION,
+        url: process.env.MARKETPLACE_AWSDEV_BRAVO_MINT_URL,
         headers: { 'Content-Type': 'application/json' },
       },
       burn: {
-        collection:
-          process.env.MARKETPLACE_AWSDEV_BRAVO_BURN_COLLECTION ||
-          '0x599b70873851c5ef6d52A613c574D6F688A53524',
-        url:
-          process.env.MARKETPLACE_AWSDEV_BRAVO_BURN_URL ||
-          'https://dev.beckett.com:3000/vaulting/burn',
+        collection: process.env.MARKETPLACE_AWSDEV_BRAVO_BURN_COLLECTION,
+        url: process.env.MARKETPLACE_AWSDEV_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
-      health: {
-        url:
-          process.env.MARKETPLACE_AWSDEV_BRAVO_HEALTH_URL ||
-          'https://dev.beckett.com:3000/vaulting/sanitycheck',
+      sanitycheck: {
+        url: process.env.MARKETPLACE_AWSDEV_BRAVO_SANITYCHECK_URL,
       },
     },
     cognito: {
-      COGNITO_USER_POOL_ID:
-        process.env.MARKETPLACE_AWSDEV_COGNITO_USER_POOL_ID ||
-        'us-west-1_YLyATgtQd',
-      COGNITO_CLIENT_ID:
-        process.env.MARKETPLACE_AWSDEV_COGNITO_CLIENT_ID ||
-        '1fkbqcr55bega982jv61rl776o',
-      COGNITO_REGION:
-        process.env.MARKETPLACE_AWSDEV_COGNITO_REGION || 'us-west-1',
+      COGNITO_USER_POOL_ID: process.env.MARKETPLACE_AWSDEV_COGNITO_USER_POOL_ID,
+      COGNITO_CLIENT_ID: process.env.MARKETPLACE_AWSDEV_COGNITO_CLIENT_ID,
+      COGNITO_REGION: process.env.MARKETPLACE_AWSDEV_COGNITO_REGION,
     },
     db: {
-      name: process.env.MARKETPLACE_AWSDEV_DB_NAME || 'beckett_marketplace_dev',
+      name: process.env.MARKETPLACE_AWSDEV_DB_NAME,
       sync: true,
-      host:
-        process.env.MARKETPLACE_AWSDEV_DB_HOST ||
-        'vaulting-api-dev-stage.cluster-cgq6lc7ttzjk.us-west-1.rds.amazonaws.com',
-      port: process.env.MARKETPLACE_AWSDEV_DB_PORT || 3306,
+      host: process.env.MARKETPLACE_AWSDEV_DB_HOST,
+      port: process.env.MARKETPLACE_AWSDEV_DB_PORT,
       username: process.env.MARKETPLACE_AWSDEV_DB_USERNAME,
       password: process.env.MARKETPLACE_AWSDEV_DB_PASSWORD,
       isolation: 'REPEATABLE READ',
     },
   },
   dev: {
-    api_ip: process.env.MARKETPLACE_DEV_API_IP || '127.0.0.1',
-    api_port: process.env.MARKETPLACE_DEV_API_PORT || 3300,
+    api_port: process.env.MARKETPLACE_DEV_API_PORT,
     auth_enabled: false,
     aws: {
       AWS_PUBLIC_BUCKET_NAME:
@@ -162,8 +142,8 @@ export default () => ({
         url: process.env.MARKETPLACE_DEV_BRAVO_BURN_URL,
         headers: { 'Content-Type': 'application/json' },
       },
-      health: {
-        url: process.env.MARKETPLACE_DEV_BRAVO_HEALTH_URL,
+      sanitycheck: {
+        url: process.env.MARKETPLACE_DEV_BRAVO_SANITYCHECK_URL,
       },
     },
     cognito: {
@@ -172,11 +152,11 @@ export default () => ({
       COGNITO_REGION: process.env.MARKETPLACE_DEV_COGNITO_REGION,
     },
     db: {
-      name: process.env.MARKETPLACE_DEV_DB_NAME || 'beckett_marketplace_dev',
+      name: process.env.MARKETPLACE_DEV_DB_NAME,
       sync: true,
-      host: process.env.MARKETPLACE_DEV_DB_HOST || 'localhost',
+      host: process.env.MARKETPLACE_DEV_DB_HOST,
       port: process.env.MARKETPLACE_DEV_DB_PORT || 3306,
-      username: process.env.MARKETPLACE_DEV_DB_USERNAME || 'root',
+      username: process.env.MARKETPLACE_DEV_DB_USERNAME,
       password: process.env.MARKETPLACE_DEV_DB_PASSWORD,
       isolation: 'REPEATABLE READ',
     },

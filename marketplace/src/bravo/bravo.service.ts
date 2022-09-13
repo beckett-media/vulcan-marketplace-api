@@ -95,16 +95,17 @@ export class BravoService {
   async sanityCheck(): Promise<[boolean, any]> {
     const env = process.env[RUNTIME_ENV];
     const config = configuration()[env];
-    const url = config['bravo']['health']['url'];
+    const url = config['bravo']['sanitycheck']['url'];
+    const settings = config['bravo'];
     try {
       const response = await got.get(url, {}).json();
       this.logger.log(
         `Bravo API /health response => ${JSON.stringify(response)}`,
       );
-      return [true, response];
+      return [true, { response: response, config: settings }];
     } catch (error) {
-      this.logger.error(`Bravo API /health error: ${error}`);
-      return [false, { error: `${error}`, url: url }];
+      this.logger.error(`Bravo API /sanitycheck error: ${error}`);
+      return [false, { error: `${error}`, config: settings }];
     }
   }
 }
