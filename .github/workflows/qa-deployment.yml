@@ -1,4 +1,4 @@
-name: Build, Upload & Deploy [DEV]
+name: Build, Upload & Deploy [QA]
 
 on:
   push:
