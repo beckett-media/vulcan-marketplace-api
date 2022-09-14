@@ -17,4 +17,5 @@ jobs:
       ECR_REPOSITORY: dev-vulcan-marketplace-api
       CONTAINER_NAME: dev-marketplace-api
       IMAGE_TAG: ${{ github.sha }}
+      ENVIRONMENT_VARIABLES: ${{ secrets.DEV_ENVIRONMENT_VARIABLES }}
     secrets: inherit
