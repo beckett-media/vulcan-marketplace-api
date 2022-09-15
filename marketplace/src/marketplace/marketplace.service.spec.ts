@@ -802,9 +802,22 @@ describe('MarketplaceService', () => {
     expect(submissionVaulted.status).toBe(SubmissionStatus.Approved);
 
     // list vaultings
-    var status, limit, offset, order;
-    const vaultings = await service.listVaultings(
+    var status, limit, offset, order, item;
+    var vaultings = await service.listVaultings(
       userUUID,
+      item,
+      offset,
+      limit,
+      order,
+    );
+    expect(vaultings.length).toBe(1);
+    expect(vaultings[0].id).toBe(vaulting.id);
+    expect(vaultings[0].item_id).toBe(submission.item_id);
+    expect(vaultings[0].user).toBe(userUUID);
+
+    vaultings = await service.listVaultings(
+      undefined,
+      submission.item_id,
       offset,
       limit,
       order,

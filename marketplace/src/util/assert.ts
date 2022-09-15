@@ -6,6 +6,10 @@ export class UserEntity {
   user: string;
 }
 
+export function isUserOnly(jwt: any) {
+  return jwt.groups.includes(Group.User) && !jwt.groups.includes(Group.Admin);
+}
+
 export function assertOwnerOrAdmin(jwt: any, entity: UserEntity, logger: any) {
   // if auth check is off
   let env = process.env[RUNTIME_ENV];

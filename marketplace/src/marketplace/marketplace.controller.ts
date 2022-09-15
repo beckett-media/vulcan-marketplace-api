@@ -20,7 +20,7 @@ import {
   ApiProduces,
   ApiResponse,
 } from '@nestjs/swagger';
-import { assertOwnerOrAdmin } from '../util/assert';
+import { assertOwnerOrAdmin, isUserOnly } from '../util/assert';
 import { OnlyAllowGroups } from '../auth/groups.decorator';
 import { GroupsGuard } from '../auth/groups.guard';
 import { JwtAuthGuard } from '../auth/jwt.authguard';
@@ -436,9 +436,14 @@ export class MarketplaceController {
     @Query() query: ListVaultingsQuery,
     @Request() request: any,
   ): Promise<VaultingDetails[]> {
+    // set the user uuid to the logged in user if not provided
+    if (isUserOnly(request.user) && query.user == undefined) {
+      query.user = request.user.user;
+    }
     assertOwnerOrAdmin(request.user, query, this.logger);
     const vaultingDetails = await this.marketplaceService.listVaultings(
       query.user,
+      query.item,
       query.offset,
       query.limit,
       query.order,

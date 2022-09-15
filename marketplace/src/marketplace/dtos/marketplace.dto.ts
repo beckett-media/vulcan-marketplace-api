@@ -1194,6 +1194,15 @@ export class ListVaultingsQuery {
   user: string;
 
   @ApiProperty({
+    description: 'The id of the vaulted item',
+    required: false,
+    example: 1,
+  })
+  @IsNumberString()
+  @IsOptional()
+  item: number;
+
+  @ApiProperty({
     description: 'The offset of the query',
     required: false,
     example: 5,

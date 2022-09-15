@@ -54,5 +54,9 @@ describe('Authentication', () => {
     expect(() => {
       assertOwnerOrAdmin(jwt, { user: uuid }, console);
     }).toThrow('Access not allowed.');
+
+    expect(() => {
+      assertOwnerOrAdmin(jwt, { user: undefined }, console);
+    }).toThrow('Access not allowed.');
   });
 });

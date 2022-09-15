@@ -615,12 +615,14 @@ export class MarketplaceService {
 
   async listVaultings(
     userUUID: string,
+    item: number,
     offset: number,
     limit: number,
     order: string,
   ): Promise<VaultingDetails[]> {
     const vaultings = await this.databaseService.listVaultings(
       userUUID,
+      item,
       offset,
       limit,
       order,

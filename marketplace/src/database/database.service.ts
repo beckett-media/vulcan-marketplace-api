@@ -586,6 +586,7 @@ export class DatabaseService {
   // list vaulting items by user id
   async listVaultings(
     userUUID: string,
+    item: number,
     offset: number,
     limit: number,
     order: string,
@@ -600,6 +601,10 @@ export class DatabaseService {
         throw new NotFoundException(`User ${userUUID} not found`);
       }
       where_filter['user'] = user.id;
+    }
+
+    if (item !== undefined) {
+      where_filter['item_id'] = item;
     }
 
     if (offset == undefined) {
