@@ -272,7 +272,7 @@ export class MarketplaceService {
     return submissionDetails;
   }
 
-  async actionLogForSubmisson(
+  async actionLogForSubmissonUpdate(
     submission: Submission,
     submissionUpdate: SubmissionUpdate,
   ) {
@@ -463,7 +463,7 @@ export class MarketplaceService {
     // Save to db and log the action
     submission = await this.databaseService.updateSubmission(submission, item);
     const trimmedRequest = trimRequestWithImage(submissionUpdate);
-    await this.actionLogForSubmisson(submission, trimmedRequest);
+    await this.actionLogForSubmissonUpdate(submission, trimmedRequest);
 
     if (!submission) {
       throw new InternalServerErrorException('Submission update failed');
@@ -591,6 +591,17 @@ export class MarketplaceService {
     });
     // get order user
     const user = await this.databaseService.getUser(submissionOrder.user);
+
+    // record user action log
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoUser,
+      actor: user.id.toString(),
+      entity_type: ActionLogEntityType.SubmissionOrder,
+      entity: order_id.toString(),
+      type: ActionLogType.UpdateSubmissionOrder,
+      extra: JSON.stringify({ status: status, order_id: order_id }),
+    });
+    await this.newActionLog(actionLogRequest);
 
     // formt the result
     return newSubmissionOrderDetails(
@@ -776,6 +787,17 @@ export class MarketplaceService {
     });
     vaultingDetails = await this.updateVaulting(vaultingUpdate);
 
+    // record user action
+    const user = await this.databaseService.getUserByUUID(vaultingDetails.user);
+    const actionLogRequest = new ActionLogRequest({
+      actor_type: ActionLogActorType.CognitoUser,
+      actor: user.id.toString(),
+      entity_type: ActionLogEntityType.Vaulting,
+      entity: vaulting_id.toString(),
+      type: ActionLogType.Withdrawal,
+      extra: JSON.stringify({ vaulting_id: vaulting_id }),
+    });
+
     return vaultingDetails;
   }
 
@@ -836,6 +858,8 @@ export class MarketplaceService {
         actor = vaulting.user.toString();
         break;
     }
+
+    // record user action
     var actionLogRequest = new ActionLogRequest({
       actor_type: actor_type,
       actor: actor,

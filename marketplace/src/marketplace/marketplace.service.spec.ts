@@ -868,6 +868,57 @@ describe('MarketplaceService', () => {
     expect(submissionVaulted.status).toBe(SubmissionStatus.Vaulted);
   });
 
+  it('should withdrawal vaulting', async () => {
+    // create submission
+    const userUUID = '00000000-0000-0000-0000-000000000001';
+    const submissionRequest = newSubmissionRequest(
+      userUUID,
+      'sn1',
+      true,
+      '',
+      true,
+    );
+    const submission = await service.submitItem(submissionRequest);
+    const submissionUpdateReceived = new SubmissionUpdate({
+      status: SubmissionStatus.Received,
+    });
+    const submissionUpdateApproved = new SubmissionUpdate({
+      status: SubmissionStatus.Approved,
+    });
+    await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateReceived,
+    );
+    await service.updateSubmission(
+      submission.submission_id,
+      submissionUpdateApproved,
+    );
+    // create vaulting
+    const vaultingRequest = {
+      item_id: submission.item_id,
+      user: userUUID,
+      submission_id: submission.submission_id,
+      image_base64: 'fake_base64',
+      image_format: 'fakeformat',
+    };
+    const vaulting = await service.newVaulting(vaultingRequest);
+
+    // update vaulting to be minted
+    const vaultingUpdate = newVaultingUpdateRequest(
+      VaultingUpdateType.Minted,
+      vaulting.item_uuid,
+    );
+    await service.updateVaulting(vaultingUpdate);
+
+    // withdrawal vaulting
+    const vaultingDetails = await service.withdrawVaulting(vaulting.id);
+    expect(vaultingDetails.id).toBe(vaulting.id);
+    expect(vaultingDetails.status).toBe(VaultingStatus.Withdrawing);
+    expect(vaultingDetails.status_desc).toBe(
+      VaultingStatusReadable[VaultingStatus.Withdrawing],
+    );
+  });
+
   it('should create new listing', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
