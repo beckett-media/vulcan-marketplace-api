@@ -1,0 +1,21 @@
+name: Build, Upload & Deploy [QA]
+
+on:
+  push:
+    branches:
+      - main
+    
+jobs:
+  deploy:
+    name: QA
+    
+    uses: beckett-media/vulcan-marketplace-api/.github/workflows/cont-deployment-base.yml@main
+    with:
+      ECS_CLUSTER: qa-vulcan-marketplace-api-cluster
+      ECS_TASK: qa-vulcan-marketplace-api-task
+      ECS_SERVICE: qa-vulcan-marketplace-api-service
+      ECR_REPOSITORY: qa-vulcan-marketplace-api
+      CONTAINER_NAME: qa-marketplace-api
+      IMAGE_TAG: ${{ github.sha }}
+      ENVIRONMENT_VARIABLES: ${{ secrets.QA_ENVIRONMENT_VARIABLES }}
+    secrets: inherit
