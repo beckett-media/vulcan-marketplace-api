@@ -19,9 +19,6 @@ on:
       IMAGE_TAG:
         required: true
         type: string
-      ENVIRONMENT_VARIABLES:
-        required: true
-        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
