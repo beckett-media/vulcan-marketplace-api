@@ -91,7 +91,11 @@ export class MarketplaceController {
   async health() {
     // keep the RDS serverless from dropping to 0 capacity
     await this.marketplaceService.dbHealthCheck();
-    return { status: 'ok' };
+    return {
+      status: 'ok',
+      api: 'marketplace',
+      runtime: process.env[RUNTIME_ENV],
+    };
   }
 
   @Get('/sanitycheck')
