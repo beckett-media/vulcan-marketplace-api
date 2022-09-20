@@ -1,0 +1,23 @@
+name: Build, Upload & Deploy [PROD]
+
+on:
+  push:
+    tags:
+      - 'v*'
+    
+jobs:
+  deploy:
+    name: PROD
+    
+    uses: beckett-media/vulcan-marketplace-api/.github/workflows/cont-deployment-base.yml@main
+    with:
+      ECS_CLUSTER: prod-vulcan-marketplace-api-cluster
+      ECS_TASK: prod-vulcan-marketplace-api-task
+      ECS_SERVICE: prod-vulcan-marketplace-api-service
+      ECR_REPOSITORY: prod-vulcan-marketplace-api
+      CONTAINER_NAME: prod-marketplace-api
+      IMAGE_TAG: ${{ github.sha }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      ENVIRONMENT_VARIABLES: ${{ secrets.PROD_ENVIRONMENT_VARIABLES }}
