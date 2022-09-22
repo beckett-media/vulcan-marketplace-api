@@ -356,7 +356,11 @@ export class MarketplaceController {
     @Request() request: any,
   ): Promise<VaultingResponse> {
     assertOwnerOrAdmin(request.user, body, this.logger);
-    const submissionResponse = await this.marketplaceService.newVaulting(body);
+    const adminUUID = request.user.user;
+    const submissionResponse = await this.marketplaceService.newVaulting(
+      body,
+      adminUUID,
+    );
     return submissionResponse;
   }
 

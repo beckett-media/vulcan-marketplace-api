@@ -686,6 +686,7 @@ describe('MarketplaceService', () => {
   it('should fail if submission image is not set', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
+    const adminUUID = '00000000-0000-0000-0000-000000000002';
     const submissionRequest = newSubmissionRequest(
       userUUID,
       'sn1',
@@ -724,7 +725,9 @@ describe('MarketplaceService', () => {
       image_base64: 'fake_base64',
       image_format: fake_format,
     };
-    await expect(service.newVaulting(vaultingRequest)).rejects.toEqual(
+    await expect(
+      service.newVaulting(vaultingRequest, adminUUID),
+    ).rejects.toEqual(
       new InternalServerErrorException(
         `Submission ${submission.submission_id} has no image`,
       ),
@@ -780,15 +783,16 @@ describe('MarketplaceService', () => {
       ),
     ).rejects.toThrow(`Cannot update status from Approved to Approved`);
 
-    // create vaulting
+    // create vaulting with admin user
+    const adminUUID = '00000000-0000-0000-0000-000000000002';
     const vaultingRequest = {
       item_id: submission.item_id,
-      user: userUUID,
+      user: adminUUID,
       submission_id: submission.submission_id,
       image_base64: 'fake_base64',
       image_format: 'fakeformat',
     };
-    const vaulting = await service.newVaulting(vaultingRequest);
+    const vaulting = await service.newVaulting(vaultingRequest, adminUUID);
     expect(vaulting).toBeDefined();
     expect(vaulting.item_id).toBe(submission.item_id);
     expect(vaulting.user).toBe(userUUID);
@@ -884,6 +888,7 @@ describe('MarketplaceService', () => {
   it('should withdrawal vaulting', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
+    const adminUUID = '00000000-0000-0000-0000-000000000002';
     const submissionRequest = newSubmissionRequest(
       userUUID,
       'sn1',
@@ -914,7 +919,7 @@ describe('MarketplaceService', () => {
       image_base64: 'fake_base64',
       image_format: 'fakeformat',
     };
-    const vaulting = await service.newVaulting(vaultingRequest);
+    const vaulting = await service.newVaulting(vaultingRequest, adminUUID);
 
     // update vaulting to be minted
     const vaultingUpdate = newVaultingUpdateRequest(
@@ -935,6 +940,7 @@ describe('MarketplaceService', () => {
   it('should create new listing', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
+    const adminUUID = '00000000-0000-0000-0000-000000000002';
     const submissionRequest = newSubmissionRequest(
       userUUID,
       'sn1',
@@ -967,7 +973,7 @@ describe('MarketplaceService', () => {
       image_base64: 'fake_base64',
       image_format: 'fakeformat',
     };
-    const vaulting = await service.newVaulting(vaultingRequest);
+    const vaulting = await service.newVaulting(vaultingRequest, adminUUID);
     expect(vaulting).toBeDefined();
     expect(vaulting.item_id).toBe(submission.item_id);
     expect(vaulting.item_id).toBeDefined();
@@ -1016,6 +1022,7 @@ describe('MarketplaceService', () => {
   it('should update listing price', async () => {
     // create submission
     const userUUID = '00000000-0000-0000-0000-000000000001';
+    const adminUUID = '00000000-0000-0000-0000-000000000002';
     const submissionRequest = newSubmissionRequest(
       userUUID,
       'sn1',
@@ -1048,7 +1055,7 @@ describe('MarketplaceService', () => {
       image_base64: 'fake_base64',
       image_format: 'fakeformat',
     };
-    const vaulting = await service.newVaulting(vaultingRequest);
+    const vaulting = await service.newVaulting(vaultingRequest, adminUUID);
     expect(vaulting).toBeDefined();
     expect(vaulting.item_id).toBe(submission.item_id);
     expect(vaulting.item_id).toBeDefined();

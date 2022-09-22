@@ -68,11 +68,6 @@ describe('UserService', () => {
 
   it('should create new user record when upload image', async () => {
     const userUUID = '00000000-0000-0000-0000-000000000001';
-    // expect error because user not exist
-    await expect(service.getUserByUUID(userUUID)).rejects.toThrow(
-      `User ${userUUID} not found`,
-    );
-
     const userProfileImageRequest: UserProfileImageRequest = {
       image_base64: imageBaseball,
       image_format: 'fake_format',

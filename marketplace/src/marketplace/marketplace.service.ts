@@ -651,7 +651,10 @@ export class MarketplaceService {
   }
 
   // call by admin
-  async newVaulting(newVaulting: VaultingRequest): Promise<VaultingResponse> {
+  async newVaulting(
+    newVaulting: VaultingRequest,
+    adminUUID: string,
+  ): Promise<VaultingResponse> {
     // check submission status
     var submission = await this.databaseService.getSubmission(
       newVaulting.submission_id,
@@ -703,11 +706,12 @@ export class MarketplaceService {
 
     // get item by id
     const item = await this.databaseService.getItem(newVaulting.item_id);
+    const itemOwner = await this.databaseService.getUser(item.user);
 
     const attributes = getAttributes(item);
     const description = generateNFTDescription(item);
     // make sure owner is 32 bytes
-    const owner = trimUUID4(newVaulting.user);
+    const owner = trimUUID4(itemOwner.uuid);
     const mint_job_id = await this.bravoService.mintNFT(
       owner,
       item.uuid,
@@ -721,19 +725,19 @@ export class MarketplaceService {
     // if vaulting record already exists, update it
     // otherwise, create a new vaulting record
     // get user by uuid
-    const user = await this.databaseService.getUserByUUID(newVaulting.user);
     const vaulting = await this.databaseService.maybeCreateNewVaulting(
-      user.id,
+      itemOwner.id,
       newVaulting.item_id,
       mint_job_id,
       submission.image,
     );
 
     // record user action
+    const adminUser = await this.databaseService.getUserByUUID(adminUUID);
     const trimmedRequest = trimRequestWithImage(newVaulting);
     var actionLogRequest = new ActionLogRequest({
       actor_type: ActionLogActorType.CognitoUser,
-      actor: user.id.toString(),
+      actor: adminUser.id.toString(),
       entity_type: ActionLogEntityType.Vaulting,
       entity: vaulting.id.toString(),
       type: ActionLogType.Vaulting,
@@ -743,7 +747,7 @@ export class MarketplaceService {
 
     return new VaultingResponse({
       id: vaulting.id,
-      user: user.uuid,
+      user: itemOwner.uuid,
       item_id: vaulting.item_id,
       item_uuid: item.uuid,
       status: vaulting.status,

@@ -522,11 +522,11 @@ export class DatabaseService {
 
   // get user by uuid
   async getUserByUUID(user_uuid: string): Promise<User> {
-    const user = await this.userRepo.findOne({
+    var user = await this.userRepo.findOne({
       where: { uuid: user_uuid },
     });
     if (!user) {
-      throw new NotFoundException(`User ${user_uuid} not found`);
+      user = await this.maybeCreateNewUser(user_uuid, DEFAULT_USER_SOURCE);
     }
     return user;
   }
