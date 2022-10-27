@@ -1309,8 +1309,8 @@ export class DatabaseService {
   ): Promise<Inventory> {
     // throw error if inventory is not found
     const inventory = await this.getInventory(inventory_id);
-
     // update inventory with new values
+    Object.keys(updateInventoryRequest).map(item => inventory[item] = updateInventoryRequest[item])
     inventory.status =
       updateInventoryRequest.status != undefined
         ? updateInventoryRequest.status
@@ -1320,7 +1320,6 @@ export class DatabaseService {
         ? updateInventoryRequest.note
         : inventory.note;
     inventory.updated_at = Math.round(Date.now() / 1000);
-
     // put updates into a single transaction
     await getManager().transaction(async (transactionalEntityManager) => {
       await transactionalEntityManager.save(inventory);
