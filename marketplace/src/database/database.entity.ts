@@ -28,6 +28,9 @@ export class SubmissionOrder {
 
   @Column({ default: 0 })
   updated_at: number;
+  
+  @Column({ default: false })
+  deleted: boolean;
 }
 
 @Entity()
@@ -73,6 +76,9 @@ export class Submission {
 
   @Column({ default: 0 })
   updated_at: number;
+
+  @Column({ default: false })
+  deleted: boolean;
 }
 
 @Entity()
@@ -93,6 +99,9 @@ export class User {
 
   @Column()
   created_at: number;
+
+  @Column({ default: false })
+  deleted: boolean;
 }
 
 @Entity()
@@ -167,6 +176,9 @@ export class Item {
 
   @Column()
   status: number;
+
+  @Column({ default: false })
+  deleted: boolean;
 }
 
 @Entity()
@@ -222,6 +234,9 @@ export class Vaulting {
   @Column()
   burned_at: number;
 
+  @Column({ default: false })
+  deleted: boolean;
+
   @BeforeInsert()
   toLowerCaseCollection() {
     this.collection = this.collection.toLowerCase();
@@ -252,6 +267,9 @@ export class Listing {
 
   @Column()
   updated_at: number;
+
+  @Column({ default: false })
+  deleted: boolean;
 }
 
 @Entity()
@@ -299,6 +317,9 @@ export class Inventory {
 
   @Column()
   updated_at: number;
+
+  @Column({ default: false })
+  deleted: boolean;
 }
 
 @Entity()
