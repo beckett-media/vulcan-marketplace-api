@@ -1085,6 +1085,14 @@ export class SubmissionUpdate {
   @IsNumber()
   status: number;
 
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsString()
+  is_active: boolean;
+
   constructor(partial: Partial<SubmissionUpdate>) {
     Object.assign(this, partial);
   }
