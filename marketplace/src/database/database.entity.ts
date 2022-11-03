@@ -73,6 +73,9 @@ export class Submission {
 
   @Column({ default: 0 })
   updated_at: number;
+
+  @Column()
+  notes: string;
 }
 
 @Entity()
