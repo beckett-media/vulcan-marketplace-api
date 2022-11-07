@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -309,6 +310,15 @@ export class SubmissionResponse {
   @IsString()
   status_desc: string;
 
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
+  
   constructor(partial: Partial<SubmissionResponse>) {
     Object.assign(this, partial);
   }
@@ -1084,6 +1094,15 @@ export class SubmissionUpdate {
   @IsOptional()
   @IsNumber()
   status: number;
+
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
 
   constructor(partial: Partial<SubmissionUpdate>) {
     Object.assign(this, partial);
