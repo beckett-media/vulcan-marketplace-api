@@ -31,6 +31,9 @@ export class SubmissionOrder {
 
   @Column({ default: 1 })
   is_active: boolean;
+
+  @Column()
+  notes: string;
 }
 
 @Entity()
@@ -176,6 +179,9 @@ export class Item {
 
   @Column({ default: 1 })
   is_active: boolean;
+
+  @Column()
+  notes: string;
 }
 
 @Entity()
