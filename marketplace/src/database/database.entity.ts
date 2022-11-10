@@ -28,9 +28,12 @@ export class SubmissionOrder {
 
   @Column({ default: 0 })
   updated_at: number;
-  
-  @Column({ default: false })
-  deleted: boolean;
+
+  @Column({ default: 1 })
+  is_active: boolean;
+
+  @Column()
+  notes: string;
 }
 
 @Entity()
@@ -77,8 +80,8 @@ export class Submission {
   @Column({ default: 0 })
   updated_at: number;
 
-  @Column({ default: false })
-  deleted: boolean;
+  @Column({ default: 1 })
+  is_active: boolean;
 }
 
 @Entity()
@@ -177,8 +180,11 @@ export class Item {
   @Column()
   status: number;
 
-  @Column({ default: false })
-  deleted: boolean;
+  @Column({ default: 1 })
+  is_active: boolean;
+
+  @Column()
+  notes: string;
 }
 
 @Entity()

@@ -270,6 +270,7 @@ export class DatabaseService {
         autograph: submission.autograph,
         subject: submission.subject,
         est_value: submission.est_value,
+        notes: submission.notes,
         status: ItemStatus.Submitted,
       });
       const itemSaved = await this.itemRepo.save(newItem);
@@ -1310,6 +1311,7 @@ export class DatabaseService {
     // throw error if inventory is not found
     const inventory = await this.getInventory(inventory_id);
     // update inventory with new values
+    Object.keys(updateInventoryRequest).map(item => inventory[item] = updateInventoryRequest[item])
     inventory.status =
       updateInventoryRequest.status != undefined
         ? updateInventoryRequest.status

@@ -98,6 +98,7 @@ export function newSubmissionDetails(
     approved_at: submission.approved_at,
     rejected_at: submission.rejected_at,
     updated_at: submission.updated_at,
+    notes: item.notes,
   });
 }
 
