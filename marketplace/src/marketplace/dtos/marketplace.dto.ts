@@ -257,6 +257,15 @@ export class SubmissionRequest {
   @IsString()
   notes: string;
 
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
+
   constructor(partial: Partial<SubmissionRequest>) {
     Object.assign(this, partial);
   }
@@ -802,6 +811,15 @@ export class SubmissionDetails {
   @IsOptional()
   @IsString()
   notes: string;
+
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
 
   constructor(partial: Partial<SubmissionDetails>) {
     Object.assign(this, partial);
@@ -1585,6 +1603,15 @@ export class VaultingDetails {
   @IsOptional()
   @IsString()
   notes: string;
+
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
 
   constructor(partial: Partial<VaultingDetails>) {
     Object.assign(this, partial);

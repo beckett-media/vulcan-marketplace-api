@@ -99,6 +99,7 @@ export function newSubmissionDetails(
     rejected_at: submission.rejected_at,
     updated_at: submission.updated_at,
     notes: item.notes,
+    is_active: item.is_active
   });
 }
 

@@ -272,6 +272,7 @@ export class DatabaseService {
         est_value: submission.est_value,
         notes: submission.notes,
         status: ItemStatus.Submitted,
+        is_active: submission.is_active,
       });
       const itemSaved = await this.itemRepo.save(newItem);
       item_id = itemSaved.id;

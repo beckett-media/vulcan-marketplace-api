@@ -459,6 +459,16 @@ export class MarketplaceService {
         }
       }
     }
+    Object.keys(submissionUpdate).map(sub => {
+      if(submission[sub]){
+        submission[sub] = submissionUpdate[sub]
+      }
+    })
+    Object.keys(submissionUpdate).map(sub => {
+      if(item[sub]){
+        item[sub] = submissionUpdate[sub]
+      }
+    })
 
     // Save to db and log the action
     submission = await this.databaseService.updateSubmission(submission, item);
