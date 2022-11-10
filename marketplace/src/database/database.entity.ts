@@ -180,7 +180,7 @@ export class Item {
   @Column({ default: 1 })
   is_active: boolean;
 
-  @Column()
+  @Column({default: ''})
   notes: string;
 }
 
