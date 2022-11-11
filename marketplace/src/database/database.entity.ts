@@ -182,6 +182,11 @@ export class Item {
 
   @Column({default: ''})
   notes: string;
+
+  @Column('int', {
+    nullable: true
+  })
+  beckett_card_id: number;
 }
 
 @Entity()
