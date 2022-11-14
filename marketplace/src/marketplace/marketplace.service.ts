@@ -459,12 +459,12 @@ export class MarketplaceService {
         }
       }
     }
-    Object.keys(submissionUpdate).map(sub => {
+    Object.keys(submissionUpdate).forEach(sub => {
       if(submission[sub]){
         submission[sub] = submissionUpdate[sub]
       }
     })
-    Object.keys(submissionUpdate).map(sub => {
+    Object.keys(submissionUpdate).forEach(sub => {
       if(item[sub]){
         item[sub] = submissionUpdate[sub]
       }

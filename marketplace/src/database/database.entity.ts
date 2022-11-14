@@ -103,10 +103,6 @@ export class User {
   @Column()
   created_at: number;
 
-  @Column({ default: false })
-  deleted: boolean;
-}
-
 @Entity()
 @Index(['uuid'], { unique: true })
 @Index(['user'])
@@ -240,9 +236,6 @@ export class Vaulting {
   @Column()
   burned_at: number;
 
-  @Column({ default: false })
-  deleted: boolean;
-
   @BeforeInsert()
   toLowerCaseCollection() {
     this.collection = this.collection.toLowerCase();
@@ -273,9 +266,6 @@ export class Listing {
 
   @Column()
   updated_at: number;
-
-  @Column({ default: false })
-  deleted: boolean;
 }
 
 @Entity()
@@ -323,9 +313,6 @@ export class Inventory {
 
   @Column()
   updated_at: number;
-
-  @Column({ default: false })
-  deleted: boolean;
 }
 
 @Entity()
