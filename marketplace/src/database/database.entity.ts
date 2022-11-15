@@ -314,9 +314,6 @@ export class Inventory {
 
   @Column()
   updated_at: number;
-
-  @Column({ default: false })
-  deleted: boolean;
 }
 
 @Entity()
