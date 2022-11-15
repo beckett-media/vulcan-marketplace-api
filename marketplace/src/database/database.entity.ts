@@ -32,7 +32,7 @@ export class SubmissionOrder {
   @Column({ default: 1 })
   is_active: boolean;
 
-  @Column({default: ''})
+  @Column({ default: '' })
   notes: string;
 }
 
@@ -180,7 +180,7 @@ export class Item {
   @Column({ default: 1 })
   is_active: boolean;
 
-  @Column({default: ''})
+  @Column({ default: '' })
   notes: string;
 
   @Column('int', {
