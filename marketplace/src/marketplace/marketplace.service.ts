@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { AwsService } from '../aws/aws.service';
@@ -460,12 +461,10 @@ export class MarketplaceService {
       }
     }
     Object.keys(submissionUpdate).forEach(sub => {
-      if(submission[sub]){
+      if(submission[sub] || submission[sub] === false){
         submission[sub] = submissionUpdate[sub]
       }
-    })
-    Object.keys(submissionUpdate).forEach(sub => {
-      if(item[sub]){
+      if(item[sub] || item[sub] === false){
         item[sub] = submissionUpdate[sub]
       }
     })

@@ -102,6 +102,7 @@ export class User {
 
   @Column()
   created_at: number;
+}
 
 @Entity()
 @Index(['uuid'], { unique: true })
@@ -313,6 +314,9 @@ export class Inventory {
 
   @Column()
   updated_at: number;
+
+  @Column({ default: false })
+  deleted: boolean;
 }
 
 @Entity()
