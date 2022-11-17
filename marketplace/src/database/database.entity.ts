@@ -255,8 +255,18 @@ export class Listing {
   @PrimaryGeneratedColumn()
   id: number;
 
+  //Deprecate this as we hopefully move away from minting.
   @Column()
   vaulting_id: number;
+
+  @Column()
+  item_id: number;
+
+  //initially we create the record, then update it with the externalId later.
+  @Column('int', {
+    nullable: true
+  })
+  external_listing_id: number;
 
   @Column()
   user: number;
@@ -272,6 +282,9 @@ export class Listing {
 
   @Column()
   updated_at: number;
+
+  @Column({ default: 1 })
+  is_active: boolean;
 }
 
 @Entity()
