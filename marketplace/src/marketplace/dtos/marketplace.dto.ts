@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -247,6 +248,24 @@ export class SubmissionRequest {
   @IsOptional()
   image_rev_path: string;
 
+  @ApiProperty({
+    description: 'A field to put submission notes',
+    required: false,
+    example: 'TEST NOTES',
+  })
+  @IsOptional()
+  @IsString()
+  notes: string;
+
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
+
   constructor(partial: Partial<SubmissionRequest>) {
     Object.assign(this, partial);
   }
@@ -309,6 +328,15 @@ export class SubmissionResponse {
   @IsString()
   status_desc: string;
 
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
+  
   constructor(partial: Partial<SubmissionResponse>) {
     Object.assign(this, partial);
   }
@@ -774,6 +802,24 @@ export class SubmissionDetails {
   })
   @IsString()
   image_rev_url: string;
+  
+  @ApiProperty({
+    description: 'A field to put submission notes',
+    required: false,
+    example: 'TEST NOTES',
+  })
+  @IsOptional()
+  @IsString()
+  notes: string;
+
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
 
   constructor(partial: Partial<SubmissionDetails>) {
     Object.assign(this, partial);
@@ -1084,6 +1130,24 @@ export class SubmissionUpdate {
   @IsOptional()
   @IsNumber()
   status: number;
+
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
+
+  @ApiProperty({
+    description: 'A field to put submission notes',
+    required: false,
+    example: 'TEST NOTES',
+  })
+  @IsOptional()
+  @IsString()
+  notes: string;
 
   constructor(partial: Partial<SubmissionUpdate>) {
     Object.assign(this, partial);
@@ -1530,6 +1594,24 @@ export class VaultingDetails {
   @IsString()
   @IsOptional()
   image_rev_url: string;
+
+  @ApiProperty({
+    description: 'A field to put submission notes',
+    required: false,
+    example: 'TEST NOTES',
+  })
+  @IsOptional()
+  @IsString()
+  notes: string;
+
+  @ApiProperty({
+    description: 'A flag for soft delete',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active: boolean;
 
   constructor(partial: Partial<VaultingDetails>) {
     Object.assign(this, partial);

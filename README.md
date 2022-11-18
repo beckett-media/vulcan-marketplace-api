@@ -6,6 +6,18 @@ From the root of the repo directly:
 make install
 ```
 
+## Connect to Vaulting API
+
+The following two envs are used to indicate the mint and burn endpoints of the Vaulting(Bravo) service. \
+When an item is vaulted or withdrawn, the endpoints will be called to mint or burn item's NFT.
+
+```
+MARKETPLACE_{DEV}_BRAVO_MINT_URL={http://localhost:3000}/vaulting/mint
+MARKETPLACE_{DEV}_BRAVO_BURN_URL={http://localhost:3000}/vaulting/burn
+```
+
+Replace the runtime name(DEV) & domain URL (http://localhost:3000) between {} to the actual value of your deployment.
+
 ## Setup envs:
 
 ```
@@ -28,7 +40,6 @@ export MARKETPLACE_DEV_DB_NAME=
 export MARKETPLACE_DEV_DB_PASSWORD=
 export MARKETPLACE_DEV_DB_PORT=
 export MARKETPLACE_DEV_DB_USERNAME=
-
 ```
 
 ## Run Service:

@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { AwsService } from '../aws/aws.service';
@@ -459,6 +460,14 @@ export class MarketplaceService {
         }
       }
     }
+    Object.keys(submissionUpdate).forEach(sub => {
+      if(submission[sub] || submission[sub] === false){
+        submission[sub] = submissionUpdate[sub]
+      }
+      if(item[sub] || item[sub] === false){
+        item[sub] = submissionUpdate[sub]
+      }
+    })
 
     // Save to db and log the action
     submission = await this.databaseService.updateSubmission(submission, item);
