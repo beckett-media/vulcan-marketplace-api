@@ -371,6 +371,8 @@ export class DatabaseService {
       filter['order'] = { id: order };
     }
 
+    //TODO: get listing.external_listing_id also
+    //TODO: TECH DEBT, we should just grab this with a single query, not all these joins outside of the DB. 
     const submissions = await this.submissionRepo.find(filter);
     // get all item ids from submissions
     const item_ids = submissions.map((submission) => submission.item_id);
