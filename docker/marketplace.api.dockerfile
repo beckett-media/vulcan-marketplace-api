@@ -4,7 +4,7 @@ LABEL org.beckett.image.authors="yifan@beckett.com"
 # setup code and node modules
 COPY marketplace /opt/marketplace
 WORKDIR /opt/marketplace
-RUN yarn install
+RUN npm ci
 
 # marketplace API port
 EXPOSE 3300
