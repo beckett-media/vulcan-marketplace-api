@@ -372,6 +372,7 @@ export class DatabaseService {
     }
 
     const submissions = await this.submissionRepo.find(filter);
+    this.logger.log(`Submissions: $(submissions)`);
     // get all item ids from submissions
     const item_ids = submissions.map((submission) => submission.item_id);
     // get all items from item_ids
